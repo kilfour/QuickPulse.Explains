@@ -1,0 +1,13 @@
+**/bin/*
+**/obj/*
+_ReSharper.*/
+*.user
+*.suo
+/packages
+**/log*.txt
+temp*.md
+reports.txt
+Tests.cs
+*.log
+.quickpulse/
+.quickacid/
