@@ -4,7 +4,6 @@ designed to turn `[Doc]`-annotated test classes and methods into clean, structur
 It leverages the `QuickPulse` library for declarative flow composition and supports
 both single-file and multi-file generation with namespace-based filtering.
 
-
 ## Attribute-Based Documentation
 Apply the `[Doc]` attribute to your test classes and methods:
 
@@ -17,9 +16,7 @@ public class CalculatorTests
     public void EmptyCart_ReturnsZero() => ...
 }
 ```
-
 The `Order` defines hierarchy (`1`, `1-1`, etc.), `Caption` becomes the header, and `Content` is the body text.
-
 ### Single Markdown File Generation
 To write all collected documentation into one Markdown file:
 
@@ -29,7 +26,6 @@ doc.ToFile("docs.md", typeof(CalculatorTests).Assembly);
 ```
 
 This emits headers and content based on the `[Doc]` attributes, using heading depth inferred from the order string.
-
 ### Multi-File Generation with Namespace Filtering
 Group output by namespace:
 ```csharp
@@ -40,11 +36,9 @@ doc.ToFiles([
 ], Assembly.GetExecutingAssembly());
 ```
 This allows documentation to be split by concern or target audience.
-
 ## Bits and Alices
 As I use aforementioned method off documenting stuff in all of my test projects, I will most likely end up putting
 all of the various tools which are duplicated across multiple projects right now inside of this little box over here.
-
 ### LinesReader: Sequential Line Navigation
 `LinesReader` is a lightweight utility intended for use in tests. It provides simple,
 sequential line-by-line reading over string content.
@@ -90,4 +84,3 @@ LinesReader.FromStringList(["one", "two"]).AsAssertsToLogFile();
         Assert.Equal("two", reader.NextLine());
         Assert.True(reader.EndOfContent());
 ```
-
