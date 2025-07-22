@@ -36,6 +36,20 @@ doc.ToFiles([
 ], Assembly.GetExecutingAssembly());
 ```
 This allows documentation to be split by concern or target audience.
+
+## Installation
+
+QuickPulse is available on NuGet:
+
+```bash
+Install-Package QuickPulse.Explains
+```
+
+Or via the .NET CLI:
+
+```bash
+dotnet add package QuickPulse.Explains
+```
 ## Bits and Alices
 As I use aforementioned method off documenting stuff in all of my test projects, I will most likely end up putting
 all of the various tools which are duplicated across multiple projects right now inside of this little box over here.

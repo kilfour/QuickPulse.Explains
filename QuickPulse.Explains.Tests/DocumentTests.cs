@@ -1,5 +1,7 @@
 using DoNotPutThisInReadme;
 using QuickPulse.Arteries;
+
+
 namespace QuickPulse.Explains.Tests;
 
 public class DocumentTests
@@ -40,7 +42,21 @@ doc.ToFiles([
     new DocFileInfo(""tests.md"", [""MyApp.Tests""])
 ], Assembly.GetExecutingAssembly());
 ```
-This allows documentation to be split by concern or target audience.")]
+This allows documentation to be split by concern or target audience.
+
+## Installation
+
+QuickPulse is available on NuGet:
+
+```bash
+Install-Package QuickPulse.Explains
+```
+
+Or via the .NET CLI:
+
+```bash
+dotnet add package QuickPulse.Explains
+```")]
     public void ToFiles_RespectsNamespaceFiltering()
     {
         var collector = new TheCollector<string>();
