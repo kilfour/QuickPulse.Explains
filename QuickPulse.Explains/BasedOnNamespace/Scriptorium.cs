@@ -2,9 +2,7 @@ using QuickPulse.Bolts;
 
 namespace QuickPulse.Explains.BasedOnNamespace;
 
-public record ToCEntry(string Text, string Path);
-
-public static class Rivers
+public static class Scriptorium
 {
     public static readonly Flow<ToCEntry> ToC =
         from input in Pulse.Start<ToCEntry>()
@@ -31,7 +29,7 @@ public static class Rivers
 
     private static readonly Flow<DocIncludeAttribute> Include =
          from attr in Pulse.Start<DocIncludeAttribute>()
-         from includes in Pulse.Gather<IReadOnlyCollection<DocFileIncluded>>()
+         from includes in Pulse.Gather<IReadOnlyCollection<Inclusion>>()
          from _ in Pulse.ToFlow(DocFileExplained, includes.Value.Single(a => a.Type == attr.IncludedDoc).DocFileExplained)
          select attr;
 
@@ -42,8 +40,8 @@ public static class Rivers
          from _i in Pulse.ToFlowIf(attr is DocIncludeAttribute, Include, () => (DocIncludeAttribute)attr)
          select attr;
 
-    private static Flow<DocFileExplained> DocFileExplained =>
-        from input in Pulse.Start<DocFileExplained>()
+    private static Flow<Explanation> DocFileExplained =>
+        from input in Pulse.Start<Explanation>()
         from _ in Pulse.ToFlow(MarkDownHeader, input.HeaderText)
         from s in Pulse.Scoped<int>(a => a + 1, Pulse.ToFlow(Method, input.DocMethods))
         select input;
@@ -57,8 +55,8 @@ public static class Rivers
             select Unit.Instance)
         select input;
 
-    public static Flow<(Page, IReadOnlyCollection<DocFileIncluded>)> DocFile =>
-        from input in Pulse.Start<(Page, IReadOnlyCollection<DocFileIncluded>)>()
+    public static Flow<(Page, IReadOnlyCollection<Inclusion>)> DocFile =>
+        from input in Pulse.Start<(Page, IReadOnlyCollection<Inclusion>)>()
         from inc in Pulse.Gather(input.Item2)
         from level in Pulse.Gather(0)
         from _ in Pulse.Scoped<int>(a => 1,
@@ -67,8 +65,8 @@ public static class Rivers
             select Unit.Instance)
         select input;
 
-    public static Flow<DocFileBook> Book =>
-        from input in Pulse.Start<DocFileBook>()
+    public static Flow<Book> Book =>
+        from input in Pulse.Start<Book>()
         from inc in Pulse.Gather(input.Includes)
         from level in Pulse.Gather(1)
         from _ in Pulse.ToFlow(Page, input.Pages)

@@ -9,7 +9,7 @@ public static class Explain
     public static void This<T>(string filename)
     {
         var book = TheArchivist.Compose<T>();
-        Signal.From(Rivers.Book)
+        Signal.From(Scriptorium.Book)
             .SetArtery(WriteData.ToNewFile(filename))
             .Pulse(book);
     }
@@ -21,14 +21,14 @@ public static class Explain
 
         var book = TheArchivist.Compose<T>();
 
-        var signal = Signal.From(Rivers.DocFile);
+        var signal = Signal.From(Scriptorium.DocFile);
         foreach (var page in book.Pages)
         {
             var artery = WriteData.ToNewFile(Path.Combine(rootPath, page.Path));
             signal.SetArtery(artery).Pulse((page, book.Includes));
         }
 
-        Signal.From(Rivers.ToC)
+        Signal.From(Scriptorium.ToC)
               .SetArtery(WriteData.ToNewFile(Path.Combine(rootPath, "ToC.md")))
               .Pulse(book.Pages.Select(a => new ToCEntry(a.DocFileExplained.HeaderText, a.Path)));
     }

@@ -3,41 +3,25 @@ using QuickPulse;
 
 namespace QuickPulse.Explains.BasedOnNamespace;
 
-public record DocFileExplained(
-    string HeaderText,
-    List<DocMethodAttribute> DocMethods);
-
-public record Page(
-    DocFileExplained DocFileExplained,
-    string Path);
-
-public record DocFileIncluded(
-    Type Type,
-    DocFileExplained DocFileExplained);
-
-public record DocFileBook(
-    IReadOnlyCollection<Page> Pages,
-    IReadOnlyCollection<DocFileIncluded> Includes);
-
 public static class TheArchivist
 {
-    public static DocFileBook Compose<T>() => new(
+    public static Book Compose<T>() => new(
         GetDocFileTypes(typeof(T).Assembly.GetTypes())
-            .Select(a => DocFilePageFromType(typeof(T), a))
+            .Select(a => PageFromType(typeof(T), a))
             .ToReadOnlyCollection(),
         GetIncludedTypes(typeof(T).Assembly.GetTypes())
             .Select(DocFileIncludedFromType)
             .ToReadOnlyCollection());
 
-    private static Page DocFilePageFromType(Type root, Type type) => new(
-        DocFileExplanationFromType(type),
+    private static Page PageFromType(Type root, Type type) => new(
+        ExplanationFromType(type),
         PathFromType(root, type));
 
-    private static DocFileExplained DocFileExplanationFromType(Type type) =>
+    private static Explanation ExplanationFromType(Type type) =>
          new(GetHeaderText(type), GetDocMethods(type));
 
-    private static DocFileIncluded DocFileIncludedFromType(Type type) =>
-        new(type, DocFileExplanationFromType(type));
+    private static Inclusion DocFileIncludedFromType(Type type) =>
+        new(type, ExplanationFromType(type));
 
     private static string PathFromType(Type root, Type type) =>
         Path.Combine(GetNamespaceRelativePath(root, type), type.Name + ".md");
