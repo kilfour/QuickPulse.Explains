@@ -6,9 +6,6 @@ namespace QuickPulse.Explains;
 
 public static class Explain
 {
-    public static Func<string, IArtery> GetArtery { get; set; } =
-        filename => new WriteDataToFile(filename).ClearFile();
-
     public static void This<T>(string filename)
     {
         var book = TheArchivist.Compose<T>();
@@ -30,6 +27,7 @@ public static class Explain
             signal.SetArtery(WriteData.ToNewFile(Path.Combine(rootPath, page.Path)))
                 .Pulse((page, book.Includes));
         }
+
         Signal.From(Rivers.ToC)
               .SetArtery(WriteData.ToNewFile(Path.Combine(rootPath, "ToC.md")))
               .Pulse(book.Pages.Select(a => new ToCEntry(a.DocFileExplained.HeaderText, a.Path)));
