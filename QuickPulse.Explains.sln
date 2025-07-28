@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuickPulse.Explains", "Quic
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuickPulse.Explains.Tests", "QuickPulse.Explains.Tests\QuickPulse.Explains.Tests.csproj", "{FC236AAF-5AC4-4FC7-861F-C4970D46951A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuickPulse.Explains.TestModels", "QuickPulse.Explains.TestModels\QuickPulse.Explains.TestModels.csproj", "{47C603B6-05F6-4A44-A795-6150EE6A2FDB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -41,6 +43,18 @@ Global
 		{FC236AAF-5AC4-4FC7-861F-C4970D46951A}.Release|x64.Build.0 = Release|Any CPU
 		{FC236AAF-5AC4-4FC7-861F-C4970D46951A}.Release|x86.ActiveCfg = Release|Any CPU
 		{FC236AAF-5AC4-4FC7-861F-C4970D46951A}.Release|x86.Build.0 = Release|Any CPU
+		{47C603B6-05F6-4A44-A795-6150EE6A2FDB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{47C603B6-05F6-4A44-A795-6150EE6A2FDB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{47C603B6-05F6-4A44-A795-6150EE6A2FDB}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{47C603B6-05F6-4A44-A795-6150EE6A2FDB}.Debug|x64.Build.0 = Debug|Any CPU
+		{47C603B6-05F6-4A44-A795-6150EE6A2FDB}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{47C603B6-05F6-4A44-A795-6150EE6A2FDB}.Debug|x86.Build.0 = Debug|Any CPU
+		{47C603B6-05F6-4A44-A795-6150EE6A2FDB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{47C603B6-05F6-4A44-A795-6150EE6A2FDB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{47C603B6-05F6-4A44-A795-6150EE6A2FDB}.Release|x64.ActiveCfg = Release|Any CPU
+		{47C603B6-05F6-4A44-A795-6150EE6A2FDB}.Release|x64.Build.0 = Release|Any CPU
+		{47C603B6-05F6-4A44-A795-6150EE6A2FDB}.Release|x86.ActiveCfg = Release|Any CPU
+		{47C603B6-05F6-4A44-A795-6150EE6A2FDB}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,5 +1,6 @@
-using _TestModel;
 using QuickPulse.Arteries;
+using QuickPulse.Explains.Bolts;
+using QuickPulse.Explains.TestModels;
 
 
 namespace QuickPulse.Explains.Tests;
@@ -67,7 +68,7 @@ dotnet add package QuickPulse.Explains
 
         var files = new[]
         {
-            new DocFileInfo("filtered.md", ["_TestModel"])
+            new DocFileInfo("filtered.md", ["QuickPulse.Explains.TestModels"])
         };
 
         document.ToFiles(files, typeof(DocumentedThing).Assembly);

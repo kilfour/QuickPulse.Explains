@@ -1,15 +1,11 @@
-using System;
+namespace QuickPulse.Explains.BasedOnNamespace;
 
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
-public class DocFileAttribute : Attribute
-{
-    // Optional: Add Title or Order if you need them later
-}
+public class DocFileAttribute : Attribute { }
 
-public abstract class DocMethodAttribute : Attribute
-{
-    // Marker base class for method-level doc attributes
-}
+
+public abstract class DocMethodAttribute : Attribute { }
+
 
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
 public class DocHeaderAttribute : DocMethodAttribute
@@ -22,6 +18,7 @@ public class DocHeaderAttribute : DocMethodAttribute
     }
 }
 
+
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
 public class DocContentAttribute : DocMethodAttribute
 {
@@ -32,3 +29,16 @@ public class DocContentAttribute : DocMethodAttribute
         Content = content;
     }
 }
+
+[AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
+public class DocIncludeAttribute : DocMethodAttribute
+{
+    public Type IncludedDoc { get; }
+
+    public DocIncludeAttribute(Type includedDoc)
+    {
+        IncludedDoc = includedDoc;
+    }
+}
+
+
