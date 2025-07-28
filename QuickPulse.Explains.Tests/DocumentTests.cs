@@ -1,4 +1,4 @@
-using DoNotPutThisInReadme;
+using _TestModel;
 using QuickPulse.Arteries;
 
 
@@ -67,7 +67,7 @@ dotnet add package QuickPulse.Explains
 
         var files = new[]
         {
-            new DocFileInfo("filtered.md", ["DoNotPutThisInReadme"])
+            new DocFileInfo("filtered.md", ["_TestModel"])
         };
 
         document.ToFiles(files, typeof(DocumentedThing).Assembly);

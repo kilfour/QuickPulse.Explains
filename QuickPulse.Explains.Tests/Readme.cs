@@ -1,3 +1,5 @@
+using _TestModel;
+
 namespace QuickPulse.Explains.Tests;
 
 [Doc(Order = "0", Caption = "QuickPulse.Explains", Content =
@@ -11,10 +13,12 @@ public class Readme
     [Fact]
     public void GenerateReadme()
     {
-        new Document().ToFiles([new("README.md",
-            [ "QuickPulse.Explains.Tests"
-            , "QuickPulse.Explains.Tests.Documenting"
-            , "QuickPulse.Explains.Tests.Text"
-            ])], typeof(Readme).Assembly);
+        // new Document().ToFiles([new("README.md",
+        //     [ "QuickPulse.Explains.Tests"
+        //     , "QuickPulse.Explains.Tests.Text"
+        //     ])], typeof(Readme).Assembly);
+
+        //Explain.This<Readme>("temp.md");
+        Explain.These<AutoDocumentedThing>("Docs");
     }
 }
