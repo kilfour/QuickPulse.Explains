@@ -24,8 +24,8 @@ public static class Explain
         var signal = Signal.From(Rivers.DocFile);
         foreach (var page in book.Pages)
         {
-            signal.SetArtery(WriteData.ToNewFile(Path.Combine(rootPath, page.Path)))
-                .Pulse((page, book.Includes));
+            var artery = WriteData.ToNewFile(Path.Combine(rootPath, page.Path));
+            signal.SetArtery(artery).Pulse((page, book.Includes));
         }
 
         Signal.From(Rivers.ToC)

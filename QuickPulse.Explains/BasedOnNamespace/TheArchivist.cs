@@ -3,8 +3,6 @@ using QuickPulse;
 
 namespace QuickPulse.Explains.BasedOnNamespace;
 
-public record DocFilePaths(string AbsolutePath, string RelativePath);
-
 public record DocFileExplained(
     string HeaderText,
     List<DocMethodAttribute> DocMethods);
