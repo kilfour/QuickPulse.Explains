@@ -12,42 +12,35 @@ public static class Scriptorium
          from _ in Pulse.Trace(header)
          select text;
 
-    private static readonly Flow<DocHeaderAttribute> Header =
-         from attr in Pulse.Start<DocHeaderAttribute>()
-         from _ in Pulse.ToFlow(MarkDownHeader, attr.Header)
-         select attr;
-
-    private static readonly Flow<DocContentAttribute> Content =
-         from attr in Pulse.Start<DocContentAttribute>()
-         from _ in Pulse.Trace(attr.Content)
-         select attr;
-
-    private static readonly Flow<DocIncludeAttribute> Include =
-         from attr in Pulse.Start<DocIncludeAttribute>()
+    private static readonly Flow<InclusionFragment> Include =
+         from attr in Pulse.Start<InclusionFragment>()
          from includes in Pulse.Gather<IReadOnlyCollection<Inclusion>>()
-         from _ in Pulse.ToFlow(Explanation, includes.Value.Single(a => a.Type == attr.IncludedDoc).Explanation)
+         from _ in Pulse.ToFlow(Explanation, includes.Value.Single(a => a.Type == attr.Included).Explanation)
          select attr;
 
-    private static readonly Flow<DocMethodAttribute> Method =
-        from attr in Pulse.Start<DocMethodAttribute>()
-            // from _ in Pulse.ToFlow(a => Pulse.ToFlow(MarkDownHeader, a.Header), (DocHeaderAttribute)attr)
-        from _h in Pulse.ToFlowIf(attr is DocHeaderAttribute, Header, () => (DocHeaderAttribute)attr)
-        from _c in Pulse.ToFlowIf(attr is DocContentAttribute, Content, () => (DocContentAttribute)attr)
-        from _i in Pulse.ToFlowIf(attr is DocIncludeAttribute, Include, () => (DocIncludeAttribute)attr)
+    private static readonly Flow<Fragment> Fragment =
+        from attr in Pulse.Start<Fragment>()
+        from _ in attr switch
+        {
+            HeaderFragment h => Pulse.ToFlow(a => Pulse.ToFlow(MarkDownHeader, a.Header), h),
+            ContentFragment c => Pulse.ToFlow(a => Pulse.Trace(a.Content), c),
+            InclusionFragment i => Pulse.ToFlow(Include, i),
+            _ => Pulse.NoOp()
+        }
         select attr;
 
     private static Flow<Explanation> Explanation =>
         from input in Pulse.Start<Explanation>()
         from _ in Pulse.ToFlow(MarkDownHeader, input.HeaderText)
-        from __ in Pulse.Scoped<int>(a => a + 1, Pulse.ToFlow(Method, input.DocMethods))
+        from __ in Pulse.Scoped<int>(a => a + 1, Pulse.ToFlow(Fragment, input.Fragments))
         select input;
 
     private static Flow<Page> Page =>
         from input in Pulse.Start<Page>()
-        let level = input.Path.Split(".").Length - 1
+        let level = input.Path.Split("\\").Length
         from _ in Pulse.Scoped<int>(a => level,
             from _ in Pulse.ToFlow(MarkDownHeader, input.Explanation.HeaderText)
-            from s in Pulse.Scoped<int>(a => a + 1, Pulse.ToFlow(Method, input.Explanation.DocMethods))
+            from s in Pulse.Scoped<int>(a => a + 1, Pulse.ToFlow(Fragment, input.Explanation.Fragments))
             select Unit.Instance)
         select input;
 
@@ -57,7 +50,7 @@ public static class Scriptorium
         from level in Pulse.Gather(0)
         from _ in Pulse.Scoped<int>(a => 1,
             from _ in Pulse.ToFlow(MarkDownHeader, input.Page.Explanation.HeaderText)
-            from __ in Pulse.Scoped<int>(a => a + 1, Pulse.ToFlow(Method, input.Page.Explanation.DocMethods))
+            from __ in Pulse.Scoped<int>(a => a + 1, Pulse.ToFlow(Fragment, input.Page.Explanation.Fragments))
             select Unit.Instance)
         select input;
 
@@ -68,8 +61,8 @@ public static class Scriptorium
         from _ in Pulse.ToFlow(Page, input.Pages)
         select input;
 
-    public static readonly Flow<ToCEntry> ToC =
-        from input in Pulse.Start<ToCEntry>()
+    public static readonly Flow<Chronicle> ToC =
+        from input in Pulse.Start<Chronicle>()
         from _ in Pulse.Trace($"- [{input.Text}]({input.Path})")
         select input;
 }

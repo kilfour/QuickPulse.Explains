@@ -1,8 +1,8 @@
 namespace QuickPulse.Explains.BasedOnNamespace;
 
-public static class ThePathfinder
+public static class TheCartographer
 {
-    public static string NamespaceRelativeFilename(Type root, Type current)
+    public static string ChartPath(Type root, Type current)
     {
         var rootNamespace = root.Namespace ?? "";
         var currentNamespace = current.Namespace ?? "";

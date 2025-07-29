@@ -21,6 +21,6 @@ public static class TheScribe
         }
         Signal.From(Scriptorium.ToC)
             .SetArtery(WriteData.ToNewFile(Path.Combine(path, "ToC.md")))
-            .Pulse(book.Pages.Select(a => new ToCEntry(a.Explanation.HeaderText, a.Path)));
+            .Pulse(book.Pages.Select(a => new Chronicle(a.Explanation.HeaderText, a.Path)));
     }
 }
