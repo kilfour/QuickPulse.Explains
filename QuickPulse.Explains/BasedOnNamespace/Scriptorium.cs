@@ -30,6 +30,7 @@ public static class Scriptorium
 
     private static readonly Flow<DocMethodAttribute> Method =
         from attr in Pulse.Start<DocMethodAttribute>()
+            // from _ in Pulse.ToFlow(a => Pulse.ToFlow(MarkDownHeader, a.Header), (DocHeaderAttribute)attr)
         from _h in Pulse.ToFlowIf(attr is DocHeaderAttribute, Header, () => (DocHeaderAttribute)attr)
         from _c in Pulse.ToFlowIf(attr is DocContentAttribute, Content, () => (DocContentAttribute)attr)
         from _i in Pulse.ToFlowIf(attr is DocIncludeAttribute, Include, () => (DocIncludeAttribute)attr)

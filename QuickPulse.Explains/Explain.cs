@@ -1,4 +1,3 @@
-using QuickPulse.Arteries;
 using QuickPulse.Explains.BasedOnNamespace;
 using QuickPulse.Instruments;
 
@@ -9,23 +8,13 @@ public static class Explain
     public static void This<T>(string filename)
     {
         var book = TheArchivist.Compose<T>();
-        Signal.From(Scriptorium.Book)
-            .SetArtery(WriteData.ToNewFile(filename))
-            .Pulse(book);
+        TheScribe.Print(filename, book);
     }
 
-    public static void These<T>(string rootPath)
+    public static void These<T>(string path)
     {
-        if (string.IsNullOrWhiteSpace(rootPath)) ComputerSays.No($"Path: '{rootPath}' is not valid.");
+        if (string.IsNullOrWhiteSpace(path)) ComputerSays.No($"Path: '{path}' is not valid.");
         var book = TheArchivist.Compose<T>();
-        var signal = Signal.From(Scriptorium.SeperatePage);
-        foreach (var page in book.Pages)
-        {
-            var artery = WriteData.ToNewFile(Path.Combine(rootPath, page.Path));
-            signal.SetArtery(artery).Pulse(new SeperatePage(page, book.Includes));
-        }
-        Signal.From(Scriptorium.ToC)
-            .SetArtery(WriteData.ToNewFile(Path.Combine(rootPath, "ToC.md")))
-            .Pulse(book.Pages.Select(a => new ToCEntry(a.Explanation.HeaderText, a.Path)));
+        TheScribe.Publish(path, book);
     }
 }

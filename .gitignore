@@ -11,3 +11,4 @@ Tests.cs
 *.log
 .quickpulse/
 .quickacid/
+Temp/

@@ -1,2 +1,0 @@
-- [Documented Thing](DocumentedThing.md)
-- [Yet Some Other Stuff](NextLevel\YetSomeOtherStuff.md)

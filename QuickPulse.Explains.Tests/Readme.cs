@@ -22,6 +22,6 @@ public class ReadMe
         //     ])], typeof(Readme).Assembly);
 
         Explain.This<DocumentedThing>("temp.md");
-        Explain.These<DocumentedThing>("Docs");
+        Explain.These<DocumentedThing>("Temp");
     }
 }
