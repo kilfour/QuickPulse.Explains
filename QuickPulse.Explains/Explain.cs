@@ -16,20 +16,16 @@ public static class Explain
 
     public static void These<T>(string rootPath)
     {
-        if (string.IsNullOrWhiteSpace(rootPath))
-            ComputerSays.No($"Path: '{rootPath}' is not valid.");
-
+        if (string.IsNullOrWhiteSpace(rootPath)) ComputerSays.No($"Path: '{rootPath}' is not valid.");
         var book = TheArchivist.Compose<T>();
-
-        var signal = Signal.From(Scriptorium.DocFile);
+        var signal = Signal.From(Scriptorium.SeperatePage);
         foreach (var page in book.Pages)
         {
             var artery = WriteData.ToNewFile(Path.Combine(rootPath, page.Path));
-            signal.SetArtery(artery).Pulse((page, book.Includes));
+            signal.SetArtery(artery).Pulse(new SeperatePage(page, book.Includes));
         }
-
         Signal.From(Scriptorium.ToC)
-              .SetArtery(WriteData.ToNewFile(Path.Combine(rootPath, "ToC.md")))
-              .Pulse(book.Pages.Select(a => new ToCEntry(a.DocFileExplained.HeaderText, a.Path)));
+            .SetArtery(WriteData.ToNewFile(Path.Combine(rootPath, "ToC.md")))
+            .Pulse(book.Pages.Select(a => new ToCEntry(a.Explanation.HeaderText, a.Path)));
     }
 }

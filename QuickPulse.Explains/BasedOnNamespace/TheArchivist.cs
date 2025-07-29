@@ -51,11 +51,9 @@ public static class TheArchivist
     {
         var rootNs = root.Namespace ?? "";
         var currentNs = current.Namespace ?? "";
-
         string relativeNs = currentNs.StartsWith(rootNs)
             ? currentNs.Substring(rootNs.Length).TrimStart('.')
             : currentNs;
-
         return Path.Combine(relativeNs.Split('.', StringSplitOptions.RemoveEmptyEntries));
     }
 

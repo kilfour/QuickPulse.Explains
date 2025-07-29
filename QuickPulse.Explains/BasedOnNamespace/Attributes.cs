@@ -3,9 +3,7 @@ namespace QuickPulse.Explains.BasedOnNamespace;
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
 public class DocFileAttribute : Attribute { }
 
-
 public abstract class DocMethodAttribute : Attribute { }
-
 
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
 public class DocHeaderAttribute : DocMethodAttribute
@@ -17,7 +15,6 @@ public class DocHeaderAttribute : DocMethodAttribute
         Header = header;
     }
 }
-
 
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
 public class DocContentAttribute : DocMethodAttribute
