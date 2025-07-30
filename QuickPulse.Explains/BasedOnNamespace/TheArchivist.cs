@@ -5,6 +5,9 @@ namespace QuickPulse.Explains.BasedOnNamespace;
 
 public static class TheArchivist
 {
+    [ThreadStatic]
+    public static Reflectionist TheReflectionist = new();
+
     public static Book Compose<T>() => new(
         TheReflectionist.GetDocFileTypes(typeof(T).Assembly.GetTypes())
             .Select(a => PageFromType(typeof(T), a))
@@ -18,10 +21,18 @@ public static class TheArchivist
         TheCartographer.ChartPath(root, type));
 
     private static Explanation ExplanationFromType(Type type) =>
-         new(GetHeaderText(type), TheReflectionist.GetDocMethods(type));
+         new(GetHeaderText(type), [.. TheReflectionist.GetDocFragmentAttributes(type).Select(ToFragment)]);
+
+    public static Fragment ToFragment(this DocFragmentAttribute attr) => attr switch
+    {
+        DocHeaderAttribute h => new HeaderFragment(h.Header, h.Level),
+        DocContentAttribute c => new ContentFragment(c.Content),
+        DocIncludeAttribute i => new InclusionFragment(i.Included),
+        _ => throw new NotSupportedException(attr.GetType().Name)
+    };
 
     private static Inclusion InclusionFromType(Type type) =>
-        new(type, ExplanationFromType(type));
+       new(type, ExplanationFromType(type));
 
     private static string GetHeaderText(Type type)
     {
