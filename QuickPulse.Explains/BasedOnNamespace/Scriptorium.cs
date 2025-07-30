@@ -61,7 +61,7 @@ public static class Scriptorium
         from _ in Pulse.ToFlow(Page, input.Pages)
         select input;
 
-    public static readonly Flow<Chronicle> ToC =
+    public static readonly Flow<Chronicle> Chronicles =
         from input in Pulse.Start<Chronicle>()
         from _ in Pulse.Trace($"- [{input.Text}]({input.Path})")
         select input;

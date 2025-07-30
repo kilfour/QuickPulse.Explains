@@ -19,7 +19,7 @@ public static class TheScribe
             var artery = WriteData.ToNewFile(Path.Combine(path, page.Path));
             signal.SetArtery(artery).Pulse(new SeperatePage(page, book.Includes));
         }
-        Signal.From(Scriptorium.ToC)
+        Signal.From(Scriptorium.Chronicles)
             .SetArtery(WriteData.ToNewFile(Path.Combine(path, "ToC.md")))
             .Pulse(book.Pages.Select(a => new Chronicle(a.Explanation.HeaderText, a.Path)));
     }
