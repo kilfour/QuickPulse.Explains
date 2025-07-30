@@ -24,7 +24,7 @@ public class TypeBuilder
         _tb = Mod.DefineType(_typeName, TypeAttributes.Public | TypeAttributes.Class);
     }
 
-    public static TypeBuilder Create(string? typeName = null)
+    public static TypeBuilder Create(string? typeName)
         => new TypeBuilder(typeName);
 
     public TypeBuilder WithClassAttribute<TAttr>(params object[]? args)
@@ -78,4 +78,3 @@ public class TypeBuilder
         setter(new CustomAttributeBuilder(ctor, ctorArgs));
     }
 }
-

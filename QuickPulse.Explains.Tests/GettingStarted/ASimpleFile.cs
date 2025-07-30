@@ -1,6 +1,8 @@
-using System.Reflection;
+using QuickPulse.Arteries;
 using QuickPulse.Explains.BasedOnNamespace;
 using QuickPulse.Explains.Tests._Tools;
+using QuickPulse.Explains.Text;
+
 
 namespace QuickPulse.Explains.Tests.GettingStarted;
 
@@ -15,17 +17,20 @@ public class ASimpleFile
     [DocHeader("Adding a Doc File")]
     [DocContent("This example shows how to add documentation for a simple file.")]
     [DocContent("Multiple DocContent attributes will be combined as separate paragraphs.")]
+    [Fact]
     public void AddingADocFile()
     {
-        var type = TypeBuilder.Create()
+        var type = TypeBuilder.Create("MyType")
             .WithClassAttribute<DocFileAttribute>()
             .Build();
-    }
 
-    // This will create another subsection
-    [DocHeader("Second Example")]
-    [DocContent("forget about the dots.")]
-    public void AnotherExample()
-    {
+        var holden = TheString.Catcher();
+        TheScribe.GetArtery = a => holden;
+
+        ExplainThis.Invoke(type, "whatever");
+
+        var reader = LinesReader.FromText(holden.Whispers());
+        Assert.Equal("# My Type", reader.NextLine());
+        Assert.True(reader.EndOfContent());
     }
 }

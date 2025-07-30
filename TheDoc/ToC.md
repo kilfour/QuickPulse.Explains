@@ -1,2 +1,0 @@
-- [QuickPulse.Explains](ReadMe.md)
-- [Attribute-Based Documentation](AttributeBased\AttributeBasedDocumentation.md)

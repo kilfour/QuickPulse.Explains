@@ -5,9 +5,6 @@ namespace QuickPulse.Explains.BasedOnNamespace;
 
 public static class TheArchivist
 {
-    [ThreadStatic]
-    public static Reflectionist TheReflectionist = new();
-
     public static Book Compose<T>() => new(
         TheReflectionist.GetDocFileTypes(typeof(T).Assembly.GetTypes())
             .Select(a => PageFromType(typeof(T), a))
