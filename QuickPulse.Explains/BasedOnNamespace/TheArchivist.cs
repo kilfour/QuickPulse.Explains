@@ -11,7 +11,20 @@ public static class TheArchivist
             .ToReadOnlyCollection(),
         TheReflectionist.GetIncludedTypes(typeof(T).Assembly.GetTypes())
             .Select(InclusionFromType)
+            .ToReadOnlyCollection(),
+        TheReflectionist.GetDocExamples(typeof(T).Assembly.GetTypes())
+            .Select(ExampleFromType)
             .ToReadOnlyCollection());
+
+    private static Example ExampleFromType((string Name, DocExampleAttribute Attribute) docExample)
+    {
+        return new Example(docExample.Name, []);
+    }
+
+    //     foreach (var line in File.ReadLines(path))
+    // {
+    //     // line-by-line, lazy, no full file in memory
+    // }
 
     private static Page PageFromType(Type root, Type type) => new(
         ExplanationFromType(type),
@@ -24,6 +37,7 @@ public static class TheArchivist
     {
         DocHeaderAttribute h => new HeaderFragment(h.Header, h.Level),
         DocContentAttribute c => new ContentFragment(c.Content),
+        DocCodeAttribute c => new CodeFragment(c.Code, c.Language),
         DocIncludeAttribute i => new InclusionFragment(i.Included),
         _ => throw new NotSupportedException(attr.GetType().Name)
     };

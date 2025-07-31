@@ -2,4 +2,5 @@ namespace QuickPulse.Explains.BasedOnNamespace;
 
 public record Book(
     IReadOnlyCollection<Page> Pages,
-    IReadOnlyCollection<Inclusion> Includes);
+    IReadOnlyCollection<Inclusion> Includes,
+    IReadOnlyCollection<Example> Examples);

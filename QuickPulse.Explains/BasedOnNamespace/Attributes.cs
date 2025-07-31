@@ -1,3 +1,5 @@
+using System.Runtime.CompilerServices;
+
 namespace QuickPulse.Explains.BasedOnNamespace;
 
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
@@ -41,6 +43,19 @@ public class DocContentAttribute : DocFragmentAttribute
 }
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true)]
+public class DocCodeAttribute : DocFragmentAttribute
+{
+    public string Code { get; }
+    public string Language { get; }
+
+    public DocCodeAttribute(string content, string language = "csharp")
+    {
+        Code = content;
+        Language = language;
+    }
+}
+
+[AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true)]
 public class DocIncludeAttribute : DocFragmentAttribute
 {
     public Type Included { get; }
@@ -51,4 +66,17 @@ public class DocIncludeAttribute : DocFragmentAttribute
     }
 }
 
+[AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
+public class DocExampleAttribute : Attribute
+{
+    public string File { get; }
+    public int Line { get; }
 
+    public DocExampleAttribute(
+        [CallerFilePath] string file = "",
+        [CallerLineNumber] int line = 0)
+    {
+        File = file;
+        Line = line;
+    }
+}

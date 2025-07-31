@@ -12,22 +12,37 @@ public static class Scriptorium
          from _ in Pulse.Trace(header)
          select text;
 
+    private static readonly Flow<HeaderFragment> HeaderFragment =
+         from header in Pulse.Start<HeaderFragment>()
+         from level in Pulse.Gather<int>()
+         let headingMarker = new string('#', level.Value + header.Level)
+         from _ in Pulse.Trace($"{headingMarker} {header.Header}")
+         select header;
+
+    private static readonly Flow<CodeFragment> Code =
+         from fragment in Pulse.Start<CodeFragment>()
+         from s in Pulse.Trace($"```{fragment.Language}")
+         from _ in Pulse.Trace(fragment.Code.Trim())
+         from e in Pulse.Trace("```")
+         select fragment;
+
     private static readonly Flow<InclusionFragment> Include =
-         from attr in Pulse.Start<InclusionFragment>()
+         from fragment in Pulse.Start<InclusionFragment>()
          from includes in Pulse.Gather<IReadOnlyCollection<Inclusion>>()
-         from _ in Pulse.ToFlow(Explanation, includes.Value.Single(a => a.Type == attr.Included).Explanation)
-         select attr;
+         from _ in Pulse.ToFlow(Explanation, includes.Value.Single(a => a.Type == fragment.Included).Explanation)
+         select fragment;
 
     private static readonly Flow<Fragment> Fragment =
-        from attr in Pulse.Start<Fragment>()
-        from _ in attr switch
+        from fragment in Pulse.Start<Fragment>()
+        from _ in fragment switch
         {
-            HeaderFragment h => Pulse.ToFlow(a => Pulse.ToFlow(MarkDownHeader, a.Header), h),
+            HeaderFragment h => Pulse.ToFlow(a => Pulse.ToFlow(HeaderFragment, a), h),
             ContentFragment c => Pulse.ToFlow(a => Pulse.Trace(a.Content), c),
+            CodeFragment c => Pulse.ToFlow(Code, c),
             InclusionFragment i => Pulse.ToFlow(Include, i),
             _ => Pulse.NoOp()
         }
-        select attr;
+        select fragment;
 
     private static Flow<Explanation> Explanation =>
         from input in Pulse.Start<Explanation>()
