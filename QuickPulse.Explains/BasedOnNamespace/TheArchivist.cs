@@ -70,6 +70,8 @@ public static class TheArchivist
         var docFileHeader = TheReflectionist.GetDocFileHeader(type);
         if (!string.IsNullOrEmpty(docFileHeader)) return docFileHeader;
         var result = type.Name;
+        result = result.EndsWith("Tests") ? result.Substring(0, result.Length - 5) : result;
+        result = result.EndsWith("Test") ? result.Substring(0, result.Length - 4) : result;
         if (result.Contains('_'))
             result = string.Join("", result.Split("_").Skip(1));
         result = result.Replace("_", " ");
