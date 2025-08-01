@@ -1,3 +1,5 @@
+using QuickPulse.Explains.Deprecated;
+
 namespace QuickPulse.Explains.Tests;
 
 [Doc(Order = "0-2", Caption = "Bits and Alices", Content =

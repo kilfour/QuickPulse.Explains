@@ -1,3 +1,5 @@
+using QuickPulse.Explains.Deprecated;
+
 namespace QuickPulse.Explains.TestModels;
 
 [Doc("1", "Test Class", "This is a class-level doc.")]

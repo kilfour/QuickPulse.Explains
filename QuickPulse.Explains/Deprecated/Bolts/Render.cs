@@ -1,6 +1,7 @@
 using QuickPulse.Bolts;
+using QuickPulse.Explains.Deprecated;
 
-namespace QuickPulse.Explains.Bolts;
+namespace QuickPulse.Explains.Deprecated.Bolts;
 
 public static class Render
 {

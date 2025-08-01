@@ -1,5 +1,6 @@
 using QuickPulse.Arteries;
-using QuickPulse.Explains.Bolts;
+using QuickPulse.Explains.Deprecated;
+using QuickPulse.Explains.Deprecated.Bolts;
 using QuickPulse.Explains.TestModels;
 
 

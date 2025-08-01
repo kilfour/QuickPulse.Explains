@@ -1,6 +1,6 @@
 using System.Runtime.CompilerServices;
 
-namespace QuickPulse.Explains.BasedOnNamespace;
+namespace QuickPulse.Explains;
 
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
 public class DocFileAttribute : Attribute { }

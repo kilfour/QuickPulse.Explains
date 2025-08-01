@@ -1,3 +1,5 @@
+using QuickPulse.Explains.Deprecated;
+
 namespace QuickPulse.Explains.Tests;
 
 [Doc(Order = "0-1", Caption = "Attribute-Based Documentation", Content =

@@ -1,4 +1,4 @@
-﻿namespace QuickPulse.Explains;
+﻿namespace QuickPulse.Explains.Deprecated;
 
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true)]

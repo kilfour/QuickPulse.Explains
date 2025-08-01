@@ -1,9 +1,9 @@
 using QuickPulse.Arteries;
 using QuickPulse;
 using System.Reflection;
-using QuickPulse.Explains.Bolts;
+using QuickPulse.Explains.Deprecated.Bolts;
 
-namespace QuickPulse.Explains;
+namespace QuickPulse.Explains.Deprecated;
 
 public class Document
 {

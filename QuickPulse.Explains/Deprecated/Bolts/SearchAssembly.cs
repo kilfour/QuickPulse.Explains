@@ -1,8 +1,9 @@
 using System.Globalization;
 using QuickPulse;
 using System.Reflection;
+using QuickPulse.Explains.Deprecated;
 
-namespace QuickPulse.Explains.Bolts;
+namespace QuickPulse.Explains.Deprecated.Bolts;
 
 public static class SearchAssembly
 {

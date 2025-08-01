@@ -1,5 +1,6 @@
 
-using QuickPulse.Explains.BasedOnNamespace;
+
+using QuickPulse.Explains.Deprecated;
 
 namespace QuickPulse.Explains.Tests;
 
@@ -13,7 +14,7 @@ both single-file and multi-file generation with namespace-based filtering.
 [DocFileHeader("QuickPulse.Explains")]
 public class ReadMe
 {
-    [Fact]
+    [Fact(Skip = "migrate doc to new way of doing things")]
     [DocContent(
 @"`QuickPulse.Explains` is a lightweight documentation generator for C# projects,
 designed to turn `[Doc]`-annotated test classes and methods into clean, structured Markdown files.

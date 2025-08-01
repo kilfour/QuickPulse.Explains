@@ -1,3 +1,4 @@
+using QuickPulse.Explains.Deprecated;
 using QuickPulse.Explains.Text;
 
 namespace QuickPulse.Explains.Tests.Text;
