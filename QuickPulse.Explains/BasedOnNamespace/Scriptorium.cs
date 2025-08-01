@@ -26,6 +26,14 @@ public static class Scriptorium
          from e in Pulse.Trace("```")
          select fragment;
 
+    private static readonly Flow<CodeExampleFragment> CodeExample =
+         from fragment in Pulse.Start<CodeExampleFragment>()
+         from examples in Pulse.Gather<IReadOnlyCollection<Example>>()
+         from s in Pulse.Trace($"```csharp")
+         from _ in Pulse.Trace($"{examples.Value.Single(a => a.Name == fragment.Name).Code}")
+         from e in Pulse.Trace("```")
+         select fragment;
+
     private static readonly Flow<InclusionFragment> Include =
          from fragment in Pulse.Start<InclusionFragment>()
          from includes in Pulse.Gather<IReadOnlyCollection<Inclusion>>()
@@ -36,10 +44,11 @@ public static class Scriptorium
         from fragment in Pulse.Start<Fragment>()
         from _ in fragment switch
         {
-            HeaderFragment h => Pulse.ToFlow(a => Pulse.ToFlow(HeaderFragment, a), h),
-            ContentFragment c => Pulse.ToFlow(a => Pulse.Trace(a.Content), c),
-            CodeFragment c => Pulse.ToFlow(Code, c),
-            InclusionFragment i => Pulse.ToFlow(Include, i),
+            HeaderFragment a => Pulse.ToFlow(b => Pulse.ToFlow(HeaderFragment, b), a),
+            ContentFragment a => Pulse.ToFlow(b => Pulse.Trace(b.Content), a),
+            CodeFragment a => Pulse.ToFlow(Code, a),
+            CodeExampleFragment a => Pulse.ToFlow(CodeExample, a),
+            InclusionFragment a => Pulse.ToFlow(Include, a),
             _ => Pulse.NoOp()
         }
         select fragment;
@@ -71,7 +80,8 @@ public static class Scriptorium
 
     public static Flow<Book> Book =>
         from input in Pulse.Start<Book>()
-        from inc in Pulse.Gather(input.Includes)
+        from includes in Pulse.Gather(input.Includes)
+        from examples in Pulse.Gather(input.Examples)
         from level in Pulse.Gather(1)
         from _ in Pulse.ToFlow(Page, input.Pages)
         select input;

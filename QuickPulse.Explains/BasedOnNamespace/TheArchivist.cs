@@ -1,5 +1,7 @@
 
 using QuickPulse;
+using QuickPulse.Arteries;
+using QuickPulse.Bolts;
 
 namespace QuickPulse.Explains.BasedOnNamespace;
 
@@ -7,6 +9,7 @@ public static class TheArchivist
 {
     public static Book Compose<T>() => new(
         TheReflectionist.GetDocFileTypes(typeof(T).Assembly.GetTypes())
+            .Where(a => (a.Namespace ?? "").StartsWith(typeof(T).Namespace ?? ""))
             .Select(a => PageFromType(typeof(T), a))
             .ToReadOnlyCollection(),
         TheReflectionist.GetIncludedTypes(typeof(T).Assembly.GetTypes())
@@ -18,13 +21,29 @@ public static class TheArchivist
 
     private static Example ExampleFromType((string Name, DocExampleAttribute Attribute) docExample)
     {
-        return new Example(docExample.Name, []);
+        var holden = TheString.Catcher();
+        var signal =
+            Signal.From<string>(
+                a =>
+                    from cnt in Pulse.Gather(-1)
+                    from _ in Pulse.ToFlow(
+                        c =>
+                            from _ in Pulse.ManipulateIf<int>(c == '}', a => a - 1)
+                            from __ in Pulse.TraceIf<int>(a => a >= 0, () => c)
+                            from ___ in Pulse.ManipulateIf<int>(c == '{', a => a + 1)
+                            select Unit.Instance, a)
+                    select Unit.Instance)
+            .SetArtery(holden);
+        foreach (var line in File.ReadLines(docExample.Attribute.File).Skip(docExample.Attribute.Line))
+        {
+            signal.Pulse(line);
+            signal.Pulse(Environment.NewLine);
+        }
+        var text = holden.Whispers().Split(Environment.NewLine).Where(a => !string.IsNullOrWhiteSpace(a));
+        var length = text.Select(a => a.TakeWhile(a => a == ' ').Count()).Min();
+        var result = string.Join(Environment.NewLine, text.Select(a => a.Substring(length)));
+        return new Example(docExample.Name, result);
     }
-
-    //     foreach (var line in File.ReadLines(path))
-    // {
-    //     // line-by-line, lazy, no full file in memory
-    // }
 
     private static Page PageFromType(Type root, Type type) => new(
         ExplanationFromType(type),
@@ -35,10 +54,11 @@ public static class TheArchivist
 
     public static Fragment ToFragment(this DocFragmentAttribute attr) => attr switch
     {
-        DocHeaderAttribute h => new HeaderFragment(h.Header, h.Level),
-        DocContentAttribute c => new ContentFragment(c.Content),
-        DocCodeAttribute c => new CodeFragment(c.Code, c.Language),
-        DocIncludeAttribute i => new InclusionFragment(i.Included),
+        DocHeaderAttribute a => new HeaderFragment(a.Header, a.Level),
+        DocContentAttribute a => new ContentFragment(a.Content),
+        DocCodeAttribute a => new CodeFragment(a.Code, a.Language),
+        DocIncludeAttribute a => new InclusionFragment(a.Included),
+        DocCodeExampleAttribute a => new CodeExampleFragment(a.Name),
         _ => throw new NotSupportedException(attr.GetType().Name)
     };
 

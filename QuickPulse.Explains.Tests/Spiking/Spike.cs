@@ -1,13 +1,16 @@
-using System.Reflection;
+using QuickPulse;
 using QuickPulse.Arteries;
 using QuickPulse.Bolts;
 using QuickPulse.Explains.BasedOnNamespace;
 using QuickPulse.Explains.Text;
 
-namespace QuickPulse.Explains.Tests;
+namespace QuickPulse.Explains.Tests.Spiking;
 
+[DocFile]
 public class Spike
 {
+
+    public record Context(int Braces, int SpaceCount);
     [Fact]
     public void ParsingMethod()
     {
@@ -20,6 +23,20 @@ public class Spike
     }
 }";
         var holden = TheString.Catcher();
+
+        var findCodeFlow =
+            from ch in Pulse.Start<char>()
+            from _ in Pulse.ManipulateIf<Context>(ch == '}', a => a with { Braces = a.Braces - 1 })
+            from __ in Pulse.TraceIf<Context>(a => a.Braces >= 0, () => ch)
+            from ___ in Pulse.ManipulateIf<Context>(ch == '{', a => a with { Braces = a.Braces + 1 })
+            select ch;
+
+        var flow =
+            from s in Pulse.Start<string>()
+            let l = s.TakeWhile(char.IsWhiteSpace).Count()
+            from _ in Pulse.Gather(new Context(-1, 0))
+            select s;
+
         Signal.From<string>(
             a =>
                 from cnt in Pulse.Gather(-1)
@@ -42,21 +59,18 @@ public class Spike
         Assert.True(reader.EndOfContent());
     }
 
-    [Fact]
-    public void GettingTheExample()
-    {
-        // var methods = typeof(Spike).GetDocAttributes<DocExampleAttribute>().ToList();
-        // Signal.From<DocExampleAttribute>(a =>
-        //         Pulse.Trace($"{a.File}:{a.Line}"))
-        //     .SetArtery(WriteData.ToNewFile())
-        //     .Pulse(methods);
-    }
+    // [Fact]
+    // [DocCodeExample(nameof(Example))]
+    // public void GettingTheExample()
+    // {
+    //     Explain.This<Spike>("temp.md");
+    // }
 
-    [DocExample]
-    public void Example()
-    {
-        string n = nameof(Example);
-        Signal.ToFile<string>().Pulse(n);
-    }
+    // [DocExample]
+    // private void Example()
+    // {
+    //     string n = nameof(Example);
+    //     Signal.ToFile<string>().Pulse(n);
+    // }
 }
 

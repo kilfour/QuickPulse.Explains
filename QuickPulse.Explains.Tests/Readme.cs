@@ -1,6 +1,5 @@
 
 using QuickPulse.Explains.BasedOnNamespace;
-using QuickPulse.Explains.TestModels;
 
 namespace QuickPulse.Explains.Tests;
 
@@ -10,7 +9,7 @@ designed to turn `[Doc]`-annotated test classes and methods into clean, structur
 It leverages the `QuickPulse` library for declarative flow composition and supports
 both single-file and multi-file generation with namespace-based filtering.
 ")]
-[DocFile]
+//[DocFile]
 [DocFileHeader("QuickPulse.Explains")]
 public class ReadMe
 {
