@@ -67,17 +67,6 @@ public class DocIncludeAttribute : DocFragmentAttribute
 }
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true)]
-public class DocIncludeFromAttribute : DocFragmentAttribute
-{
-    public string Namespace { get; }
-
-    public DocIncludeFromAttribute(string namespaceAsString)
-    {
-        Namespace = namespaceAsString;
-    }
-}
-
-[AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true)]
 public class DocCodeExampleAttribute : DocFragmentAttribute
 {
     public string Name { get; }
