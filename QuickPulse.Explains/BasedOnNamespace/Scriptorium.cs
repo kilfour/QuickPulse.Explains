@@ -26,9 +26,23 @@ public static class Scriptorium
          from e in Pulse.Trace("```")
          select fragment;
 
+    private static string ApplyReplacements(string code, string[] replacements)
+    {
+        var raw = code;
+        foreach (var repl in replacements)
+        {
+            var parts = repl.Split(new[] { "=>" }, StringSplitOptions.None);
+            if (parts.Length == 2)
+                raw = raw.Replace(parts[0], parts[1]);
+        }
+        return raw;
+    }
+
     private static readonly Flow<CodeExampleFragment> CodeExample =
          from fragment in Pulse.Start<CodeExampleFragment>()
          from examples in Pulse.Gather<IReadOnlyCollection<Example>>()
+         let code = examples.Value.Single(a => a.Name == fragment.Name).Code
+         let replaced = ApplyReplacements(code, fragment.Replacements)
          from s in Pulse.Trace($"```csharp")
          from _ in Pulse.Trace($"{examples.Value.Single(a => a.Name == fragment.Name).Code}")
          from e in Pulse.Trace("```")

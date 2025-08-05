@@ -58,7 +58,7 @@ public static class TheArchivist
         DocContentAttribute a => new ContentFragment(a.Content),
         DocCodeAttribute a => new CodeFragment(a.Code, a.Language),
         DocIncludeAttribute a => new InclusionFragment(a.Included),
-        DocCodeExampleAttribute a => new CodeExampleFragment(a.Name),
+        DocCodeExampleAttribute a => new CodeExampleFragment(a.Name, a.Replacements),
         _ => throw new NotSupportedException(attr.GetType().Name)
     };
 

@@ -11,9 +11,17 @@ public static class TheReflectionist
             .ThenBy(t => t.Name);
 
     public static IEnumerable<Type> GetIncludedTypes(Type[] types) =>
-        types.SelectMany(a => a.GetMethods().SelectMany(a => a.GetCustomAttributes<DocIncludeAttribute>(false)))
-            .Select(a => a.Included)
-            .Distinct();
+        GetIncludedTypesFromNamespace(types).Concat(
+        types.SelectMany(a => a.GetCustomAttributes<DocIncludeAttribute>(false).Select(a => a.Included))
+            .Concat(types.SelectMany(a => a.GetMethods().SelectMany(a => a.GetCustomAttributes<DocIncludeAttribute>(false)))
+            .Select(a => a.Included))
+            .Distinct());
+
+    private static IEnumerable<Type> GetIncludedTypesFromNamespace(Type[] types)
+    {
+        var namespaces = types.SelectMany(a => a.GetCustomAttributes<DocIncludeFromAttribute>(false).Select(a => a.Namespace));
+        return types.Where(a => namespaces.Contains(a.Namespace)); // .Any(b => a.Namespace))
+    }
 
     public static List<DocFragmentAttribute> GetDocFragmentAttributes(Type type) =>
         [.. type.GetCustomAttributes<DocFragmentAttribute>(false)

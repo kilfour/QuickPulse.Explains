@@ -56,17 +56,6 @@ public class DocCodeAttribute : DocFragmentAttribute
 }
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true)]
-public class DocCodeExampleAttribute : DocFragmentAttribute
-{
-    public string Name { get; }
-
-    public DocCodeExampleAttribute(string name)
-    {
-        Name = name;
-    }
-}
-
-[AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true)]
 public class DocIncludeAttribute : DocFragmentAttribute
 {
     public Type Included { get; }
@@ -74,6 +63,30 @@ public class DocIncludeAttribute : DocFragmentAttribute
     public DocIncludeAttribute(Type includedDoc)
     {
         Included = includedDoc;
+    }
+}
+
+[AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true)]
+public class DocIncludeFromAttribute : DocFragmentAttribute
+{
+    public string Namespace { get; }
+
+    public DocIncludeFromAttribute(string namespaceAsString)
+    {
+        Namespace = namespaceAsString;
+    }
+}
+
+[AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true)]
+public class DocCodeExampleAttribute : DocFragmentAttribute
+{
+    public string Name { get; }
+    public string[] Replacements { get; }
+
+    public DocCodeExampleAttribute(string name, params string[] replacements)
+    {
+        Name = name;
+        Replacements = replacements;
     }
 }
 
