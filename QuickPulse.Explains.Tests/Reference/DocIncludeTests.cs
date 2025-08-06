@@ -7,7 +7,7 @@ using QuickPulse.Explains.Text;
 
 namespace QuickPulse.Explains.Tests.Reference;
 
-[DocFile]
+//[DocFile]
 public class DocIncludeTests
 {
     [Fact]

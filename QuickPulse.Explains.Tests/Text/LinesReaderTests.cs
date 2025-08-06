@@ -1,9 +1,10 @@
-using QuickPulse.Explains.Deprecated;
 using QuickPulse.Explains.Text;
 
 namespace QuickPulse.Explains.Tests.Text;
 
-[Doc(Order = "0-2-1", Caption = "LinesReader: Sequential Line Navigation", Content =
+[DocFile]
+[DocFileHeader("LinesReader: Sequential Line Navigation")]
+[DocContent(
 @"`LinesReader` is a lightweight utility intended for use in tests. It provides simple,
 sequential line-by-line reading over string content.
 
