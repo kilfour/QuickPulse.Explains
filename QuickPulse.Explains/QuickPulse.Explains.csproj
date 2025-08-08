@@ -3,7 +3,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Version>0.2.0</Version>
+    <Version>0.2.1</Version>
     <Authors>Kilfour</Authors>
     <PackageId>QuickPulse.Explains</PackageId>
     <Description>Write some tests, make QuickPulse read them aloud.</Description>
@@ -19,10 +19,6 @@
   
   <ItemGroup>
     <PackageReference Include="QuickPulse" Version="0.2.0" /> 
-  </ItemGroup>
-
-  <ItemGroup>
-    <!-- <ProjectReference Include="..\..\QuickPulse\QuickPulse\QuickPulse.csproj" />  -->
   </ItemGroup>
 
 </Project>
