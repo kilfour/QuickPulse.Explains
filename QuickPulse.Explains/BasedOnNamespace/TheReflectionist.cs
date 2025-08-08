@@ -26,7 +26,7 @@ public static class TheReflectionist
         type.GetCustomAttribute<DocFileHeaderAttribute>(false)?.Header;
 
     public static IEnumerable<(string, DocExampleAttribute)> GetDocExamples(Type[] types) =>
-        types.SelectMany(a => a.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
+        types.SelectMany(a => a.GetMethods(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic))
             .Where(a => a.GetCustomAttributes<DocExampleAttribute>().Any())
             .Select(a => (a.Name, a.GetCustomAttribute<DocExampleAttribute>()))!;
 }

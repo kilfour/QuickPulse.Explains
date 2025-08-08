@@ -19,18 +19,23 @@ public static class TheArchivist
             .Select(ExampleFromType)
             .ToReadOnlyCollection());
 
+
+    public record Context(int Count, bool Printing);
     private static Example ExampleFromType((string Name, DocExampleAttribute Attribute) docExample)
     {
+
         var holden = TheString.Catcher();
         var signal =
             Signal.From<string>(
                 a =>
-                    from cnt in Pulse.Gather(-1)
+                    from ctx in Pulse.Gather(new Context(-1, true))
                     from _ in Pulse.ToFlow(
                         c =>
-                            from _ in Pulse.ManipulateIf<int>(c == '}', a => a - 1)
-                            from __ in Pulse.TraceIf<int>(a => a >= 0, () => c)
-                            from ___ in Pulse.ManipulateIf<int>(c == '{', a => a + 1)
+                            from _ in Pulse.ManipulateIf<Context>(c == '}', a => a with { Count = a.Count - 1 })
+                            from ctx in Pulse.Gather<Context>()
+                            from __ in Pulse.ManipulateIf<Context>(c == '}' && ctx.Value.Count <= 0, a => a with { Printing = false })
+                            from ___ in Pulse.TraceIf<Context>(a => a.Count >= 0 && a.Printing, () => c)
+                            from ____ in Pulse.ManipulateIf<Context>(c == '{', a => a with { Count = a.Count + 1 })
                             select Unit.Instance, a)
                     select Unit.Instance)
             .SetArtery(holden);
