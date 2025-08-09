@@ -25,7 +25,7 @@ public static class TheScribe
         foreach (var page in book.Pages)
         {
             var artery = GetArtery(Path.Combine(path, page.Path));
-            signal.SetArtery(artery).Pulse(new SeperatePage(page, book.Includes));
+            signal.SetArtery(artery).Pulse(new SeperatePage(page, book.Includes, book.Examples));
         }
         Signal.From(Scriptorium.Chronicles)
             .SetArtery(GetArtery(Path.Combine(path, "ToC.md")))
