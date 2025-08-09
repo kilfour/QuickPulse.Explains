@@ -44,7 +44,7 @@ public static class Scriptorium
          let code = examples.Value.Single(a => a.Name == fragment.Name).Code
          let replaced = ApplyReplacements(code, fragment.Replacements)
          from s in Pulse.Trace($"```csharp")
-         from _ in Pulse.Trace($"{examples.Value.Single(a => a.Name == fragment.Name).Code}")
+         from _ in Pulse.Trace(replaced)
          from e in Pulse.Trace("```")
          select fragment;
 
