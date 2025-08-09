@@ -12,4 +12,10 @@ public static class TheCartographer
         var path = Path.Combine(relativeNamespace.Split('.', StringSplitOptions.RemoveEmptyEntries));
         return Path.Combine(path, current.Name + ".md");
     }
+
+    public static string GetFileContents(string filePath, string filename)
+    {
+        var codeFile = Path.Combine(Path.GetDirectoryName(filePath)!, filename);
+        return File.ReadAllText(codeFile);
+    }
 }

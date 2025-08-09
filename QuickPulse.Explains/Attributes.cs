@@ -18,6 +18,17 @@ public class DocFileHeaderAttribute : Attribute
 
 public abstract class DocFragmentAttribute : Attribute { }
 
+[AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true)]
+public class DocIncludeAttribute : DocFragmentAttribute
+{
+    public Type Included { get; }
+
+    public DocIncludeAttribute(Type includedDoc)
+    {
+        Included = includedDoc;
+    }
+}
+
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
 public class DocHeaderAttribute : DocFragmentAttribute
 {
@@ -56,25 +67,14 @@ public class DocCodeAttribute : DocFragmentAttribute
 }
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true)]
-public class DocIncludeAttribute : DocFragmentAttribute
-{
-    public Type Included { get; }
-
-    public DocIncludeAttribute(Type includedDoc)
-    {
-        Included = includedDoc;
-    }
-}
-
-[AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true)]
 public class DocCodeExampleAttribute : DocFragmentAttribute
 {
     public string Name { get; }
     public string[] Replacements { get; }
 
-    public DocCodeExampleAttribute(string name, params string[] replacements)
+    public DocCodeExampleAttribute(Type type, string methodName, params string[] replacements)
     {
-        Name = name;
+        Name = type.FullName + "." + methodName; ;
         Replacements = replacements;
     }
 }
@@ -91,5 +91,20 @@ public class DocExampleAttribute : Attribute
     {
         File = file;
         Line = line;
+    }
+}
+
+[AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true)]
+public class DocCodeFileAttribute : DocFragmentAttribute
+{
+    public string Filename { get; }
+    public string Language { get; }
+    public string Path { get; }
+
+    public DocCodeFileAttribute(string filename, string language = "", [CallerFilePath] string path = "")
+    {
+        Language = language;
+        Path = path;
+        Filename = filename;
     }
 }

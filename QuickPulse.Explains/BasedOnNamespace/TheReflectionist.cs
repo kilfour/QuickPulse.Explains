@@ -28,5 +28,5 @@ public static class TheReflectionist
     public static IEnumerable<(string, DocExampleAttribute)> GetDocExamples(Type[] types) =>
         types.SelectMany(a => a.GetMethods(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic))
             .Where(a => a.GetCustomAttributes<DocExampleAttribute>().Any())
-            .Select(a => (a.Name, a.GetCustomAttribute<DocExampleAttribute>()))!;
+            .Select(a => ($"{a.DeclaringType!.FullName}.{a.Name}", a.GetCustomAttribute<DocExampleAttribute>()))!;
 }

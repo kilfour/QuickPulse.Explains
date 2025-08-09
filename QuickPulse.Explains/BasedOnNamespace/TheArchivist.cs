@@ -45,7 +45,7 @@ public static class TheArchivist
             signal.Pulse(Environment.NewLine);
         }
         var text = holden.Whispers().Split(Environment.NewLine).Where(a => !string.IsNullOrWhiteSpace(a));
-        var length = text.Select(a => a.TakeWhile(a => a == ' ').Count()).Min();
+        var length = text.Select(a => a.TakeWhile(a => a == ' ' || a == '\t').Count()).Min();
         var result = string.Join(Environment.NewLine, text.Select(a => a.Substring(length)));
         return new Example(docExample.Name, result);
     }
@@ -64,6 +64,7 @@ public static class TheArchivist
         DocCodeAttribute a => new CodeFragment(a.Code, a.Language),
         DocIncludeAttribute a => new InclusionFragment(a.Included),
         DocCodeExampleAttribute a => new CodeExampleFragment(a.Name, a.Replacements),
+        DocCodeFileAttribute a => new CodeFragment(TheCartographer.GetFileContents(a.Path, a.Filename), a.Language),
         _ => throw new NotSupportedException(attr.GetType().Name)
     };
 
