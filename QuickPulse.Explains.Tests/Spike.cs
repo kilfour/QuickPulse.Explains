@@ -8,6 +8,8 @@ public class Spike
     [DocCodeExample(typeof(Spike), nameof(Foo))]
     [DocCodeExample(typeof(Spike), nameof(FullFoo))]
     [DocCodeExample(typeof(Bar))]
+    [DocCodeExample(typeof(Spike), nameof(AList))]
+    [DocCodeExample(typeof(Spike), nameof(AnotherList))]
     public void Files()
     {
         Explain.This<Spike>("Spike.md");
@@ -22,19 +24,64 @@ public class Spike
     }
 
 
-    [DocReplace("just some text", "replaced")]
     [DocExample]
+    [DocReplace("just some text", "replaced")]
     private void FullFoo()
     {
         // just some text { }
     }
 
 
-    [DocReplace("Method", "MyMethod")]
     [DocExample]
+    [DocReplace("Method", "MyMethod")]
+
     private class Bar
     {
         public int Method() { return 42; }
+    }
+
+    [DocSnippet]
+    [DocReplace("return", "")]
+    private List<string> AList()
+    {
+        return
+        [
+            "char='{', enter=-1, emit=False, exit=0",
+            "char=' ', enter=0, emit=True, exit=0",
+            "char='a', enter=0, emit=True, exit=0",
+            "char=' ', enter=0, emit=True, exit=0",
+            "char='{', enter=0, emit=True, exit=1",
+            "char=' ', enter=1, emit=True, exit=1",
+            "char='b', enter=1, emit=True, exit=1",
+            "char=' ', enter=1, emit=True, exit=1",
+            "char='}', enter=1, emit=True, exit=0",
+            "char=' ', enter=0, emit=True, exit=0",
+            "char='c', enter=0, emit=True, exit=0",
+            "char=' ', enter=0, emit=True, exit=0",
+            "char='}', enter=0, emit=True, exit=-1"
+        ];
+    }
+
+    [DocExample]
+    [DocReplace("return", "")]
+    private List<string> AnotherList()
+    {
+        return
+        [
+            "char='{', enter=-1, emit=False, exit=0",
+            "char=' ', enter=0, emit=True, exit=0",
+            "char='a', enter=0, emit=True, exit=0",
+            "char=' ', enter=0, emit=True, exit=0",
+            "char='{', enter=0, emit=True, exit=1",
+            "char=' ', enter=1, emit=True, exit=1",
+            "char='b', enter=1, emit=True, exit=1",
+            "char=' ', enter=1, emit=True, exit=1",
+            "char='}', enter=1, emit=True, exit=0",
+            "char=' ', enter=0, emit=True, exit=0",
+            "char='c', enter=0, emit=True, exit=0",
+            "char=' ', enter=0, emit=True, exit=0",
+            "char='}', enter=0, emit=True, exit=-1"
+        ];
     }
 }
 

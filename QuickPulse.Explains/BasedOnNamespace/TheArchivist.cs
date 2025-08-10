@@ -1,7 +1,5 @@
-
 using QuickPulse;
 using QuickPulse.Arteries;
-using QuickPulse.Bolts;
 using QuickPulse.Explains.Abstractions;
 using QuickPulse.Explains.BasedOnNamespace.Fragments;
 
@@ -31,30 +29,6 @@ public static class TheArchivist
             from __ in Pulse.ManipulateIf<int>(c == '}', a => --a)
             from ___ in Pulse.TraceIf<int>(a => a >= 0, () => c)
             from ____ in Pulse.ManipulateIf<int>(c == '{', a => ++a)
-            from s in Pulse.StopFlowingIf<int>(a => c == '}' && a <= 0)
-            select c;
-        var text =
-            Signal.From<string>(a => Pulse.ToFlow(flow, a))
-                .SetArtery(TheString.Catcher())
-                .Pulse(File.ReadLines(docExample.Attribute.File)
-                    .Skip(docExample.Attribute.Line)
-                    .Select(a => a + Environment.NewLine))
-                .GetArtery<Holden>()
-                .Whispers();
-        var lines = text.Split(Environment.NewLine).Where(a => !string.IsNullOrWhiteSpace(a));
-        var length = lines.Select(a => a.TakeWhile(a => a == ' ' || a == '\t').Count()).Min();
-        var result = string.Join(Environment.NewLine, lines.Select(a => a.Substring(length)));
-        return new Example(docExample.Name, ApplyReplacements(result, docExample.Replacements));
-    }
-
-    private static Example ExampleFromDocExample((string Name, DocExampleAttribute Attribute, List<DocReplaceAttribute> Replacements) docExample)
-    {
-        var flow =
-            from c in Pulse.Start<char>()
-            from _ in Pulse.Gather(-1)
-            from __ in Pulse.ManipulateIf<int>(c == '}', a => --a)
-            from ___ in Pulse.Trace(c)
-            from ____ in Pulse.ManipulateIf<int>(c == '{', a => ++a)
             from s in Pulse.StopFlowingIf<int>(a => c == '}' && a < 0)
             select c;
         var text =
@@ -67,8 +41,42 @@ public static class TheArchivist
                 .Whispers();
         var lines = text.Split(Environment.NewLine).Where(a => !string.IsNullOrWhiteSpace(a));
         var length = lines.Select(a => a.TakeWhile(a => a == ' ' || a == '\t').Count()).Min();
-        var result = string.Join(Environment.NewLine, lines.Select(a => a.Substring(length)));
-        return new Example(docExample.Name, ApplyReplacements(result, docExample.Replacements));
+        var result = string.Join(Environment.NewLine, lines
+            .Select(a => a.Substring(length))
+            .Select(a => ApplyReplacements(a, docExample.Replacements))
+            .Where(a => !string.IsNullOrWhiteSpace(a)));
+        return new Example(docExample.Name, result);
+    }
+
+    public record FlowContext(int Brackets, int Braces, bool Printing);
+    private static Example ExampleFromDocExample((string Name, DocExampleAttribute Attribute, List<DocReplaceAttribute> Replacements) docExample)
+    {
+        var flow =
+            from c in Pulse.Start<char>()
+            from _ in Pulse.Gather(new FlowContext(-1, -1, false))
+            from a___ in Pulse.ManipulateIf<FlowContext>(c == '[', a => a with { Brackets = a.Brackets + 1 })
+            from a__ in Pulse.ManipulateIf<FlowContext>(a => !char.IsWhiteSpace(c) && a.Brackets < 0, a => a with { Printing = true })
+            from a_ in Pulse.ManipulateIf<FlowContext>(c == ']', a => a with { Brackets = a.Brackets - 1 })
+            from __ in Pulse.ManipulateIf<FlowContext>(c == '}', a => a with { Braces = a.Braces - 1 })
+            from ___ in Pulse.TraceIf<FlowContext>(a => a.Printing, () => c)
+            from ____ in Pulse.ManipulateIf<FlowContext>(c == '{', a => a with { Braces = a.Braces + 1 })
+            from s in Pulse.StopFlowingIf<FlowContext>(a => c == '}' && a.Braces < 0)
+            select c;
+        var text =
+            Signal.From<string>(a => Pulse.ToFlow(flow, a))
+                .SetArtery(TheString.Catcher())
+                .Pulse(File.ReadLines(docExample.Attribute.File)
+                    .Skip(docExample.Attribute.Line)
+                    .Select(a => a + Environment.NewLine))
+                .GetArtery<Holden>()
+                .Whispers();
+        var lines = text.Split(Environment.NewLine).Where(a => !string.IsNullOrWhiteSpace(a));
+        var length = lines.Count() > 1 ? lines.Skip(1).Select(a => a.TakeWhile(a => a == ' ' || a == '\t').Count()).Min() : 0;
+        var result = string.Join(Environment.NewLine, new string[] { lines.First() }.Concat(lines.Skip(1)
+            .Select(a => a.Substring(length)))
+            .Select(a => ApplyReplacements(a, docExample.Replacements))
+            .Where(a => !string.IsNullOrWhiteSpace(a)));
+        return new Example(docExample.Name, result);
     }
 
     private static string ApplyReplacements(string code, List<DocReplaceAttribute> replacements)
