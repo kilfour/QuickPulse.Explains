@@ -17,11 +17,13 @@ public static class TheArchivist
         TheReflectionist.GetIncludedTypes(typeof(T).Assembly.GetTypes())
             .Select(InclusionFromType)
             .ToReadOnlyCollection(),
-        TheReflectionist.GetDocExamples(typeof(T).Assembly.GetTypes())
-            .Select(ExampleFromType)
+        TheReflectionist.GetDocSnippets(typeof(T).Assembly.GetTypes())
+            .Select(ExampleFromDocSnippet)
+            .Concat(TheReflectionist.GetDocExamples(typeof(T).Assembly.GetTypes())
+                .Select(ExampleFromDocExample))
             .ToReadOnlyCollection());
 
-    private static Example ExampleFromType((string Name, DocExampleAttribute Attribute) docExample)
+    private static Example ExampleFromDocSnippet((string Name, DocSnippetAttribute Attribute, List<DocReplaceAttribute> Replacements) docExample)
     {
         var flow =
             from c in Pulse.Start<char>()
@@ -42,17 +44,39 @@ public static class TheArchivist
         var lines = text.Split(Environment.NewLine).Where(a => !string.IsNullOrWhiteSpace(a));
         var length = lines.Select(a => a.TakeWhile(a => a == ' ' || a == '\t').Count()).Min();
         var result = string.Join(Environment.NewLine, lines.Select(a => a.Substring(length)));
-        return new Example(docExample.Name, result);
+        return new Example(docExample.Name, ApplyReplacements(result, docExample.Replacements));
     }
 
-    private static string ApplyReplacements(string code, string[] replacements)
+    private static Example ExampleFromDocExample((string Name, DocExampleAttribute Attribute, List<DocReplaceAttribute> Replacements) docExample)
+    {
+        var flow =
+            from c in Pulse.Start<char>()
+            from _ in Pulse.Gather(-1)
+            from __ in Pulse.ManipulateIf<int>(c == '}', a => --a)
+            from ___ in Pulse.Trace(c)
+            from ____ in Pulse.ManipulateIf<int>(c == '{', a => ++a)
+            from s in Pulse.StopFlowingIf<int>(a => c == '}' && a < 0)
+            select c;
+        var text =
+            Signal.From<string>(a => Pulse.ToFlow(flow, a))
+                .SetArtery(TheString.Catcher())
+                .Pulse(File.ReadLines(docExample.Attribute.File)
+                    .Skip(docExample.Attribute.Line)
+                    .Select(a => a + Environment.NewLine))
+                .GetArtery<Holden>()
+                .Whispers();
+        var lines = text.Split(Environment.NewLine).Where(a => !string.IsNullOrWhiteSpace(a));
+        var length = lines.Select(a => a.TakeWhile(a => a == ' ' || a == '\t').Count()).Min();
+        var result = string.Join(Environment.NewLine, lines.Select(a => a.Substring(length)));
+        return new Example(docExample.Name, ApplyReplacements(result, docExample.Replacements));
+    }
+
+    private static string ApplyReplacements(string code, List<DocReplaceAttribute> replacements)
     {
         var raw = code;
         foreach (var repl in replacements)
         {
-            var parts = repl.Split(new[] { "=>" }, StringSplitOptions.None);
-            if (parts.Length == 2)
-                raw = raw.Replace(parts[0], parts[1]);
+            raw = raw.Replace(repl.From, repl.To);
         }
         return raw;
     }

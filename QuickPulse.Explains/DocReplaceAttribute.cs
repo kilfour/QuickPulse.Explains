@@ -1,6 +1,6 @@
 namespace QuickPulse.Explains;
 
-[AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true)]
 public sealed class DocReplaceAttribute : Attribute
 {
     public string From { get; }

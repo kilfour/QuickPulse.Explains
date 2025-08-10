@@ -26,10 +26,26 @@ public static class TheReflectionist
     public static string? GetDocFileHeader(Type type) =>
         type.GetCustomAttribute<DocFileHeaderAttribute>(false)?.Header;
 
-    public static IEnumerable<(string, DocExampleAttribute)> GetDocExamples(Type[] types) =>
+    public static IEnumerable<(string, DocSnippetAttribute, List<DocReplaceAttribute>)> GetDocSnippets(Type[] types) =>
+        types.SelectMany(a => a.GetMethods(Flags))
+            .Where(a => a.GetCustomAttributes<DocSnippetAttribute>().Any())
+            .Select(a => (
+                $"{a.DeclaringType!.FullName}.{a.Name}",
+                a.GetCustomAttribute<DocSnippetAttribute>(),
+                a.GetCustomAttributes<DocReplaceAttribute>().ToList()))!;
+
+    public static IEnumerable<(string, DocExampleAttribute, List<DocReplaceAttribute>)> GetDocExamples(Type[] types) =>
+        types.Where(a => a.GetCustomAttributes<DocExampleAttribute>().Any())
+            .Select(a => (
+                a.FullName!,
+                a.GetCustomAttribute<DocExampleAttribute>()!,
+                a.GetCustomAttributes<DocReplaceAttribute>().ToList())).Concat(
         types.SelectMany(a => a.GetMethods(Flags))
             .Where(a => a.GetCustomAttributes<DocExampleAttribute>().Any())
-            .Select(a => ($"{a.DeclaringType!.FullName}.{a.Name}", a.GetCustomAttribute<DocExampleAttribute>()))!;
+            .Select(a => (
+                $"{a.DeclaringType!.FullName!}.{a.Name}",
+                a.GetCustomAttribute<DocExampleAttribute>()!,
+                a.GetCustomAttributes<DocReplaceAttribute>().ToList())));
 
     private readonly static BindingFlags Flags =
         BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;

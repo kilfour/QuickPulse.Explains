@@ -3,5 +3,17 @@
 Just Checking
 ```
 ```csharp
-// just some text
+// just a comment { a { b } }
+```
+```csharp
+private void FullFoo()
+{
+    // replaced { }
+}
+```
+```csharp
+private class Bar
+{
+    public int MyMethod() { return 42; }
+}
 ```

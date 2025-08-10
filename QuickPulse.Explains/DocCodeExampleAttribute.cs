@@ -7,8 +7,8 @@ public class DocCodeExampleAttribute : DocFragmentAttribute
 {
     public string Name { get; }
 
-    public DocCodeExampleAttribute(Type type, string methodName, params string[] replacements)
+    public DocCodeExampleAttribute(Type type, string methodName = "")
     {
-        Name = type.FullName + "." + methodName;
+        Name = methodName == "" ? type.FullName! : type.FullName + "." + methodName;
     }
 }
