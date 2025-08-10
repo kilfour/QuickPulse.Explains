@@ -2,6 +2,8 @@
 using QuickPulse;
 using QuickPulse.Arteries;
 using QuickPulse.Bolts;
+using QuickPulse.Explains.Abstractions;
+using QuickPulse.Explains.BasedOnNamespace.Fragments;
 
 namespace QuickPulse.Explains.BasedOnNamespace;
 
@@ -43,6 +45,18 @@ public static class TheArchivist
         return new Example(docExample.Name, result);
     }
 
+    private static string ApplyReplacements(string code, string[] replacements)
+    {
+        var raw = code;
+        foreach (var repl in replacements)
+        {
+            var parts = repl.Split(new[] { "=>" }, StringSplitOptions.None);
+            if (parts.Length == 2)
+                raw = raw.Replace(parts[0], parts[1]);
+        }
+        return raw;
+    }
+
     private static Page PageFromType(Type root, Type type) => new(
         ExplanationFromType(type),
         TheCartographer.ChartPath(root, type));
@@ -56,7 +70,7 @@ public static class TheArchivist
         DocContentAttribute a => new ContentFragment(a.Content),
         DocCodeAttribute a => new CodeFragment(a.Code, a.Language),
         DocIncludeAttribute a => new InclusionFragment(a.Included),
-        DocCodeExampleAttribute a => new CodeExampleFragment(a.Name, a.Replacements),
+        DocCodeExampleAttribute a => new CodeExampleFragment(a.Name),
         DocCodeFileAttribute a => new CodeFragment(TheCartographer.GetFileContents(a.Path, a.Filename), a.Language),
         _ => throw new NotSupportedException(attr.GetType().Name)
     };
