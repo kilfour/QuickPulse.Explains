@@ -3,7 +3,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Version>0.2.2</Version>
+    <Version>0.2.3</Version>
     <Authors>Kilfour</Authors>
     <PackageId>QuickPulse.Explains</PackageId>
     <Description>Write some tests, make QuickPulse read them aloud.</Description>
@@ -17,12 +17,12 @@
     <None Include="..\README.md" Pack="true" PackagePath="" />
   </ItemGroup>
   
-  <!-- <ItemGroup>
-    <PackageReference Include="QuickPulse" Version="0.2.1" /> 
-  </ItemGroup> -->
-
   <ItemGroup>
-    <ProjectReference Include="..\..\QuickPulse\QuickPulse\QuickPulse.csproj" />
+    <PackageReference Include="QuickPulse" Version="0.2.2" /> 
   </ItemGroup>
+
+  <!-- <ItemGroup>
+    <ProjectReference Include="..\..\QuickPulse\QuickPulse\QuickPulse.csproj" />
+  </ItemGroup> -->
 
 </Project>
