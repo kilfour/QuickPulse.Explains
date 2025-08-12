@@ -1,6 +1,7 @@
 using System.Reflection;
 using QuickPulse;
 using QuickPulse.Explains.Abstractions;
+using QuickPulse.Explains.Formatters;
 
 namespace QuickPulse.Explains.BasedOnNamespace;
 
@@ -26,26 +27,29 @@ public static class TheReflectionist
     public static string? GetDocFileHeader(Type type) =>
         type.GetCustomAttribute<DocFileHeaderAttribute>(false)?.Header;
 
-    public static IEnumerable<(string, CodeSnippetAttribute, List<DocReplaceAttribute>)> GetDocSnippets(Type[] types) =>
+    public static IEnumerable<(string, CodeSnippetAttribute, List<CodeReplaceAttribute>, List<CodeFormatAttribute>)> GetDocSnippets(Type[] types) =>
         types.SelectMany(a => a.GetMethods(Flags))
             .Where(a => a.GetCustomAttributes<CodeSnippetAttribute>().Any())
             .Select(a => (
                 $"{a.DeclaringType!.FullName}.{a.Name}",
                 a.GetCustomAttribute<CodeSnippetAttribute>(),
-                a.GetCustomAttributes<DocReplaceAttribute>().ToList()))!;
+                a.GetCustomAttributes<CodeReplaceAttribute>().ToList(),
+                a.GetCustomAttributes<CodeFormatAttribute>().ToList()))!;
 
-    public static IEnumerable<(string, CodeExampleAttribute, List<DocReplaceAttribute>)> GetDocExamples(Type[] types) =>
+    public static IEnumerable<(string, CodeExampleAttribute, List<CodeReplaceAttribute>, List<CodeFormatAttribute>)> GetDocExamples(Type[] types) =>
         types.Where(a => a.GetCustomAttributes<CodeExampleAttribute>().Any())
             .Select(a => (
                 a.FullName!,
                 a.GetCustomAttribute<CodeExampleAttribute>()!,
-                a.GetCustomAttributes<DocReplaceAttribute>().ToList())).Concat(
+                a.GetCustomAttributes<CodeReplaceAttribute>().ToList(),
+                a.GetCustomAttributes<CodeFormatAttribute>().ToList())).Concat(
         types.SelectMany(a => a.GetMethods(Flags))
             .Where(a => a.GetCustomAttributes<CodeExampleAttribute>().Any())
             .Select(a => (
                 $"{a.DeclaringType!.FullName!}.{a.Name}",
                 a.GetCustomAttribute<CodeExampleAttribute>()!,
-                a.GetCustomAttributes<DocReplaceAttribute>().ToList())));
+                a.GetCustomAttributes<CodeReplaceAttribute>().ToList(),
+                a.GetCustomAttributes<CodeFormatAttribute>().ToList())));
 
     private readonly static BindingFlags Flags =
         BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;

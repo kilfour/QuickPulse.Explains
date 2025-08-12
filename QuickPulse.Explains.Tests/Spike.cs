@@ -1,3 +1,5 @@
+using QuickPulse.Explains.Formatters;
+
 namespace QuickPulse.Explains.DontInclude;
 
 [DocFile]
@@ -8,7 +10,7 @@ public class Spike
     [DocExample(typeof(Spike), nameof(Foo))]
     [DocExample(typeof(Spike), nameof(FullFoo))]
     [DocExample(typeof(Bar))]
-    [DocExample(typeof(Spike), nameof(AList))]
+    [DocExample(typeof(Spike), nameof(AList), "sql")]
     [DocExample(typeof(Spike), nameof(AnotherList))]
     public void Files()
     {
@@ -16,8 +18,8 @@ public class Spike
     }
 
     [CodeSnippet]
-    [DocReplace("text", "comment")]
-    [DocReplace("some", "a")]
+    [CodeReplace("text", "comment")]
+    [CodeReplace("some", "a")]
     private void Foo()
     {
         // just some text { a { b } }
@@ -25,7 +27,7 @@ public class Spike
 
 
     [CodeExample]
-    [DocReplace("just some text", "replaced")]
+    [CodeReplace("just some text", "replaced")]
     private void FullFoo()
     {
         // just some text { }
@@ -33,7 +35,7 @@ public class Spike
 
 
     [CodeExample]
-    [DocReplace("Method", "MyMethod")]
+    [CodeReplace("Method", "MyMethod")]
 
     private class Bar
     {
@@ -41,29 +43,19 @@ public class Spike
     }
 
     [CodeSnippet]
-    [DocReplace("return", "")]
+    [CodeFormat(typeof(StringArrayToString))]
     private List<string> AList()
     {
         return
         [
-            "char='{', enter=-1, emit=False, exit=0",
-            "char=' ', enter=0, emit=True, exit=0",
-            "char='a', enter=0, emit=True, exit=0",
-            "char=' ', enter=0, emit=True, exit=0",
-            "char='{', enter=0, emit=True, exit=1",
-            "char=' ', enter=1, emit=True, exit=1",
-            "char='b', enter=1, emit=True, exit=1",
-            "char=' ', enter=1, emit=True, exit=1",
-            "char='}', enter=1, emit=True, exit=0",
-            "char=' ', enter=0, emit=True, exit=0",
-            "char='c', enter=0, emit=True, exit=0",
-            "char=' ', enter=0, emit=True, exit=0",
-            "char='}', enter=0, emit=True, exit=-1"
+            "one\"withquote",
+            "tw,o",
+            "three"
         ];
     }
 
     [CodeExample]
-    [DocReplace("return", "")]
+    [CodeReplace("return", "")]
     private List<string> AnotherList()
     {
         return

@@ -32,7 +32,7 @@ public static class Scriptorium
     private static readonly Flow<CodeExampleFragment> CodeExample =
          from fragment in Pulse.Start<CodeExampleFragment>()
          from examples in Pulse.Gather<IReadOnlyCollection<Example>>()
-         from s in Pulse.Trace($"```csharp")
+         from s in Pulse.Trace($"```{fragment.Language}")
          from _ in Pulse.Trace(examples.Value.Single(a => a.Name == fragment.Name).Code)
          from e in Pulse.Trace("```")
          select fragment;

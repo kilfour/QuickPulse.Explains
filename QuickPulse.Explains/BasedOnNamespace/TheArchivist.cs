@@ -2,6 +2,7 @@ using QuickPulse;
 using QuickPulse.Arteries;
 using QuickPulse.Explains.Abstractions;
 using QuickPulse.Explains.BasedOnNamespace.Fragments;
+using QuickPulse.Explains.Formatters;
 
 namespace QuickPulse.Explains.BasedOnNamespace;
 
@@ -21,10 +22,10 @@ public static class TheArchivist
         TheReflectionist.GetDocSnippets(typeof(T).Assembly.GetTypes())
             .Select(ExampleFromDocSnippet)
             .Concat(TheReflectionist.GetDocExamples(typeof(T).Assembly.GetTypes())
-                .Select(ExampleFromDocExample))
+                .Select(ExampleFromCodeExample))
             .ToReadOnlyCollection());
 
-    private static Example ExampleFromDocSnippet((string Name, CodeSnippetAttribute Attribute, List<DocReplaceAttribute> Replacements) docExample)
+    private static Example ExampleFromDocSnippet((string Name, CodeSnippetAttribute Attribute, List<CodeReplaceAttribute> Replacements, List<CodeFormatAttribute> Formatters) docExample)
     {
         var flow =
             from c in Pulse.Start<char>()
@@ -44,15 +45,16 @@ public static class TheArchivist
                 .Whispers();
         var lines = text.Split(Environment.NewLine).Where(a => !string.IsNullOrWhiteSpace(a));
         var length = lines.Select(a => a.TakeWhile(a => a == ' ' || a == '\t').Count()).Min();
-        var result = string.Join(Environment.NewLine, lines
+        var newLines = lines
             .Select(a => a.Substring(length))
             .Select(a => ApplyReplacements(a, docExample.Replacements))
-            .Where(a => !string.IsNullOrWhiteSpace(a)));
+            .Where(a => !string.IsNullOrWhiteSpace(a));
+        var result = string.Join(Environment.NewLine, ApplyFormatters(newLines, docExample.Formatters));
         return new Example(docExample.Name, result);
     }
 
     public record FlowContext(int Brackets, int Braces, bool Printing);
-    private static Example ExampleFromDocExample((string Name, CodeExampleAttribute Attribute, List<DocReplaceAttribute> Replacements) docExample)
+    private static Example ExampleFromCodeExample((string Name, CodeExampleAttribute Attribute, List<CodeReplaceAttribute> Replacements, List<CodeFormatAttribute> Formatters) docExample)
     {
         var flow =
             from c in Pulse.Start<char>()
@@ -75,14 +77,26 @@ public static class TheArchivist
                 .Whispers();
         var lines = text.Split(Environment.NewLine).Where(a => !string.IsNullOrWhiteSpace(a));
         var length = lines.Count() > 1 ? lines.Skip(1).Select(a => a.TakeWhile(a => a == ' ' || a == '\t').Count()).Min() : 0;
-        var result = string.Join(Environment.NewLine, new string[] { lines.First() }.Concat(lines.Skip(1)
+        var newLines = new string[] { lines.First() }.Concat(lines.Skip(1)
             .Select(a => a.Substring(length)))
             .Select(a => ApplyReplacements(a, docExample.Replacements))
-            .Where(a => !string.IsNullOrWhiteSpace(a)));
+            .Where(a => !string.IsNullOrWhiteSpace(a));
+        var result = string.Join(Environment.NewLine, ApplyFormatters(newLines, docExample.Formatters));
         return new Example(docExample.Name, result);
     }
 
-    private static string ApplyReplacements(string code, List<DocReplaceAttribute> replacements)
+    private static IEnumerable<string> ApplyFormatters(IEnumerable<string> code, List<CodeFormatAttribute> formatters)
+    {
+        var raw = code;
+        foreach (var formatterAttr in formatters)
+        {
+            var formatter = (ICodeFormatter)Activator.CreateInstance(formatterAttr.FormatterType)!;
+            raw = formatter.Format(raw);
+        }
+        return raw;
+    }
+
+    private static string ApplyReplacements(string code, List<CodeReplaceAttribute> replacements)
     {
         var raw = code;
         foreach (var repl in replacements)
@@ -105,7 +119,7 @@ public static class TheArchivist
         DocContentAttribute a => new ContentFragment(a.Content),
         DocCodeAttribute a => new CodeFragment(a.Code, a.Language),
         DocIncludeAttribute a => new InclusionFragment(a.Included),
-        DocExampleAttribute a => new CodeExampleFragment(a.Name),
+        DocExampleAttribute a => new CodeExampleFragment(a.Name, a.Language),
         CodeFileAttribute a => new CodeFragment(TheCartographer.GetFileContents(a.Path, a.Filename), a.Language),
         _ => throw new NotSupportedException(attr.GetType().Name)
     };

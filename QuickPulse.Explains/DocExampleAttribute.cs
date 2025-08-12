@@ -6,9 +6,11 @@ namespace QuickPulse.Explains;
 public class DocExampleAttribute : DocFragmentAttribute
 {
     public string Name { get; }
+    public string Language { get; }
 
-    public DocExampleAttribute(Type type, string methodName = "")
+    public DocExampleAttribute(Type type, string methodName = "", string language = "csharp")
     {
         Name = methodName == "" ? type.FullName! : type.FullName + "." + methodName;
+        Language = language;
     }
 }
