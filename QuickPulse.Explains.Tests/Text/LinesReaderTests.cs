@@ -113,7 +113,8 @@ public class LinesReaderTests
     public void NextLines_returns_string_array()
     {
         var reader = LinesReader.FromText("first\r\nsecond\r\nthird");
-        Assert.Equal([], reader.NextLines(3));
+        reader.Skip();
+        Assert.Equal(["second", "third"], reader.NextLines(2));
     }
 
     [Fact]

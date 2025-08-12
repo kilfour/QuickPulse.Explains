@@ -33,12 +33,12 @@ public class LinesReader
 
     public string[] NextLines(int howMany)
     {
-        string[] result = [];
-        for (int i = 0; i < howMany - 1; i++)
+        List<string> result = [];
+        for (int i = 0; i < howMany; i++)
         {
-            result.Append(NextLine());
+            result.Add(NextLine());
         }
-        return result;
+        return [.. result];
     }
 
     public void Skip() => currentIndex++;
