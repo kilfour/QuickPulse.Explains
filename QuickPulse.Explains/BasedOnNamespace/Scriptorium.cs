@@ -64,7 +64,7 @@ public static class Scriptorium
 
     private static Flow<Page> Page =>
         from input in Pulse.Start<Page>()
-        let level = input.Path.Split("\\").Length
+        let level = input.Path.Split("/").Length // Create a Path Seperator Constant somewhere
         from _ in Pulse.Scoped<int>(a => level,
             from _ in Pulse.ToFlow(MarkDownHeader, input.Explanation.HeaderText)
             from s in Pulse.Scoped<int>(a => a + 1, Pulse.ToFlow(Fragment, input.Explanation.Fragments))
@@ -92,6 +92,8 @@ public static class Scriptorium
 
     public static readonly Flow<Chronicle> Chronicles =
         from input in Pulse.Start<Chronicle>()
-        from _ in Pulse.Trace($"- [{input.Text}]({input.Path})")
+        let level = input.Path.Split("/").Count() - 1
+        let indent = new string(' ', level * 2)
+        from _ in Pulse.Trace($"{indent}- [{input.Text}]({input.Path})")
         select input;
 }

@@ -2,13 +2,13 @@ using System.Runtime.CompilerServices;
 
 namespace QuickPulse.Explains;
 
-[AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
-public class DocSnippetAttribute : Attribute
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false)]
+public class CodeExampleAttribute : Attribute
 {
     public string File { get; }
     public int Line { get; }
 
-    public DocSnippetAttribute(
+    public CodeExampleAttribute(
         [CallerFilePath] string file = "",
         [CallerLineNumber] int line = 0)
     {

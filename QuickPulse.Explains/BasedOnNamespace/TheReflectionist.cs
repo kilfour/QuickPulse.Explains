@@ -26,25 +26,25 @@ public static class TheReflectionist
     public static string? GetDocFileHeader(Type type) =>
         type.GetCustomAttribute<DocFileHeaderAttribute>(false)?.Header;
 
-    public static IEnumerable<(string, DocSnippetAttribute, List<DocReplaceAttribute>)> GetDocSnippets(Type[] types) =>
+    public static IEnumerable<(string, CodeSnippetAttribute, List<DocReplaceAttribute>)> GetDocSnippets(Type[] types) =>
         types.SelectMany(a => a.GetMethods(Flags))
-            .Where(a => a.GetCustomAttributes<DocSnippetAttribute>().Any())
+            .Where(a => a.GetCustomAttributes<CodeSnippetAttribute>().Any())
             .Select(a => (
                 $"{a.DeclaringType!.FullName}.{a.Name}",
-                a.GetCustomAttribute<DocSnippetAttribute>(),
+                a.GetCustomAttribute<CodeSnippetAttribute>(),
                 a.GetCustomAttributes<DocReplaceAttribute>().ToList()))!;
 
-    public static IEnumerable<(string, DocExampleAttribute, List<DocReplaceAttribute>)> GetDocExamples(Type[] types) =>
-        types.Where(a => a.GetCustomAttributes<DocExampleAttribute>().Any())
+    public static IEnumerable<(string, CodeExampleAttribute, List<DocReplaceAttribute>)> GetDocExamples(Type[] types) =>
+        types.Where(a => a.GetCustomAttributes<CodeExampleAttribute>().Any())
             .Select(a => (
                 a.FullName!,
-                a.GetCustomAttribute<DocExampleAttribute>()!,
+                a.GetCustomAttribute<CodeExampleAttribute>()!,
                 a.GetCustomAttributes<DocReplaceAttribute>().ToList())).Concat(
         types.SelectMany(a => a.GetMethods(Flags))
-            .Where(a => a.GetCustomAttributes<DocExampleAttribute>().Any())
+            .Where(a => a.GetCustomAttributes<CodeExampleAttribute>().Any())
             .Select(a => (
                 $"{a.DeclaringType!.FullName!}.{a.Name}",
-                a.GetCustomAttribute<DocExampleAttribute>()!,
+                a.GetCustomAttribute<CodeExampleAttribute>()!,
                 a.GetCustomAttributes<DocReplaceAttribute>().ToList())));
 
     private readonly static BindingFlags Flags =

@@ -10,7 +10,7 @@ public static class TheCartographer
             ? currentNamespace.Substring(rootNamespace.Length).TrimStart('.')
             : currentNamespace;
         var path = Path.Combine(relativeNamespace.Split('.', StringSplitOptions.RemoveEmptyEntries));
-        return Path.Combine(path, current.Name + ".md");
+        return Path.Combine(path, current.Name + ".md").Replace("\\", "/");
     }
 
     public static string GetFileContents(string filePath, string filename)

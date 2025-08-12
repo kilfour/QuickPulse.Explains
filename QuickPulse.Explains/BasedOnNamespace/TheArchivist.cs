@@ -24,7 +24,7 @@ public static class TheArchivist
                 .Select(ExampleFromDocExample))
             .ToReadOnlyCollection());
 
-    private static Example ExampleFromDocSnippet((string Name, DocSnippetAttribute Attribute, List<DocReplaceAttribute> Replacements) docExample)
+    private static Example ExampleFromDocSnippet((string Name, CodeSnippetAttribute Attribute, List<DocReplaceAttribute> Replacements) docExample)
     {
         var flow =
             from c in Pulse.Start<char>()
@@ -52,7 +52,7 @@ public static class TheArchivist
     }
 
     public record FlowContext(int Brackets, int Braces, bool Printing);
-    private static Example ExampleFromDocExample((string Name, DocExampleAttribute Attribute, List<DocReplaceAttribute> Replacements) docExample)
+    private static Example ExampleFromDocExample((string Name, CodeExampleAttribute Attribute, List<DocReplaceAttribute> Replacements) docExample)
     {
         var flow =
             from c in Pulse.Start<char>()
@@ -105,8 +105,8 @@ public static class TheArchivist
         DocContentAttribute a => new ContentFragment(a.Content),
         DocCodeAttribute a => new CodeFragment(a.Code, a.Language),
         DocIncludeAttribute a => new InclusionFragment(a.Included),
-        DocCodeExampleAttribute a => new CodeExampleFragment(a.Name),
-        DocCodeFileAttribute a => new CodeFragment(TheCartographer.GetFileContents(a.Path, a.Filename), a.Language),
+        DocExampleAttribute a => new CodeExampleFragment(a.Name),
+        CodeFileAttribute a => new CodeFragment(TheCartographer.GetFileContents(a.Path, a.Filename), a.Language),
         _ => throw new NotSupportedException(attr.GetType().Name)
     };
 

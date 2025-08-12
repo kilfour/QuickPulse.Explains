@@ -152,7 +152,31 @@ It renders as:
 ### Header From SomeOtherClass Method
 ```
 
-## LinesReader: Sequential Line Navigation
+## The Living Doc
+**QuickPulse.Explains** supports embedding source code directly into generated documentation through
+a set of Code... attributes.  
+These attributes don't create documentation content themselves, instead,
+they reference code from your project so it can be displayed alongside explanations, headers, and other doc elements.
+
+`CodeExample` extracts a method or class for use as a worked example.
+
+`CodeSnippet` extracts the body of a method, ignoring the signature.
+
+`DocExample` uses the extractions from the above attributes and injects it into the generated markdown.
+
+`CodeFile` pulls in an entire file.
+The filename needs to be specified and the file to be included,
+needs to be in the same folder as the class with the attribute.
+
+All extracted code is formatted and syntax-highlighted automatically, preserving indentation and spacing.
+This ensures your documentation always reflects the current, runnable source without manual copy-paste.
+
+**Important:** The code extraction only works for methods with a *block body*,
+it currently fails miserably when confronted with *expression bodied* methods.
+## Talking About The Tools
+As I use aforementioned method off documenting stuff in all of my test projects, I will most likely end up putting
+all of the various tools which are duplicated across multiple projects right now inside of this little box over here.
+### LinesReader: Sequential Line Navigation
 `LinesReader` is a lightweight utility intended for use in tests. It provides simple,
 sequential line-by-line reading over string content.
 

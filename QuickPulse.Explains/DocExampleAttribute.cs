@@ -1,18 +1,14 @@
-using System.Runtime.CompilerServices;
+using QuickPulse.Explains.Abstractions;
 
 namespace QuickPulse.Explains;
 
-[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false)]
-public class DocExampleAttribute : Attribute
+[AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true)]
+public class DocExampleAttribute : DocFragmentAttribute
 {
-    public string File { get; }
-    public int Line { get; }
+    public string Name { get; }
 
-    public DocExampleAttribute(
-        [CallerFilePath] string file = "",
-        [CallerLineNumber] int line = 0)
+    public DocExampleAttribute(Type type, string methodName = "")
     {
-        File = file;
-        Line = line;
+        Name = methodName == "" ? type.FullName! : type.FullName + "." + methodName;
     }
 }

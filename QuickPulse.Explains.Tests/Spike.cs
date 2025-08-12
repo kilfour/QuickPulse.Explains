@@ -4,18 +4,18 @@ namespace QuickPulse.Explains.DontInclude;
 public class Spike
 {
     [Fact]
-    [DocCodeFile("Spike.txt", "markdown")]
-    [DocCodeExample(typeof(Spike), nameof(Foo))]
-    [DocCodeExample(typeof(Spike), nameof(FullFoo))]
-    [DocCodeExample(typeof(Bar))]
-    [DocCodeExample(typeof(Spike), nameof(AList))]
-    [DocCodeExample(typeof(Spike), nameof(AnotherList))]
+    [CodeFile("Spike.txt", "markdown")]
+    [DocExample(typeof(Spike), nameof(Foo))]
+    [DocExample(typeof(Spike), nameof(FullFoo))]
+    [DocExample(typeof(Bar))]
+    [DocExample(typeof(Spike), nameof(AList))]
+    [DocExample(typeof(Spike), nameof(AnotherList))]
     public void Files()
     {
         Explain.This<Spike>("Spike.md");
     }
 
-    [DocSnippet]
+    [CodeSnippet]
     [DocReplace("text", "comment")]
     [DocReplace("some", "a")]
     private void Foo()
@@ -24,7 +24,7 @@ public class Spike
     }
 
 
-    [DocExample]
+    [CodeExample]
     [DocReplace("just some text", "replaced")]
     private void FullFoo()
     {
@@ -32,7 +32,7 @@ public class Spike
     }
 
 
-    [DocExample]
+    [CodeExample]
     [DocReplace("Method", "MyMethod")]
 
     private class Bar
@@ -40,7 +40,7 @@ public class Spike
         public int Method() { return 42; }
     }
 
-    [DocSnippet]
+    [CodeSnippet]
     [DocReplace("return", "")]
     private List<string> AList()
     {
@@ -62,7 +62,7 @@ public class Spike
         ];
     }
 
-    [DocExample]
+    [CodeExample]
     [DocReplace("return", "")]
     private List<string> AnotherList()
     {
