@@ -1,6 +1,6 @@
 using QuickPulse.Explains.Text;
 
-namespace QuickPulse.Explains.Tests.Text;
+namespace QuickPulse.Explains.Tests.DocTests.Tools.Text;
 
 [DocFile]
 [DocFileHeader("LinesReader: Sequential Line Navigation")]
@@ -80,7 +80,7 @@ public class LinesReaderTests
     {
         var reader = LinesReader.FromText("a\r\nb");
         reader.NextLine();
-        var ex = Assert.Throws<QuickPulse.Instruments.ComputerSaysNo>(() => reader.EndOfContent());
+        var ex = Assert.Throws<Instruments.ComputerSaysNo>(() => reader.EndOfContent());
         Assert.Equal("Not end of content: 'b'.", ex.Message);
     }
 
@@ -130,7 +130,7 @@ public class LinesReaderTests
     {
         var reader = LinesReader.FromText("only");
         reader.NextLine();
-        var ex = Assert.Throws<QuickPulse.Instruments.ComputerSaysNo>(reader.NextLine);
+        var ex = Assert.Throws<Instruments.ComputerSaysNo>(reader.NextLine);
         Assert.Equal("Attempted to read past the end of content.", ex.Message);
     }
 

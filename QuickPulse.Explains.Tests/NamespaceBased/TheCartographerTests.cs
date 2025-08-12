@@ -1,4 +1,5 @@
 using QuickPulse.Explains.BasedOnNamespace;
+using QuickPulse.Explains.Tests.DocTests;
 
 namespace QuickPulse.Explains.Tests.NamespaceBased;
 

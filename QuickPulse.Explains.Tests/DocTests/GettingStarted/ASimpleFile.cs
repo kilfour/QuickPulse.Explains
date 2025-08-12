@@ -6,7 +6,7 @@ using QuickPulse.Explains.Tests._Tools;
 using QuickPulse.Explains.Text;
 
 
-namespace QuickPulse.Explains.Tests.GettingStarted;
+namespace QuickPulse.Explains.Tests.DocTests.GettingStarted;
 
 [DocFile]
 [DocContent("This example shows how to add documentation for a simple file.")]

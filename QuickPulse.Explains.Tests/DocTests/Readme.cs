@@ -1,5 +1,4 @@
-
-namespace QuickPulse.Explains.Tests;
+namespace QuickPulse.Explains.Tests.DocTests;
 
 
 [DocFile]
@@ -16,6 +15,5 @@ both single-file and multi-file generation with namespace-based filtering.
     public void GenerateReadme()
     {
         Explain.This<ReadMe>("README.md");
-        //Explain.These<ReadMe>("TheDoc");
     }
 }
