@@ -74,7 +74,7 @@ public static class Scriptorium
     public static Flow<SeperatePage> SeperatePage =>
         from input in Pulse.Start<SeperatePage>()
         from includes in Pulse.Gather(input.Inclusions)
-        from examples in Pulse.Gather(input.Inclusions)
+        from examples in Pulse.Gather(input.Examples)
         from level in Pulse.Gather(0)
         from _ in Pulse.Scoped<int>(a => 1,
             from _ in Pulse.ToFlow(MarkDownHeader, input.Page.Explanation.HeaderText)

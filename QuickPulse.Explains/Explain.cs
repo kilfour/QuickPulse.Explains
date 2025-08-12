@@ -11,6 +11,12 @@ public static class Explain
         TheScribe.Print(filename, book);
     }
 
+    public static void OnlyThis<T>(string filename)
+    {
+        var book = TheArchivist.ComposeOnly<T>();
+        TheScribe.Print(filename, book);
+    }
+
     public static void These<T>(string path)
     {
         if (string.IsNullOrWhiteSpace(path)) ComputerSays.No($"Path: '{path}' is not valid.");

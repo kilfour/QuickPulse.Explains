@@ -7,12 +7,15 @@ namespace QuickPulse.Explains.BasedOnNamespace;
 
 public static class TheArchivist
 {
-    public static Book Compose<T>() => new(
-        TheReflectionist.GetDocFileTypes(typeof(T).Assembly.GetTypes())
+    public static Book Compose<T>() => ComposeBook<T>(typeof(T).Assembly.GetTypes());
+    public static Book ComposeOnly<T>() => ComposeBook<T>([typeof(T)]);
+
+    private static Book ComposeBook<T>(Type[] types) => new(
+        TheReflectionist.GetDocFileTypes(types)
             .Where(a => (a.Namespace ?? "").StartsWith(typeof(T).Namespace ?? ""))
             .Select(a => PageFromType(typeof(T), a))
             .ToReadOnlyCollection(),
-        TheReflectionist.GetIncludedTypes(typeof(T).Assembly.GetTypes())
+        TheReflectionist.GetIncludedTypes(types)
             .Select(InclusionFromType)
             .ToReadOnlyCollection(),
         TheReflectionist.GetDocSnippets(typeof(T).Assembly.GetTypes())

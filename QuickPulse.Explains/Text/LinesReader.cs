@@ -31,8 +31,27 @@ public class LinesReader
         return lines[currentIndex++];
     }
 
+    public string[] NextLines(int howMany)
+    {
+        string[] result = [];
+        for (int i = 0; i < howMany - 1; i++)
+        {
+            result.Append(NextLine());
+        }
+        return result;
+    }
+
     public void Skip() => currentIndex++;
     public void Skip(int linesToSkip) => currentIndex += linesToSkip;
+    public string SkipToLineContaining(string fragment)
+    {
+        while (true)
+        {
+            var line = NextLine();
+            if (line.Contains(fragment, StringComparison.OrdinalIgnoreCase))
+                return line;
+        }
+    }
     public bool EndOfContent()
     {
         if (currentIndex < lines.Length)

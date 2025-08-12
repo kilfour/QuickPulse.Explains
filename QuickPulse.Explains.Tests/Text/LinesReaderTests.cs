@@ -31,9 +31,16 @@ Assert.True(reader.EndOfContent());
 **Error Handling:**
 
 LinesReader throws exceptions if:
-- You call `NextLine()` or `Skip()` past the end of the content.
+- You call `NextLine()`, `NextLines()` or `Skip()` past the end of the content.
 - You use the reader before it's initialized.
 - You call `EndOfContent()` when there are still lines to read.
+
+#### SkipToLineContaining
+Utility function that allows you to skip ahead to the first line containing a specific string.
+
+#### ReadLines(int howMany)
+Returns an array of strings, starting at current index and reading `howMany` lines into said array.
+
 
 #### AsAssertsToLogFile
 `.AsAssertsToLogFile()` outputs the contents of the reader as xUnit `Assert.Equal(...)` statements,
@@ -92,6 +99,21 @@ public class LinesReaderTests
         var reader = LinesReader.FromText("a\r\nb\r\nc\r\nd");
         reader.Skip(2);
         Assert.Equal("c", reader.NextLine());
+    }
+
+    [Fact]
+    public void SkipToLineContaining_is_forward_search()
+    {
+        var reader = LinesReader.FromText("first\r\nfindme\r\nthird");
+        Assert.Equal("findme", reader.SkipToLineContaining("me"));
+        Assert.Equal("third", reader.NextLine());
+    }
+
+    [Fact]
+    public void NextLines_returns_string_array()
+    {
+        var reader = LinesReader.FromText("first\r\nsecond\r\nthird");
+        Assert.Equal([], reader.NextLines(3));
     }
 
     [Fact]
