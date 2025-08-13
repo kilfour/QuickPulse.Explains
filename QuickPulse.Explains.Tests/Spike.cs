@@ -8,13 +8,15 @@ public class Spike
 {
 
     [Fact]
-    [DocContent("one")]
-    [DocContent("Two")]
-    [DocContent("three")]
+    [DocExample(typeof(Spike), "NopeNotHere")]
+    [DocExample(typeof(Generic<string>))]
     public void Content()
     {
-        Explain.OnlyThis<Foo>("Spike.md");
+        Explain.OnlyThis<Spike>("Spike.md");
     }
+
+    [CodeExample]
+    public class Generic<T> { }
 
     [Fact]
     [DocCodeFile("Spike.txt", "markdown")]

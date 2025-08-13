@@ -1,4 +1,5 @@
 using QuickPulse.Arteries;
+using QuickPulse.Instruments;
 
 namespace QuickPulse.Explains.BasedOnNamespace;
 
@@ -14,9 +15,12 @@ public static class TheScribe
 
     public static void Print(string filename, Book book)
     {
+        var diagnostics = new Diagnostics();
         Signal.From(Scriptorium.Book)
             .SetArtery(GetArtery(filename))
+            .Graft(diagnostics)
             .Pulse(book);
+        CheckDiagnostics(diagnostics);
     }
 
     public static void Publish(string path, Book book)
@@ -27,8 +31,19 @@ public static class TheScribe
             var artery = GetArtery(Path.Combine(path, page.Path));
             signal.SetArtery(artery).Pulse(new SeperatePage(page, book.Includes, book.Examples));
         }
+        var diagnostics = new Diagnostics();
         Signal.From(Scriptorium.Chronicles)
             .SetArtery(GetArtery(Path.Combine(path, "ToC.md")))
+            .Graft(diagnostics)
             .Pulse(book.Pages.Select(a => new Chronicle(a.Explanation.HeaderText, a.Path)));
+        CheckDiagnostics(diagnostics);
+    }
+
+    private static void CheckDiagnostics(Diagnostics diagnostics)
+    {
+        if (diagnostics.TheExhibit.Count != 0)
+            ComputerSays.No(
+                "\r\n-----------------------------------------------------------------------\r\n" +
+                string.Join(Environment.NewLine, diagnostics.TheExhibit));
     }
 }

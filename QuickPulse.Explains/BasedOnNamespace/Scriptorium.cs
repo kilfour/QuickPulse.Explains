@@ -1,5 +1,7 @@
+using System.Diagnostics;
 using QuickPulse.Bolts;
 using QuickPulse.Explains.BasedOnNamespace.Fragments;
+using static QuickPulse.Explains.BasedOnNamespace.TheScribe;
 
 namespace QuickPulse.Explains.BasedOnNamespace;
 
@@ -32,12 +34,26 @@ public static class Scriptorium
          from e in Pulse.Trace("```")
          select fragment;
 
+
+    private static string GetErrorMessageFromCodeExampleFragmentName(string name)
+    {
+        var result = "Code Example not found.\r\n" +
+            "Looking for: `" + name + "`.\r\n";
+        if (name.Contains("`"))
+            result = result +
+                " => Are you referencing a generic type?\r\n" +
+                "If so you need to supply the open generic type (f.i. `typeof(MyType<>)` instead of `typeof(MyType<string>)`).\r\n";
+        result += "-----------------------------------------------------------------------";
+        return result;
+    }
     private static readonly Flow<CodeExampleFragment> CodeExample =
          from fragment in Pulse.Start<CodeExampleFragment>()
          from examples in Pulse.Gather<IReadOnlyCollection<Example>>()
-         let example = examples.Value.Single(a => a.Name == fragment.Name)
+         let example = examples.Value.SingleOrDefault(a => a.Name == fragment.Name)
          from s in Pulse.Trace($"```{fragment.Language}")
-         from _ in Pulse.Trace(example.Code)
+         from _ in Pulse.TraceIf(example != null, () => example.Code)
+         from __ in Pulse.When(example == null,
+            () => Pulse.TraceTo<Diagnostics>(GetErrorMessageFromCodeExampleFragmentName(fragment.Name)))
          from e in Pulse.Trace("```")
          select fragment;
 
