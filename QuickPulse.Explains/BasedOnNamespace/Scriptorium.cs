@@ -13,12 +13,17 @@ public static class Scriptorium
          from _ in Pulse.Trace(header)
          select text;
 
-    private static readonly Flow<HeaderFragment> HeaderFragment =
-         from header in Pulse.Start<HeaderFragment>()
+    private static readonly Flow<HeaderFragment> Header =
+         from fragment in Pulse.Start<HeaderFragment>()
          from level in Pulse.Gather<int>()
-         let headingMarker = new string('#', level.Value + header.Level)
-         from _ in Pulse.Trace($"{headingMarker} {header.Header}")
-         select header;
+         let headingMarker = new string('#', level.Value + fragment.Level)
+         from _ in Pulse.Trace($"{headingMarker} {fragment.Header}")
+         select fragment;
+
+    private static readonly Flow<ContentFragment> Content =
+         from fragment in Pulse.Start<ContentFragment>()
+         from _ in Pulse.Trace($"{fragment.Content}  ")
+         select fragment;
 
     private static readonly Flow<CodeFragment> Code =
          from fragment in Pulse.Start<CodeFragment>()
@@ -27,13 +32,12 @@ public static class Scriptorium
          from e in Pulse.Trace("```")
          select fragment;
 
-
-
     private static readonly Flow<CodeExampleFragment> CodeExample =
          from fragment in Pulse.Start<CodeExampleFragment>()
          from examples in Pulse.Gather<IReadOnlyCollection<Example>>()
+         let example = examples.Value.Single(a => a.Name == fragment.Name)
          from s in Pulse.Trace($"```{fragment.Language}")
-         from _ in Pulse.Trace(examples.Value.Single(a => a.Name == fragment.Name).Code)
+         from _ in Pulse.Trace(example.Code)
          from e in Pulse.Trace("```")
          select fragment;
 
@@ -47,8 +51,8 @@ public static class Scriptorium
         from fragment in Pulse.Start<Fragment>()
         from _ in fragment switch
         {
-            HeaderFragment a => Pulse.ToFlow(b => Pulse.ToFlow(HeaderFragment, b), a),
-            ContentFragment a => Pulse.ToFlow(b => Pulse.Trace(b.Content), a),
+            HeaderFragment a => Pulse.ToFlow(b => Pulse.ToFlow(Header, b), a),
+            ContentFragment a => Pulse.ToFlow(Content, a),
             CodeFragment a => Pulse.ToFlow(Code, a),
             CodeExampleFragment a => Pulse.ToFlow(CodeExample, a),
             InclusionFragment a => Pulse.ToFlow(Include, a),
@@ -57,43 +61,43 @@ public static class Scriptorium
         select fragment;
 
     private static Flow<Explanation> Explanation =>
-        from input in Pulse.Start<Explanation>()
-        from _ in Pulse.ToFlow(MarkDownHeader, input.HeaderText)
-        from __ in Pulse.Scoped<int>(a => a + 1, Pulse.ToFlow(Fragment, input.Fragments))
-        select input;
+        from explanation in Pulse.Start<Explanation>()
+        from _ in Pulse.ToFlow(MarkDownHeader, explanation.HeaderText)
+        from __ in Pulse.Scoped<int>(a => a + 1, Pulse.ToFlow(Fragment, explanation.Fragments))
+        select explanation;
 
     private static Flow<Page> Page =>
-        from input in Pulse.Start<Page>()
-        let level = input.Path.Split("/").Length // Create a Path Seperator Constant somewhere
+        from page in Pulse.Start<Page>()
+        let level = page.Path.Split("/").Length // Create a Path Seperator Constant somewhere
         from _ in Pulse.Scoped<int>(a => level,
-            from _ in Pulse.ToFlow(MarkDownHeader, input.Explanation.HeaderText)
-            from s in Pulse.Scoped<int>(a => a + 1, Pulse.ToFlow(Fragment, input.Explanation.Fragments))
+            from _ in Pulse.ToFlow(MarkDownHeader, page.Explanation.HeaderText)
+            from s in Pulse.Scoped<int>(a => a + 1, Pulse.ToFlow(Fragment, page.Explanation.Fragments))
             select Unit.Instance)
-        select input;
+        select page;
 
     public static Flow<SeperatePage> SeperatePage =>
-        from input in Pulse.Start<SeperatePage>()
-        from includes in Pulse.Gather(input.Inclusions)
-        from examples in Pulse.Gather(input.Examples)
+        from page in Pulse.Start<SeperatePage>()
+        from includes in Pulse.Gather(page.Inclusions)
+        from examples in Pulse.Gather(page.Examples)
         from level in Pulse.Gather(0)
         from _ in Pulse.Scoped<int>(a => 1,
-            from _ in Pulse.ToFlow(MarkDownHeader, input.Page.Explanation.HeaderText)
-            from __ in Pulse.Scoped<int>(a => a + 1, Pulse.ToFlow(Fragment, input.Page.Explanation.Fragments))
+            from _ in Pulse.ToFlow(MarkDownHeader, page.Page.Explanation.HeaderText)
+            from __ in Pulse.Scoped<int>(a => a + 1, Pulse.ToFlow(Fragment, page.Page.Explanation.Fragments))
             select Unit.Instance)
-        select input;
+        select page;
 
     public static Flow<Book> Book =>
-        from input in Pulse.Start<Book>()
-        from includes in Pulse.Gather(input.Includes)
-        from examples in Pulse.Gather(input.Examples)
+        from book in Pulse.Start<Book>()
+        from includes in Pulse.Gather(book.Includes)
+        from examples in Pulse.Gather(book.Examples)
         from level in Pulse.Gather(1)
-        from _ in Pulse.ToFlow(Page, input.Pages)
-        select input;
+        from _ in Pulse.ToFlow(Page, book.Pages)
+        select book;
 
     public static readonly Flow<Chronicle> Chronicles =
-        from input in Pulse.Start<Chronicle>()
-        let level = input.Path.Split("/").Count() - 1
+        from chronicle in Pulse.Start<Chronicle>()
+        let level = chronicle.Path.Split("/").Count() - 1
         let indent = new string(' ', level * 2)
-        from _ in Pulse.Trace($"{indent}- [{input.Text}]({input.Path})")
-        select input;
+        from _ in Pulse.Trace($"{indent}- [{chronicle.Text}]({chronicle.Path})")
+        select chronicle;
 }

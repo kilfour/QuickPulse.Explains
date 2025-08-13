@@ -1,6 +1,7 @@
 using QuickPulse;
 using QuickPulse.Arteries;
 using QuickPulse.Explains.Abstractions;
+using QuickPulse.Explains.BasedOnNamespace.CodeLocator;
 using QuickPulse.Explains.BasedOnNamespace.Fragments;
 using QuickPulse.Explains.Formatters;
 
@@ -8,6 +9,14 @@ namespace QuickPulse.Explains.BasedOnNamespace;
 
 public static class TheArchivist
 {
+    private static readonly AsyncLocal<Func<ICodeLocator>?> _override = new();
+
+    public static Func<ICodeLocator> GetCodeLocator
+    {
+        get => _override.Value ?? (() => new FileSystemCodeLocator());
+        set => _override.Value = value;
+    }
+
     public static Book Compose<T>() => ComposeBook<T>(typeof(T).Assembly.GetTypes());
     public static Book ComposeOnly<T>() => ComposeBook<T>([typeof(T)]);
 
@@ -38,9 +47,7 @@ public static class TheArchivist
         var text =
             Signal.From<string>(a => Pulse.ToFlow(flow, a))
                 .SetArtery(TheString.Catcher())
-                .Pulse(File.ReadLines(docExample.Attribute.File)
-                    .Skip(docExample.Attribute.Line)
-                    .Select(a => a + Environment.NewLine))
+                .Pulse(GetCodeLocator().ReadAfter(docExample.Attribute.File, docExample.Attribute.Line))
                 .GetArtery<Holden>()
                 .Whispers();
         var lines = text.Split(Environment.NewLine).Where(a => !string.IsNullOrWhiteSpace(a));
@@ -70,9 +77,7 @@ public static class TheArchivist
         var text =
             Signal.From<string>(a => Pulse.ToFlow(flow, a))
                 .SetArtery(TheString.Catcher())
-                .Pulse(File.ReadLines(docExample.Attribute.File)
-                    .Skip(docExample.Attribute.Line)
-                    .Select(a => a + Environment.NewLine))
+                .Pulse(GetCodeLocator().ReadAfter(docExample.Attribute.File, docExample.Attribute.Line))
                 .GetArtery<Holden>()
                 .Whispers();
         var lines = text.Split(Environment.NewLine).Where(a => !string.IsNullOrWhiteSpace(a));
@@ -120,7 +125,7 @@ public static class TheArchivist
         DocCodeAttribute a => new CodeFragment(a.Code, a.Language),
         DocIncludeAttribute a => new InclusionFragment(a.Included),
         DocExampleAttribute a => new CodeExampleFragment(a.Name, a.Language),
-        CodeFileAttribute a => new CodeFragment(TheCartographer.GetFileContents(a.Path, a.Filename), a.Language),
+        DocCodeFileAttribute a => new CodeFragment(TheCartographer.GetFileContents(a.Path, a.Filename), a.Language),
         _ => throw new NotSupportedException(attr.GetType().Name)
     };
 

@@ -105,7 +105,7 @@ This example shows how to add documentation for a simple file.
 
         var reader = LinesReader.FromStringList([.. collector.TheExhibit]);
         Assert.Equal("# A Simple File", reader.NextLine());
-        Assert.Equal("my content", reader.NextLine());
+        Assert.Equal("my content  ", reader.NextLine());
         Assert.True(reader.EndOfContent());
     }
 
@@ -147,8 +147,8 @@ By putting this attribute on the class, ...
 
         var reader = LinesReader.FromStringList([.. collector.TheExhibit]);
         Assert.Equal("# A Simple File", reader.NextLine());
-        Assert.Equal("my class content", reader.NextLine());
-        Assert.Equal("my method content", reader.NextLine());
+        Assert.Equal("my class content  ", reader.NextLine());
+        Assert.Equal("my method content  ", reader.NextLine());
         Assert.True(reader.EndOfContent());
     }
 

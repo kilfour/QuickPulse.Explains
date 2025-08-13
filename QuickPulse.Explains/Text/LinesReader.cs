@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using QuickPulse.Arteries;
 using QuickPulse.Instruments;
 
@@ -20,6 +21,7 @@ public class LinesReader
     public static LinesReader FromStringList(string[] lines) =>
         new(lines);
 
+    [StackTraceHidden]
     public string NextLine()
     {
         if (currentIndex == -1)
@@ -31,6 +33,7 @@ public class LinesReader
         return lines[currentIndex++];
     }
 
+    [StackTraceHidden]
     public string[] NextLines(int howMany)
     {
         List<string> result = [];
@@ -41,7 +44,9 @@ public class LinesReader
         return [.. result];
     }
 
+    [StackTraceHidden]
     public void Skip() => currentIndex++;
+    [StackTraceHidden]
     public void Skip(int linesToSkip) => currentIndex += linesToSkip;
     public string SkipToLineContaining(string fragment)
     {
@@ -52,6 +57,8 @@ public class LinesReader
                 return line;
         }
     }
+
+    [StackTraceHidden]
     public bool EndOfContent()
     {
         if (currentIndex < lines.Length)

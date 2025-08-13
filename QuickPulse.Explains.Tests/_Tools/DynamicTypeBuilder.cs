@@ -12,11 +12,6 @@ public class DynamicTypeBuilder
         this.typeBuilder = typeBuilder;
     }
 
-    /// <summary>
-    /// Create a builder for a new dynamic type.
-    /// If <paramref name="module"/> is supplied, the type will be created in that module,
-    /// otherwise a new dynamic assembly and module will be created.
-    /// </summary>
     public static DynamicTypeBuilder Create(string typeName, ModuleBuilder? module = null)
     {
         if (module == null)

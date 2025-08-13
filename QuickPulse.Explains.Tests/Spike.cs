@@ -3,10 +3,21 @@ using QuickPulse.Explains.Formatters;
 namespace QuickPulse.Explains.DontInclude;
 
 [DocFile]
+[DocExample(typeof(Bar))]
 public class Spike
 {
+
     [Fact]
-    [CodeFile("Spike.txt", "markdown")]
+    [DocContent("one")]
+    [DocContent("Two")]
+    [DocContent("three")]
+    public void Content()
+    {
+        Explain.OnlyThis<Foo>("Spike.md");
+    }
+
+    [Fact]
+    [DocCodeFile("Spike.txt", "markdown")]
     [DocExample(typeof(Spike), nameof(Foo))]
     [DocExample(typeof(Spike), nameof(FullFoo))]
     [DocExample(typeof(Bar))]
@@ -14,7 +25,7 @@ public class Spike
     [DocExample(typeof(Spike), nameof(AnotherList))]
     public void Files()
     {
-        Explain.This<Spike>("Spike.md");
+        // ----
     }
 
     [CodeSnippet]
@@ -74,6 +85,17 @@ public class Spike
             "char=' ', enter=0, emit=True, exit=0",
             "char='}', enter=0, emit=True, exit=-1"
         ];
+    }
+}
+
+[DocFile]
+[DocExample(typeof(Bar))]
+public class Foo
+{
+    [CodeExample]
+    private class Bar
+    {
+        public int Method() { return 42; }
     }
 }
 
