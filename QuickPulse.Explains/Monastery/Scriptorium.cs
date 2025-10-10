@@ -13,16 +13,16 @@ public static class Scriptorium
 
     private static readonly Flow<string> MarkDownHeader =
          from text in Pulse.Start<string>()
-         from level in Pulse.Gather<int>()
-         let headingMarker = new string('#', level.Value)
+         from level in Pulse.Extract<int>()
+         let headingMarker = new string('#', level)
          let header = $"{headingMarker} {text}"
          from _ in Pulse.Trace(header)
          select text;
 
     private static readonly Flow<HeaderFragment> Header =
          from fragment in Pulse.Start<HeaderFragment>()
-         from level in Pulse.Gather<int>()
-         let headingMarker = new string('#', level.Value + fragment.Level)
+         from level in Pulse.Extract<int>()
+         let headingMarker = new string('#', level + fragment.Level)
          from _ in Pulse.Trace($"{headingMarker} {fragment.Header}")
          select fragment;
 
@@ -52,8 +52,8 @@ public static class Scriptorium
 
     private static readonly Flow<CodeExampleFragment> CodeExample =
          from fragment in Pulse.Start<CodeExampleFragment>()
-         from examples in Pulse.Gather<IReadOnlyCollection<Example>>()
-         let example = examples.Value.SingleOrDefault(a => a.Name == fragment.Name)
+         from examples in Pulse.Extract<IReadOnlyCollection<Example>>()
+         let example = examples.SingleOrDefault(a => a.Name == fragment.Name)
          from s in Pulse.Trace($"```{fragment.Language}")
          from _ in Pulse.TraceIf(example != null, () => example.Code)
          from __ in Pulse.When(example == null,
@@ -63,8 +63,8 @@ public static class Scriptorium
 
     private static Flow<InclusionFragment> Include =>
          from fragment in Pulse.Start<InclusionFragment>()
-         from includes in Pulse.Gather<IReadOnlyCollection<Inclusion>>()
-         from _ in Pulse.ToFlow(Explanation, includes.Value.Single(a => a.Type == fragment.Included).Explanation)
+         from includes in Pulse.Extract<IReadOnlyCollection<Inclusion>>()
+         from _ in Pulse.ToFlow(Explanation, includes.Single(a => a.Type == fragment.Included).Explanation)
          select fragment;
 
     private static readonly Flow<Fragment> Fragment =
@@ -80,29 +80,23 @@ public static class Scriptorium
         }
         select fragment;
 
-    private static Flow<Explanation> Explanation =
+    private static readonly Flow<Explanation> Explanation =
         from explanation in Pulse.Start<Explanation>()
         from _ in Pulse.ToFlow(MarkDownHeader, explanation.HeaderText)
         from __ in Pulse.Scoped<int>(a => a + 1, Pulse.ToFlow(Fragment, explanation.Fragments))
         select explanation;
 
-    private static Flow<Page> Page =
+    private static readonly Flow<Page> Page =
         from page in Pulse.Start<Page>()
         let level = page.Path.Split("/").Length // Create a Path Seperator Constant somewhere
-        from _ in Pulse.Scoped<int>(a => level,
-            from _ in Pulse.ToFlow(MarkDownHeader, page.Explanation.HeaderText)
-            from s in Pulse.Scoped<int>(a => a + 1, Pulse.ToFlow(Fragment, page.Explanation.Fragments))
-            select Unit.Instance)
+        from _ in Pulse.Scoped<int>(a => level, Pulse.ToFlow(Explanation, page.Explanation))
         select page;
 
     public static readonly Flow<SeperatePage> SeperatePage =
-        from page in Pulse.Start<SeperatePage>()
-        from initialize in Pulse.ToFlow(LoadReference, page)
-        from _ in Pulse.Scoped<int>(a => 1,
-            from _ in Pulse.ToFlow(MarkDownHeader, page.Page.Explanation.HeaderText)
-            from __ in Pulse.Scoped<int>(a => a + 1, Pulse.ToFlow(Fragment, page.Page.Explanation.Fragments))
-            select Unit.Instance)
-        select page;
+        from typeset in Pulse.Start<SeperatePage>()
+        from initialize in Pulse.ToFlow(LoadReference, typeset)
+        from _ in Pulse.Scoped<int>(a => 1, Pulse.ToFlow(Explanation, typeset.Page.Explanation))
+        select typeset;
 
     public static readonly Flow<Book> Book =
         from book in Pulse.Start<Book>()
