@@ -5,10 +5,6 @@ private class Bar
     public int MyMethod() { return 42; }
 }
 ```
-```csharp
-```
-```csharp
-```
 ```markdown
 Just Checking
 ```

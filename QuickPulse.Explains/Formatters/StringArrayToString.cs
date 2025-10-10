@@ -1,7 +1,5 @@
 
 using System.Text.RegularExpressions;
-using QuickPulse.Arteries;
-using QuickPulse.Bolts;
 
 namespace QuickPulse.Explains.Formatters;
 

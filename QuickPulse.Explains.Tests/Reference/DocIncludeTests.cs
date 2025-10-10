@@ -33,7 +33,7 @@ public class DocIncludeTests
             .WithClassAttribute<DocIncludeAttribute>(includedType)
             .Build();
 
-        var collector = new TheCollector<string>();
+        var collector = TheCollector.Exhibits<string>();
         TheScribe.GetArtery = a => collector;
 
         ExplainThis.Invoke(type, "whatever");

@@ -7,9 +7,10 @@ namespace QuickPulse.Explains.DontInclude;
 public class Spike
 {
 
+    //[Fact]
     [Fact(Skip = "explicit")]
-    [DocExample(typeof(Spike), "NopeNotHere")]
-    [DocExample(typeof(Generic<string>))]
+    // [DocExample(typeof(Spike), "NopeNotHere")]
+    // [DocExample(typeof(Generic<string>))]
     public void Content()
     {
         Explain.OnlyThis<Spike>("Spike.md");

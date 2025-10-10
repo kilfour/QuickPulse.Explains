@@ -74,7 +74,7 @@ public class LinesReader
         Signal.From<string[]>(list =>
                 Pulse.ToFlow(element => Pulse.Trace(assert(element)), list)
                 .Then(Pulse.Trace(endOfContent)))
-            .SetArtery(WriteData.ToFile())
+            .SetArtery(TheLedger.Records())
             .Pulse(lines);
         return this;
     }

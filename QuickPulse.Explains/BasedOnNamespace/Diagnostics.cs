@@ -2,4 +2,4 @@ using QuickPulse.Arteries;
 
 namespace QuickPulse.Explains.BasedOnNamespace;
 
-public class Diagnostics : TheCollector<string> { }
+public class Diagnostics : Collector<string> { }

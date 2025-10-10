@@ -9,7 +9,7 @@ public static class TheScribe
 
     public static Func<string, IArtery> GetArtery
     {
-        get => _override.Value ?? WriteData.ToNewFile;
+        get => _override.Value ?? (a => TheLedger.Rewrites(a));
         set => _override.Value = value;
     }
 

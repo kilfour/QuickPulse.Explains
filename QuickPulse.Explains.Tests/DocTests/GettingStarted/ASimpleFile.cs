@@ -98,7 +98,7 @@ This example shows how to add documentation for a simple file.
             .WithClassAttribute<DocContentAttribute>("my content")
             .Build();
 
-        var collector = new TheCollector<string>();
+        var collector = TheCollector.Exhibits<string>();
         TheScribe.GetArtery = a => collector;
 
         ExplainThis.Invoke(type, "whatever");
@@ -140,7 +140,7 @@ By putting this attribute on the class, ...
             .WithVoidMethod<DocContentAttribute>("MyMethod", "my method content")
             .Build();
 
-        var collector = new TheCollector<string>();
+        var collector = TheCollector.Exhibits<string>();
         TheScribe.GetArtery = a => collector;
 
         ExplainThis.Invoke(type, "whatever");
@@ -186,7 +186,7 @@ By putting this attribute on the class, ...
             .WithVoidMethod<DocHeaderAttribute>("MyMethod", "my method header", 0)
             .Build();
 
-        var collector = new TheCollector<string>();
+        var collector = TheCollector.Exhibits<string>();
         TheScribe.GetArtery = a => collector;
 
         ExplainThis.Invoke(type, "whatever");
@@ -228,7 +228,7 @@ Renders as:
             .WithVoidMethod<DocHeaderAttribute>("MyMethod", "my method header", 1)
             .Build();
 
-        var collector = new TheCollector<string>();
+        var collector = TheCollector.Exhibits<string>();
         TheScribe.GetArtery = a => collector;
 
         ExplainThis.Invoke(type, "whatever");
@@ -301,7 +301,7 @@ It renders as:
             .WithVoidMethod<DocIncludeAttribute>("MyMethod", includedType)
             .Build();
 
-        var collector = new TheCollector<string>();
+        var collector = TheCollector.Exhibits<string>();
         TheScribe.GetArtery = a => collector;
 
         ExplainThis.Invoke(type, "whatever");

@@ -1,5 +1,3 @@
-using System.Reflection;
-using System.Reflection.Emit;
 using QuickPulse.Arteries;
 using QuickPulse.Explains.BasedOnNamespace;
 using QuickPulse.Explains.Tests._Tools;
@@ -56,7 +54,7 @@ public class TheLivingDocTests
            .WithClassAttribute<DocFileAttribute>()
            .WithClassAttribute<DocExampleAttribute>(includedType, "MyMethod", "csharp")
            .Build();
-        var collector = new TheCollector<string>();
+        var collector = TheCollector.Exhibits<string>();
         TheScribe.GetArtery = a => collector;
         var codeLocator = new CodeLocatorMock()
             .Add("code.cs", 0,
