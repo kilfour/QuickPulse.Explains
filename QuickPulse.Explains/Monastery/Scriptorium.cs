@@ -92,18 +92,21 @@ public static class Scriptorium
         from _ in Pulse.Scoped<int>(a => level, Pulse.ToFlow(Explanation, page.Explanation))
         select page;
 
+    // Single File Render
     public static readonly Flow<SeperatePage> SeperatePage =
-        from typeset in Pulse.Start<SeperatePage>()
-        from initialize in Pulse.ToFlow(LoadReference, typeset)
-        from _ in Pulse.Scoped<int>(a => 1, Pulse.ToFlow(Explanation, typeset.Page.Explanation))
-        select typeset;
+        from pageAndReference in Pulse.Start<SeperatePage>()
+        from initialize in Pulse.ToFlow(LoadReference, pageAndReference)
+        from _ in Pulse.Scoped<int>(a => 1, Pulse.ToFlow(Explanation, pageAndReference.Page.Explanation))
+        select pageAndReference;
 
+    // Render over multiple files
     public static readonly Flow<Book> Book =
         from book in Pulse.Start<Book>()
         from initialize in Pulse.ToFlow(LoadReference, book)
         from _ in Pulse.ToFlow(Page, book.Pages)
         select book;
 
+    // Table of Content
     public static readonly Flow<Chronicle> Chronicles =
         from chronicle in Pulse.Start<Chronicle>()
         let level = chronicle.Path.Split("/").Length - 1
