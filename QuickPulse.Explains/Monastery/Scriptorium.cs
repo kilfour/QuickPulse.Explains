@@ -54,7 +54,7 @@ public static class Scriptorium
          from e in Pulse.Trace("```")
          select fragment;
 
-    private static readonly Flow<InclusionFragment> Include =
+    private static Flow<InclusionFragment> Include =>
          from fragment in Pulse.Start<InclusionFragment>()
          from includes in Pulse.Gather<IReadOnlyCollection<Inclusion>>()
          from _ in Pulse.ToFlow(Explanation, includes.Value.Single(a => a.Type == fragment.Included).Explanation)
@@ -73,13 +73,13 @@ public static class Scriptorium
         }
         select fragment;
 
-    private static Flow<Explanation> Explanation =>
+    private static Flow<Explanation> Explanation =
         from explanation in Pulse.Start<Explanation>()
         from _ in Pulse.ToFlow(MarkDownHeader, explanation.HeaderText)
         from __ in Pulse.Scoped<int>(a => a + 1, Pulse.ToFlow(Fragment, explanation.Fragments))
         select explanation;
 
-    private static Flow<Page> Page =>
+    private static Flow<Page> Page =
         from page in Pulse.Start<Page>()
         let level = page.Path.Split("/").Length // Create a Path Seperator Constant somewhere
         from _ in Pulse.Scoped<int>(a => level,
@@ -89,14 +89,14 @@ public static class Scriptorium
         select page;
 
 
-    public static Flow<Reference> InitializeState =
+    public static readonly Flow<Reference> InitializeState =
         from reference in Pulse.Start<Reference>()
         from includes in Pulse.Ensure(() => reference.Inclusions)
         from examples in Pulse.Ensure(() => reference.Examples)
         from level in Pulse.Ensure(() => 1)
         select reference;
 
-    public static Flow<SeperatePage> SeperatePage =
+    public static readonly Flow<SeperatePage> SeperatePage =
         from page in Pulse.Start<SeperatePage>()
         from includes in Pulse.Gather(() => page.Inclusions)
         from examples in Pulse.Gather(() => page.Examples)
@@ -107,7 +107,7 @@ public static class Scriptorium
             select Unit.Instance)
         select page;
 
-    public static Flow<Book> Book =>
+    public static readonly Flow<Book> Book =
         from book in Pulse.Start<Book>()
         from includes in Pulse.Ensure(() => book.Inclusions)
         from examples in Pulse.Ensure(() => book.Examples)
