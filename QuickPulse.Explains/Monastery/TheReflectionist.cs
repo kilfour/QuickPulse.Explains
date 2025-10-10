@@ -3,7 +3,7 @@ using QuickPulse;
 using QuickPulse.Explains.Abstractions;
 using QuickPulse.Explains.Formatters;
 
-namespace QuickPulse.Explains.BasedOnNamespace;
+namespace QuickPulse.Explains.Monastery;
 
 public static class TheReflectionist
 {

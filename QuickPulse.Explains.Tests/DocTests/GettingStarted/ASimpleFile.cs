@@ -1,7 +1,7 @@
 using System.Reflection;
 using System.Reflection.Emit;
 using QuickPulse.Arteries;
-using QuickPulse.Explains.BasedOnNamespace;
+using QuickPulse.Explains.Monastery;
 using QuickPulse.Explains.Tests._Tools;
 using QuickPulse.Explains.Text;
 

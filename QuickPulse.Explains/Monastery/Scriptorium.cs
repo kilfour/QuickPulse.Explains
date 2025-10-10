@@ -1,6 +1,6 @@
-using QuickPulse.Explains.BasedOnNamespace.Fragments;
+using QuickPulse.Explains.Monastery.Fragments;
 
-namespace QuickPulse.Explains.BasedOnNamespace;
+namespace QuickPulse.Explains.Monastery;
 
 public static class Scriptorium
 {
@@ -88,11 +88,19 @@ public static class Scriptorium
             select Unit.Instance)
         select page;
 
-    public static Flow<SeperatePage> SeperatePage =>
+
+    public static Flow<Reference> InitializeState =
+        from reference in Pulse.Start<Reference>()
+        from includes in Pulse.Ensure(() => reference.Inclusions)
+        from examples in Pulse.Ensure(() => reference.Examples)
+        from level in Pulse.Ensure(() => 1)
+        select reference;
+
+    public static Flow<SeperatePage> SeperatePage =
         from page in Pulse.Start<SeperatePage>()
-        from includes in Pulse.Gather(page.Inclusions)
-        from examples in Pulse.Gather(page.Examples)
-        from level in Pulse.Gather(0)
+        from includes in Pulse.Gather(() => page.Inclusions)
+        from examples in Pulse.Gather(() => page.Examples)
+        from level in Pulse.Gather(() => 0)
         from _ in Pulse.Scoped<int>(a => 1,
             from _ in Pulse.ToFlow(MarkDownHeader, page.Page.Explanation.HeaderText)
             from __ in Pulse.Scoped<int>(a => a + 1, Pulse.ToFlow(Fragment, page.Page.Explanation.Fragments))
@@ -101,9 +109,9 @@ public static class Scriptorium
 
     public static Flow<Book> Book =>
         from book in Pulse.Start<Book>()
-        from includes in Pulse.Gather(book.Includes)
-        from examples in Pulse.Gather(book.Examples)
-        from level in Pulse.Gather(1)
+        from includes in Pulse.Ensure(() => book.Inclusions)
+        from examples in Pulse.Ensure(() => book.Examples)
+        from level in Pulse.Ensure(() => 1)
         from _ in Pulse.ToFlow(Page, book.Pages)
         select book;
 

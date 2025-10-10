@@ -1,11 +1,11 @@
 using QuickPulse;
 using QuickPulse.Arteries;
 using QuickPulse.Explains.Abstractions;
-using QuickPulse.Explains.BasedOnNamespace.CodeLocator;
-using QuickPulse.Explains.BasedOnNamespace.Fragments;
+using QuickPulse.Explains.Monastery.CodeLocator;
+using QuickPulse.Explains.Monastery.Fragments;
 using QuickPulse.Explains.Formatters;
 
-namespace QuickPulse.Explains.BasedOnNamespace;
+namespace QuickPulse.Explains.Monastery;
 
 public static class TheArchivist
 {

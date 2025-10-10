@@ -1,4 +1,4 @@
-using QuickPulse.Explains.BasedOnNamespace;
+using QuickPulse.Explains.Monastery;
 using QuickPulse.Instruments;
 
 namespace QuickPulse.Explains;

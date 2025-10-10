@@ -1,4 +1,4 @@
-using QuickPulse.Explains.BasedOnNamespace;
+using QuickPulse.Explains.Monastery;
 using QuickPulse.Explains.Tests.DocTests;
 
 namespace QuickPulse.Explains.Tests.NamespaceBased;

@@ -1,4 +1,4 @@
-using QuickPulse.Explains.BasedOnNamespace.CodeLocator;
+using QuickPulse.Explains.Monastery.CodeLocator;
 
 namespace QuickPulse.Explains.Tests._Tools;
 

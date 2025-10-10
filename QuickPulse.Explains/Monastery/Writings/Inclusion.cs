@@ -1,3 +1,3 @@
-namespace QuickPulse.Explains.BasedOnNamespace;
+namespace QuickPulse.Explains.Monastery;
 
 public record Inclusion(Type Type, Explanation Explanation);

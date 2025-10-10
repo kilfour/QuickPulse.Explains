@@ -1,4 +1,4 @@
-namespace QuickPulse.Explains.BasedOnNamespace;
+namespace QuickPulse.Explains.Monastery;
 
 public static class TheCartographer
 {

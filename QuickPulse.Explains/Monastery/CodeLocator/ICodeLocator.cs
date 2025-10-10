@@ -1,4 +1,4 @@
-namespace QuickPulse.Explains.BasedOnNamespace.CodeLocator;
+namespace QuickPulse.Explains.Monastery.CodeLocator;
 
 public interface ICodeLocator
 {

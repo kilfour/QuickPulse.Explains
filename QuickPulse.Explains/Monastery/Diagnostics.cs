@@ -1,5 +1,5 @@
 using QuickPulse.Arteries;
 
-namespace QuickPulse.Explains.BasedOnNamespace;
+namespace QuickPulse.Explains.Monastery;
 
 public class Diagnostics : Collector<string> { }

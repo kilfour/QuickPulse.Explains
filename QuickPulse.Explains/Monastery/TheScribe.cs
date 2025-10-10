@@ -1,7 +1,7 @@
 using QuickPulse.Arteries;
 using QuickPulse.Instruments;
 
-namespace QuickPulse.Explains.BasedOnNamespace;
+namespace QuickPulse.Explains.Monastery;
 
 public static class TheScribe
 {
@@ -29,7 +29,7 @@ public static class TheScribe
         foreach (var page in book.Pages)
         {
             var artery = GetArtery(Path.Combine(path, page.Path));
-            signal.SetArtery(artery).Pulse(new SeperatePage(page, book.Includes, book.Examples));
+            signal.SetArtery(artery).Pulse(new SeperatePage(page, book.Inclusions, book.Examples));
         }
         var diagnostics = new Diagnostics();
         Signal.From(Scriptorium.Chronicles)
