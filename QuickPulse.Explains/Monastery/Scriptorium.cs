@@ -4,6 +4,13 @@ namespace QuickPulse.Explains.Monastery;
 
 public static class Scriptorium
 {
+    public static readonly Flow<Reference> LoadReference =
+        from reference in Pulse.Start<Reference>()
+        from includes in Pulse.Ensure(() => reference.Inclusions)
+        from examples in Pulse.Ensure(() => reference.Examples)
+        from level in Pulse.Ensure(() => 1)
+        select reference;
+
     private static readonly Flow<string> MarkDownHeader =
          from text in Pulse.Start<string>()
          from level in Pulse.Gather<int>()
@@ -88,17 +95,9 @@ public static class Scriptorium
             select Unit.Instance)
         select page;
 
-
-    public static readonly Flow<Reference> InitializeState =
-        from reference in Pulse.Start<Reference>()
-        from includes in Pulse.Ensure(() => reference.Inclusions)
-        from examples in Pulse.Ensure(() => reference.Examples)
-        from level in Pulse.Ensure(() => 1)
-        select reference;
-
     public static readonly Flow<SeperatePage> SeperatePage =
         from page in Pulse.Start<SeperatePage>()
-        from initialize in Pulse.ToFlow(InitializeState, page)
+        from initialize in Pulse.ToFlow(LoadReference, page)
         from _ in Pulse.Scoped<int>(a => 1,
             from _ in Pulse.ToFlow(MarkDownHeader, page.Page.Explanation.HeaderText)
             from __ in Pulse.Scoped<int>(a => a + 1, Pulse.ToFlow(Fragment, page.Page.Explanation.Fragments))
@@ -107,7 +106,7 @@ public static class Scriptorium
 
     public static readonly Flow<Book> Book =
         from book in Pulse.Start<Book>()
-        from initialize in Pulse.ToFlow(InitializeState, book)
+        from initialize in Pulse.ToFlow(LoadReference, book)
         from _ in Pulse.ToFlow(Page, book.Pages)
         select book;
 
