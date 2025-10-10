@@ -1,6 +1,6 @@
 namespace QuickPulse.Explains.Monastery;
 
-public record SeperatePage(
+public record SinglePage(
     Page Page,
     IReadOnlyCollection<Inclusion> Inclusions,
     IReadOnlyCollection<Example> Examples)

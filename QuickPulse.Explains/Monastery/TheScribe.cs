@@ -25,14 +25,14 @@ public static class TheScribe
 
     public static void Publish(string path, Book book)
     {
-        var signal = Signal.From(Scriptorium.SeperatePage);
+        var signal = Signal.From(Scriptorium.SinglePage);
         foreach (var page in book.Pages)
         {
             var artery = GetArtery(Path.Combine(path, page.Path));
-            signal.SetArtery(artery).Pulse(new SeperatePage(page, book.Inclusions, book.Examples));
+            signal.SetArtery(artery).Pulse(new SinglePage(page, book.Inclusions, book.Examples));
         }
         var diagnostics = new Diagnostics();
-        Signal.From(Scriptorium.Chronicles)
+        Signal.From(Scriptorium.TableOfContent)
             .SetArtery(GetArtery(Path.Combine(path, "ToC.md")))
             .Graft(diagnostics)
             .Pulse(book.Pages.Select(a => new Chronicle(a.Explanation.HeaderText, a.Path)));

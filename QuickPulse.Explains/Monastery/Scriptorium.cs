@@ -4,6 +4,8 @@ namespace QuickPulse.Explains.Monastery;
 
 public static class Scriptorium
 {
+    private const char Separator = '/';
+
     public static readonly Flow<Reference> LoadReference =
         from reference in Pulse.Start<Reference>()
         from includes in Pulse.Ensure(() => reference.Inclusions)
@@ -86,30 +88,27 @@ public static class Scriptorium
         from __ in Pulse.Scoped<int>(a => a + 1, Pulse.ToFlow(Fragment, explanation.Fragments))
         select explanation;
 
-    private static readonly Flow<Page> Page =
+    private static readonly Flow<Page> BookPage =
         from page in Pulse.Start<Page>()
-        let level = page.Path.Split("/").Length // Create a Path Seperator Constant somewhere
+        let level = page.Path.Split(Separator).Length
         from _ in Pulse.Scoped<int>(a => level, Pulse.ToFlow(Explanation, page.Explanation))
         select page;
 
-    // Single File Render
-    public static readonly Flow<SeperatePage> SeperatePage =
-        from pageAndReference in Pulse.Start<SeperatePage>()
+    public static readonly Flow<SinglePage> SinglePage =
+        from pageAndReference in Pulse.Start<SinglePage>()
         from initialize in Pulse.ToFlow(LoadReference, pageAndReference)
         from _ in Pulse.Scoped<int>(a => 1, Pulse.ToFlow(Explanation, pageAndReference.Page.Explanation))
         select pageAndReference;
 
-    // Render over multiple files
     public static readonly Flow<Book> Book =
         from book in Pulse.Start<Book>()
         from initialize in Pulse.ToFlow(LoadReference, book)
-        from _ in Pulse.ToFlow(Page, book.Pages)
+        from _ in Pulse.ToFlow(BookPage, book.Pages)
         select book;
 
-    // Table of Content
-    public static readonly Flow<Chronicle> Chronicles =
+    public static readonly Flow<Chronicle> TableOfContent =
         from chronicle in Pulse.Start<Chronicle>()
-        let level = chronicle.Path.Split("/").Length - 1
+        let level = chronicle.Path.Split(Separator).Length - 1
         let indent = new string(' ', level * 2)
         from _ in Pulse.Trace($"{indent}- [{chronicle.Text}]({chronicle.Path})")
         select chronicle;
