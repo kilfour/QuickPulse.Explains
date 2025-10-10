@@ -98,9 +98,7 @@ public static class Scriptorium
 
     public static readonly Flow<SeperatePage> SeperatePage =
         from page in Pulse.Start<SeperatePage>()
-        from includes in Pulse.Gather(() => page.Inclusions)
-        from examples in Pulse.Gather(() => page.Examples)
-        from level in Pulse.Gather(() => 0)
+        from initialize in Pulse.ToFlow(InitializeState, page)
         from _ in Pulse.Scoped<int>(a => 1,
             from _ in Pulse.ToFlow(MarkDownHeader, page.Page.Explanation.HeaderText)
             from __ in Pulse.Scoped<int>(a => a + 1, Pulse.ToFlow(Fragment, page.Page.Explanation.Fragments))
@@ -109,9 +107,7 @@ public static class Scriptorium
 
     public static readonly Flow<Book> Book =
         from book in Pulse.Start<Book>()
-        from includes in Pulse.Ensure(() => book.Inclusions)
-        from examples in Pulse.Ensure(() => book.Examples)
-        from level in Pulse.Ensure(() => 1)
+        from initialize in Pulse.ToFlow(InitializeState, book)
         from _ in Pulse.ToFlow(Page, book.Pages)
         select book;
 
