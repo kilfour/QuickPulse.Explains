@@ -8,14 +8,14 @@ public static class Scriptorium
 
     public static readonly Flow<Reference> LoadReference =
         from reference in Pulse.Start<Reference>()
-        from includes in Pulse.Ensure(() => reference.Inclusions)
-        from examples in Pulse.Ensure(() => reference.Examples)
-        from level in Pulse.Ensure(() => 1)
+        from includes in Pulse.Prime(() => reference.Inclusions)
+        from examples in Pulse.Prime(() => reference.Examples)
+        from level in Pulse.Prime(() => 1)
         select reference;
 
     private static readonly Flow<string> MarkDownHeader =
          from text in Pulse.Start<string>()
-         from level in Pulse.Extract<int>()
+         from level in Pulse.Draw<int>()
          let headingMarker = new string('#', level)
          let header = $"{headingMarker} {text}"
          from _ in Pulse.Trace(header)
@@ -23,7 +23,7 @@ public static class Scriptorium
 
     private static readonly Flow<HeaderFragment> Header =
          from fragment in Pulse.Start<HeaderFragment>()
-         from level in Pulse.Extract<int>()
+         from level in Pulse.Draw<int>()
          let headingMarker = new string('#', level + fragment.Level)
          from _ in Pulse.Trace($"{headingMarker} {fragment.Header}")
          select fragment;
@@ -54,7 +54,7 @@ public static class Scriptorium
 
     private static readonly Flow<CodeExampleFragment> CodeExample =
          from fragment in Pulse.Start<CodeExampleFragment>()
-         from examples in Pulse.Extract<IReadOnlyCollection<Example>>()
+         from examples in Pulse.Draw<IReadOnlyCollection<Example>>()
          let example = examples.SingleOrDefault(a => a.Name == fragment.Name)
          from s in Pulse.Trace($"```{fragment.Language}")
          from _ in Pulse.TraceIf(example != null, () => example.Code)
@@ -65,7 +65,7 @@ public static class Scriptorium
 
     private static Flow<InclusionFragment> Include =>
          from fragment in Pulse.Start<InclusionFragment>()
-         from includes in Pulse.Extract<IReadOnlyCollection<Inclusion>>()
+         from includes in Pulse.Draw<IReadOnlyCollection<Inclusion>>()
          from _ in Pulse.ToFlow(Explanation, includes.Single(a => a.Type == fragment.Included).Explanation)
          select fragment;
 
