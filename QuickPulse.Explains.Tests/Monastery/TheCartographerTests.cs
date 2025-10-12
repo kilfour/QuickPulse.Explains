@@ -1,7 +1,7 @@
 using QuickPulse.Explains.Monastery;
 using QuickPulse.Explains.Tests.DocTests;
 
-namespace QuickPulse.Explains.Tests.NamespaceBased;
+namespace QuickPulse.Explains.Tests.Monastery;
 
 public class TheCartographerTests
 {

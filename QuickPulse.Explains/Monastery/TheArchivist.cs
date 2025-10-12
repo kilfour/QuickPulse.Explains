@@ -38,7 +38,7 @@ public static class TheArchivist
     {
         var flow =
             from c in Pulse.Start<char>()
-            from _ in Pulse.Gather(-1)
+            from _ in Pulse.Prime(() => -1)
             from __ in Pulse.ManipulateIf<int>(c == '}', a => --a)
             from ___ in Pulse.TraceIf<int>(a => a >= 0, () => c)
             from ____ in Pulse.ManipulateIf<int>(c == '{', a => ++a)
@@ -65,7 +65,7 @@ public static class TheArchivist
     {
         var flow =
             from c in Pulse.Start<char>()
-            from _ in Pulse.Gather(new FlowContext(-1, -1, false))
+            from _ in Pulse.Prime(() => new FlowContext(-1, -1, false))
             from a___ in Pulse.ManipulateIf<FlowContext>(c == '[', a => a with { Brackets = a.Brackets + 1 })
             from a__ in Pulse.ManipulateIf<FlowContext>(a => !char.IsWhiteSpace(c) && a.Brackets < 0, a => a with { Printing = true })
             from a_ in Pulse.ManipulateIf<FlowContext>(c == ']', a => a with { Brackets = a.Brackets - 1 })

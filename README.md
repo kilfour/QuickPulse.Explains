@@ -174,6 +174,7 @@ public class Foo
 }
 ```
 Renders as:
+````
 # Foo
 ```csharp
 private class Bar
@@ -181,6 +182,7 @@ private class Bar
     public int Method() { return 42; }
 }
 ```
+````
 **Important:** The code extraction only works for methods with a *block body*,
 it currently fails miserably when confronted with *expression bodied* methods.
 
