@@ -2,7 +2,7 @@ using QuickPulse.Explains.Monastery.CodeLocator;
 
 namespace QuickPulse.Explains.Tests._Tools;
 
-public sealed class CodeLocatorMock : ICodeLocator
+public class CodeLocatorMock : ICodeLocator
 {
     private readonly Dictionary<(string file, int line), string[]> _data = new();
 
