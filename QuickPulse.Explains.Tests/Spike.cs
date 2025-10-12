@@ -25,7 +25,7 @@ public class Spike
     [DocExample(typeof(Bar))]
     [DocExample(typeof(Spike), nameof(AList), "sql")]
     [DocExample(typeof(Spike), nameof(AnotherList))]
-    public void Files()
+    private void Files()
     {
         // ----
     }

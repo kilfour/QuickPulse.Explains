@@ -122,7 +122,7 @@ The advantage of using the `DocHeader` attribute is that it's level is based on 
 You can if you have multiple *Doc-decorated* classes, render them all to one file.
 In which case header level is based on namespace *depth*.  
 
-You can also render them as seperate files in which case each file will be rendered similarely to as what has been shown here.  
+You can also render them as separate files in which case each file will be rendered similarly to as what has been shown here.  
 And then there's also includes ... .  
   
 ### So What About These `DocInclude`'s ?
@@ -151,6 +151,7 @@ It renders as:
 ## Some Other Class
 ### Header From SomeOtherClass Method
 ```
+> ⟲>-~~-<⟲
   
 ## The Living Doc
 **QuickPulse.Explains** supports embedding source code directly into generated documentation through
