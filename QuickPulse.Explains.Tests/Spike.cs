@@ -19,6 +19,7 @@ public class Spike
     [CodeExample]
     public class Generic<T> { }
 
+    // TODO allow code formatters on DocFile, ... somehow
     [DocCodeFile("Spike.txt", "markdown")]
     [DocExample(typeof(Spike), nameof(Foo))]
     [DocExample(typeof(Spike), nameof(FullFoo))]
