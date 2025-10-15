@@ -1,12 +1,7 @@
 namespace QuickPulse.Explains;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true)]
-public class CodeReplaceAttribute : Attribute
+public class CodeReplaceAttribute(string from, string to) : Attribute
 {
-    public string From { get; }
-    public string To { get; }
-    public CodeReplaceAttribute(string from, string to)
-    {
-        From = from; To = to;
-    }
+    public string From { get; } = from; public string To { get; } = to;
 }

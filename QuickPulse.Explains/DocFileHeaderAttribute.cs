@@ -1,12 +1,7 @@
 namespace QuickPulse.Explains;
 
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
-public class DocFileHeaderAttribute : Attribute
+public class DocFileHeaderAttribute(string header) : Attribute
 {
-    public string Header { get; }
-
-    public DocFileHeaderAttribute(string header)
-    {
-        Header = header;
-    }
+    public string Header { get; } = header;
 }

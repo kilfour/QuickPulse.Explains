@@ -4,16 +4,9 @@ using QuickPulse.Explains.Abstractions;
 namespace QuickPulse.Explains;
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true)]
-public class DocCodeFileAttribute : DocFragmentAttribute
+public class DocCodeFileAttribute(string filename, string language = "", [CallerFilePath] string path = "") : DocFragmentAttribute
 {
-    public string Filename { get; }
-    public string Language { get; }
-    public string Path { get; }
-
-    public DocCodeFileAttribute(string filename, string language = "", [CallerFilePath] string path = "")
-    {
-        Language = language;
-        Path = path;
-        Filename = filename;
-    }
+    public string Filename { get; } = filename;
+    public string Language { get; } = language;
+    public string Path { get; } = path;
 }

@@ -1,8 +1,6 @@
 namespace QuickPulse.Explains;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true)]
-public class CodeRemoveAttribute : CodeReplaceAttribute
+public class CodeRemoveAttribute(string from) : CodeReplaceAttribute(from, "")
 {
-    public CodeRemoveAttribute(string from)
-        : base(from, "") { }
 }

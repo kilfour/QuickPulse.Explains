@@ -3,12 +3,7 @@ using QuickPulse.Explains.Abstractions;
 namespace QuickPulse.Explains;
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true)]
-public class DocContentAttribute : DocFragmentAttribute
+public class DocContentAttribute(string content) : DocFragmentAttribute
 {
-    public string Content { get; }
-
-    public DocContentAttribute(string content)
-    {
-        Content = content;
-    }
+    public string Content { get; } = content;
 }
