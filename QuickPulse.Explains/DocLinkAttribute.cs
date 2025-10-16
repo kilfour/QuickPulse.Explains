@@ -1,7 +1,9 @@
+using QuickPulse.Explains.Abstractions;
+
 namespace QuickPulse.Explains;
 
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
-public class DocLink(string name, Type target, string section = "") : Attribute
+public class DocLinkAttribute(string name, Type target, string section = "") : DocFragmentAttribute
 {
     public string Name { get; } = name;
     public Type Target { get; } = target;

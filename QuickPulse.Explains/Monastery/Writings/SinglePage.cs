@@ -1,3 +1,5 @@
+using QuickPulse.Explains.Monastery.Writings;
+
 namespace QuickPulse.Explains.Monastery;
 
 public record SinglePage(

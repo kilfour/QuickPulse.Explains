@@ -1,4 +1,5 @@
 using QuickPulse.Arteries;
+using QuickPulse.Explains.Monastery.Writings;
 using QuickPulse.Instruments;
 
 namespace QuickPulse.Explains.Monastery;

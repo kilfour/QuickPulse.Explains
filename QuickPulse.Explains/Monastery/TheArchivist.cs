@@ -4,6 +4,7 @@ using QuickPulse.Explains.Abstractions;
 using QuickPulse.Explains.Monastery.CodeLocator;
 using QuickPulse.Explains.Monastery.Fragments;
 using QuickPulse.Explains.Formatters;
+using QuickPulse.Explains.Monastery.Writings;
 
 namespace QuickPulse.Explains.Monastery;
 
@@ -26,7 +27,7 @@ public static class TheArchivist
             .Select(a => PageFromType(typeof(T), a))
             .ToReadOnlyCollection(),
         TheReflectionist.GetIncludedTypes(types)
-            .Select(InclusionFromType)
+            .Select(a => InclusionFromType(typeof(T), a))
             .ToReadOnlyCollection(),
         TheReflectionist.GetDocSnippets(typeof(T).Assembly.GetTypes())
             .Select(ExampleFromDocSnippet)
@@ -112,25 +113,31 @@ public static class TheArchivist
     }
 
     private static Page PageFromType(Type root, Type type) => new(
-        ExplanationFromType(type),
+        ExplanationFromType(root, type),
         TheCartographer.ChartPath(root, type));
 
-    private static Explanation ExplanationFromType(Type type) =>
-         new(GetHeaderText(type), [.. TheReflectionist.GetDocFragmentAttributes(type).Select(ToFragment)]);
+    private static Explanation ExplanationFromType(Type root, Type type)
+    {
+        var fragments = TheReflectionist.GetDocFragmentAttributes(type).ToList();
+        var nonLinks = fragments.Where(a => a is not DocLinkAttribute);
+        var links = fragments.Where(a => a is DocLinkAttribute);
+        return new(GetHeaderText(type), [.. nonLinks.Union(links).Select(a => ToFragment(a, root))]);
+    }
 
-    public static Fragment ToFragment(this DocFragmentAttribute attr) => attr switch
+    public static Fragment ToFragment(DocFragmentAttribute attr, Type root) => attr switch
     {
         DocHeaderAttribute a => new HeaderFragment(a.Header, a.Level),
         DocContentAttribute a => new ContentFragment(a.Content),
         DocCodeAttribute a => new CodeFragment(a.Code, a.Language),
         DocIncludeAttribute a => new InclusionFragment(a.Included),
         DocExampleAttribute a => new CodeExampleFragment(a.Name, a.Language),
-        DocCodeFileAttribute a => new CodeFragment(TheCartographer.GetFileContents(a.Path, a.Filename), a.Language),
+        DocCodeFileAttribute a => new CodeFragment(TheCartographer.GetFileContents(a.Path, a.Filename, a.SkipLines), a.Language),
+        DocLinkAttribute a => new LinkFragment(a.Name, TheCartographer.ChartPath(root, a.Target) + (string.IsNullOrWhiteSpace(a.Section) ? "" : $"#{a.Section}")),
         _ => throw new NotSupportedException(attr.GetType().Name)
     };
 
-    private static Inclusion InclusionFromType(Type type) =>
-       new(type, ExplanationFromType(type));
+    private static Inclusion InclusionFromType(Type root, Type type) =>
+       new(type, ExplanationFromType(root, type));
 
     private static string GetHeaderText(Type type)
     {

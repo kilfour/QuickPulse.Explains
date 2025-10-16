@@ -1,4 +1,5 @@
 using QuickPulse.Explains.Monastery.Fragments;
+using QuickPulse.Explains.Monastery.Writings;
 
 namespace QuickPulse.Explains.Monastery;
 
@@ -69,6 +70,13 @@ public static class Scriptorium
          from _ in Pulse.ToFlow(Explanation, includes.Single(a => a.Type == fragment.Included).Explanation)
          select fragment;
 
+    private static Flow<LinkFragment> Link =>
+         from fragment in Pulse.Start<LinkFragment>()
+         from includes in Pulse.Draw<IReadOnlyCollection<Inclusion>>()
+         from _1 in Pulse.Trace("")
+         from _2 in Pulse.Trace($"[{fragment.Name}]: {fragment.Location}")
+         select fragment;
+
     private static readonly Flow<Fragment> Fragment =
         from fragment in Pulse.Start<Fragment>()
         from _ in fragment switch
@@ -78,6 +86,7 @@ public static class Scriptorium
             CodeFragment a => Pulse.ToFlow(Code, a),
             CodeExampleFragment a => Pulse.ToFlow(CodeExample, a),
             InclusionFragment a => Pulse.ToFlow(Include, a),
+            LinkFragment a => Pulse.ToFlow(Link, a),
             _ => Pulse.NoOp()
         }
         select fragment;
