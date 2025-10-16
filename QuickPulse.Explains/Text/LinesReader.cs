@@ -11,17 +11,17 @@ public class LinesReader
 
     private LinesReader(string[] lines)
     {
-        this.lines = [.. lines.Select(Normalize)];
+        this.lines = lines;
         if (lines.Length > 0)
             currentIndex = 0;
     }
 
+    public static LinesReader FromText(string text) =>
+        new(Normalize(text).Split('\n'));
+
     [StackTraceHidden]
     private static string Normalize(string s)
         => s.Replace("\r\n", "\n").Replace("\r", "\n");
-
-    public static LinesReader FromText(string text) =>
-        new(text.Split(Environment.NewLine));
 
     public static LinesReader FromStringList(string[] lines) =>
         new(lines);
