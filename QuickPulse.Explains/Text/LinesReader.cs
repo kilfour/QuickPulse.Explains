@@ -11,10 +11,15 @@ public class LinesReader
 
     private LinesReader(string[] lines)
     {
-        this.lines = lines;
+        this.lines = [.. lines.Select(Normalize)];
         if (lines.Length > 0)
             currentIndex = 0;
     }
+
+    [StackTraceHidden]
+    private static string Normalize(string s)
+        => s.Replace("\r\n", "\n").Replace("\r", "\n");
+
     public static LinesReader FromText(string text) =>
         new(text.Split(Environment.NewLine));
 
