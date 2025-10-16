@@ -33,7 +33,7 @@ public class LinesReader
             ComputerSays.No("No text was provided to the reader.");
 
         if (currentIndex >= lines.Length)
-            ComputerSays.No("Attempted to read past the end of content.");
+            ComputerSays.No($"Attempted to read past the end of content.{Environment.NewLine} Last line: {lines[currentIndex]}.");
 
         return lines[currentIndex++];
     }
