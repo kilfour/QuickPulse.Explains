@@ -5,8 +5,8 @@ namespace QuickPulse.Explains.DontInclude;
 [DocLink("Anchored", typeof(LinkingTo), "Section")]
 public class Spike_References
 {
-    [Fact]
-    //[Fact(Skip = "explicit")]
+    //[Fact]
+    [Fact(Skip = "explicit")]
     [DocContent(
 @"- [Top of File][LinkName]
 - [Section][Anchored]")]
