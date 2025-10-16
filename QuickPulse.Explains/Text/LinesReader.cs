@@ -4,6 +4,10 @@ using QuickPulse.Instruments;
 
 namespace QuickPulse.Explains.Text;
 
+/// <summary>
+/// Utility for reading multi-line text sequentially in tests,
+/// providing simple navigation and assertion-friendly helpers.
+/// </summary>
 public class LinesReader
 {
     private readonly string[] lines;
@@ -16,6 +20,9 @@ public class LinesReader
             currentIndex = 0;
     }
 
+    /// <summary>
+    /// Creates a reader from a text block, normalizing all line endings.
+    /// </summary>
     public static LinesReader FromText(string text) =>
         new(Normalize(text).Split('\n'));
 
@@ -23,9 +30,16 @@ public class LinesReader
     private static string Normalize(string s)
         => s.Replace("\r\n", "\n").Replace("\r", "\n");
 
+    /// <summary>
+    /// Creates a reader from a pre-split list of lines.
+    /// </summary>
     public static LinesReader FromStringList(string[] lines) =>
         new(lines);
 
+    /// <summary>
+    /// Reads the next line and advances the cursor.
+    /// Throws if no text or past the end of content.
+    /// </summary>
     [StackTraceHidden]
     public string NextLine()
     {
@@ -38,6 +52,9 @@ public class LinesReader
         return lines[currentIndex++];
     }
 
+    /// <summary>
+    /// Reads and returns the specified number of lines in sequence.
+    /// </summary>
     [StackTraceHidden]
     public string[] NextLines(int howMany)
     {
@@ -49,10 +66,21 @@ public class LinesReader
         return [.. result];
     }
 
+    /// <summary>
+    /// Skips the next line without reading it.
+    /// </summary>
     [StackTraceHidden]
     public void Skip() => currentIndex++;
+
+    /// <summary>
+    /// Skips the specified number of lines without reading them.
+    /// </summary>
     [StackTraceHidden]
     public void Skip(int linesToSkip) => currentIndex += linesToSkip;
+
+    /// <summary>
+    /// Advances until a line containing the given fragment is found and returns it.
+    /// </summary>
     public string SkipToLineContaining(string fragment)
     {
         while (true)
@@ -63,6 +91,9 @@ public class LinesReader
         }
     }
 
+    /// <summary>
+    /// Asserts that all lines have been consumed, fails if not.
+    /// </summary>
     [StackTraceHidden]
     public bool EndOfContent()
     {
@@ -71,6 +102,10 @@ public class LinesReader
         return true;
     }
 
+    /// <summary>
+    /// Converts the current content into xUnit-style Assert lines
+    /// and traces them to a test log for debugging.
+    /// </summary>
     public LinesReader AsAssertsToLogFile()
     {
         var indent = new string(' ', 8);
@@ -84,3 +119,4 @@ public class LinesReader
         return this;
     }
 }
+

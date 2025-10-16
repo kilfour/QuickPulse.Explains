@@ -113,11 +113,7 @@ Renders as:
 ## Level Two
 ### Level Three
 ```
-
-[Name][LinkName]
-
-[LinkName]: Spike.md
-
+  
 You could of course just put *'## Level Two'* etc. inside the previously shown `DocContent` attribute and be done with it.  
 That is how the previous version of this lib worked.  
 
