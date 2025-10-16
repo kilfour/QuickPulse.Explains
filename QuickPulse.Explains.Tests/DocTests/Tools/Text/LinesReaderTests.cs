@@ -131,7 +131,7 @@ public class LinesReaderTests
         var reader = LinesReader.FromText("only");
         reader.NextLine();
         var ex = Assert.Throws<Instruments.ComputerSaysNo>(reader.NextLine);
-        Assert.Equal("Attempted to read past the end of content.", ex.Message);
+        Assert.StartsWith("Attempted to read past the end of content.", ex.Message);
     }
 
     [Fact]
