@@ -16,6 +16,6 @@ public static class TheCartographer
     public static string GetFileContents(string filePath, string filename, int skipLines)
     {
         var codeFile = Path.Combine(Path.GetDirectoryName(filePath)!, filename);
-        return string.Join("", File.ReadAllLines(codeFile).Skip(skipLines));
+        return string.Join(Environment.NewLine, File.ReadAllLines(codeFile).Skip(skipLines));
     }
 }

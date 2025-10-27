@@ -7,6 +7,7 @@ private class Bar
 ```
 ```markdown
 Just Checking
+multi line stuff
 ```
 ```csharp
 // just a comment { a { b } }
@@ -15,12 +16,6 @@ Just Checking
 private void FullFoo()
 {
     // replaced { }
-}
-```
-```csharp
-private class Bar
-{
-    public int MyMethod() { return 42; }
 }
 ```
 ```sql

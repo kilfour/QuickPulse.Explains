@@ -8,9 +8,9 @@ namespace QuickPulse.Explains;
 /// Use the label in Markdown like [Text][Name] to reference the generated definition.
 /// </summary>
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
-public class DocLinkAttribute(string name, Type target, string section = "") : DocFragmentAttribute
+public class DocLinkAttribute(Type target, string name = "", string section = "") : DocFragmentAttribute
 {
-    public string Name { get; } = name;
+    public string Name { get; } = string.IsNullOrWhiteSpace(name) ? target.Name : name;
     public Type Target { get; } = target;
     public string Section { get; } = section;
 }

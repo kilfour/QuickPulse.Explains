@@ -14,6 +14,6 @@ public static class ExplainThis
             throw new InvalidOperationException("Method 'This' not found on Explain.");
 
         var closed = method.MakeGenericMethod(dynamicType);
-        closed.Invoke(null, new object[] { filename });
+        closed.Invoke(null, [filename]);
     }
 }

@@ -1,14 +1,15 @@
 namespace QuickPulse.Explains.DontInclude;
 
 [DocFile]
-[DocLink("LinkName", typeof(LinkingTo))]
-[DocLink("Anchored", typeof(LinkingTo), "Section")]
+[DocLink(typeof(LinkingTo), "LinkName")]
+[DocLink(typeof(LinkingTo), "Anchored", "Section")]
 public class Spike_References
 {
     //[Fact]
     [Fact(Skip = "explicit")]
     [DocContent(
-@"- [Top of File][LinkName]
+@"
+- [Top of File][LinkName]
 - [Section][Anchored]")]
     public void Try()
     {
