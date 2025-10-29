@@ -4,7 +4,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 
-    <Version>0.3.1</Version>
+    <Version>0.3.2</Version>
     <Authors>Kilfour</Authors>
     
     <PackageId>QuickPulse.Explains</PackageId>
@@ -48,8 +48,8 @@
 
 
   <ItemGroup>
-    <!-- <PackageReference Include="QuickPulse" Version="0.3.1" />  -->
-    <ProjectReference Include="..\..\QuickPulse\QuickPulse\QuickPulse.csproj" />
+    <PackageReference Include="QuickPulse" Version="0.3.2" /> 
+    <!-- <ProjectReference Include="..\..\QuickPulse\QuickPulse\QuickPulse.csproj" /> -->
   </ItemGroup>
 
 

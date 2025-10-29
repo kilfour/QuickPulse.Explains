@@ -122,3 +122,4 @@ public static class Scriptorium
         from _ in Pulse.Trace($"{indent}- [{chronicle.Text}]({chronicle.Path})")
         select chronicle;
 }
+
