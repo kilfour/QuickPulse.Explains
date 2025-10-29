@@ -16,12 +16,12 @@ public class DocFileTests
             .WithClassAttribute<DocFileAttribute>()
             .Build();
 
-        var holden = TheString.Catcher();
-        TheScribe.GetArtery = a => holden;
+        var stringSink = Arteries.Text.Capture();
+        TheScribe.GetArtery = a => stringSink;
 
         ExplainThis.Invoke(type, "whatever");
 
-        var reader = LinesReader.FromText(holden.Whispers());
+        var reader = LinesReader.FromText(stringSink.Content());
         Assert.Equal("# Sample Class", reader.NextLine());
         Assert.True(reader.EndOfContent());
     }
@@ -34,12 +34,12 @@ public class DocFileTests
             .WithClassAttribute<DocFileAttribute>()
             .Build();
 
-        var holden = TheString.Catcher();
-        TheScribe.GetArtery = a => holden;
+        var stringSink = Arteries.Text.Capture();
+        TheScribe.GetArtery = a => stringSink;
 
         ExplainThis.Invoke(type, "whatever");
 
-        var reader = LinesReader.FromText(holden.Whispers());
+        var reader = LinesReader.FromText(stringSink.Content());
         Assert.Equal("# Sample Classtests", reader.NextLine());
         Assert.True(reader.EndOfContent());
     }
@@ -52,12 +52,12 @@ public class DocFileTests
             .WithClassAttribute<DocFileAttribute>()
             .Build();
 
-        var holden = TheString.Catcher();
-        TheScribe.GetArtery = a => holden;
+        var stringSink = Arteries.Text.Capture();
+        TheScribe.GetArtery = a => stringSink;
 
         ExplainThis.Invoke(type, "whatever");
 
-        var reader = LinesReader.FromText(holden.Whispers());
+        var reader = LinesReader.FromText(stringSink.Content());
         Assert.Equal("# Sample Class", reader.NextLine());
         Assert.True(reader.EndOfContent());
     }
@@ -70,12 +70,12 @@ public class DocFileTests
             .WithClassAttribute<DocFileAttribute>()
             .Build();
 
-        var holden = TheString.Catcher();
-        TheScribe.GetArtery = a => holden;
+        var stringSink = Arteries.Text.Capture();
+        TheScribe.GetArtery = a => stringSink;
 
         ExplainThis.Invoke(type, "whatever");
 
-        var reader = LinesReader.FromText(holden.Whispers());
+        var reader = LinesReader.FromText(stringSink.Content());
         Assert.Equal("# Sample Classtest", reader.NextLine());
         Assert.True(reader.EndOfContent());
     }

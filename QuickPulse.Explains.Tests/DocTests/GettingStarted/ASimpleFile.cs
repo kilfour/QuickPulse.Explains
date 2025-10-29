@@ -33,12 +33,12 @@ At this point the output will contain only a header, which is derived from the c
             .WithClassAttribute<DocFileAttribute>()
             .Build();
 
-        var holden = TheString.Catcher();
-        TheScribe.GetArtery = a => holden;
+        var stringSink = Arteries.Text.Capture();
+        TheScribe.GetArtery = a => stringSink;
 
         ExplainThis.Invoke(type, "whatever");
 
-        var reader = LinesReader.FromText(holden.Whispers());
+        var reader = LinesReader.FromText(stringSink.Content());
         Assert.Equal("# A Simple File", reader.NextLine());
         Assert.True(reader.EndOfContent());
     }
@@ -64,12 +64,12 @@ public class ASimpleFile { }
             .WithClassAttribute<DocFileHeaderAttribute>("My Custom Header")
             .Build();
 
-        var holden = TheString.Catcher();
-        TheScribe.GetArtery = a => holden;
+        var stringSink = Arteries.Text.Capture();
+        TheScribe.GetArtery = a => stringSink;
 
         ExplainThis.Invoke(type, "whatever");
 
-        var reader = LinesReader.FromText(holden.Whispers());
+        var reader = LinesReader.FromText(stringSink.Content());
         Assert.Equal("# My Custom Header", reader.NextLine());
         Assert.True(reader.EndOfContent());
     }
@@ -98,12 +98,12 @@ This example shows how to add documentation for a simple file.
             .WithClassAttribute<DocContentAttribute>("my content")
             .Build();
 
-        var collector = TheCollector.Exhibits<string>();
+        var collector = Collect.ValuesOf<string>();
         TheScribe.GetArtery = a => collector;
 
         ExplainThis.Invoke(type, "whatever");
 
-        var reader = LinesReader.FromStringList([.. collector.TheExhibit]);
+        var reader = LinesReader.FromStringList([.. collector.Values]);
         Assert.Equal("# A Simple File", reader.NextLine());
         Assert.Equal("my content  ", reader.NextLine());
         Assert.True(reader.EndOfContent());
@@ -140,12 +140,12 @@ By putting this attribute on the class, ...
             .WithVoidMethod<DocContentAttribute>("MyMethod", "my method content")
             .Build();
 
-        var collector = TheCollector.Exhibits<string>();
+        var collector = Collect.ValuesOf<string>();
         TheScribe.GetArtery = a => collector;
 
         ExplainThis.Invoke(type, "whatever");
 
-        var reader = LinesReader.FromStringList([.. collector.TheExhibit]);
+        var reader = LinesReader.FromStringList([.. collector.Values]);
         Assert.Equal("# A Simple File", reader.NextLine());
         Assert.Equal("my class content  ", reader.NextLine());
         Assert.Equal("my method content  ", reader.NextLine());
@@ -186,12 +186,12 @@ By putting this attribute on the class, ...
             .WithVoidMethod<DocHeaderAttribute>("MyMethod", "my method header", 0)
             .Build();
 
-        var collector = TheCollector.Exhibits<string>();
+        var collector = Collect.ValuesOf<string>();
         TheScribe.GetArtery = a => collector;
 
         ExplainThis.Invoke(type, "whatever");
 
-        var reader = LinesReader.FromStringList([.. collector.TheExhibit]);
+        var reader = LinesReader.FromStringList([.. collector.Values]);
         Assert.Equal("# A Simple File", reader.NextLine());
         Assert.Equal("## my method header", reader.NextLine());
         Assert.True(reader.EndOfContent());
@@ -228,12 +228,12 @@ Renders as:
             .WithVoidMethod<DocHeaderAttribute>("MyMethod", "my method header", 1)
             .Build();
 
-        var collector = TheCollector.Exhibits<string>();
+        var collector = Collect.ValuesOf<string>();
         TheScribe.GetArtery = a => collector;
 
         ExplainThis.Invoke(type, "whatever");
 
-        var reader = LinesReader.FromStringList([.. collector.TheExhibit]);
+        var reader = LinesReader.FromStringList([.. collector.Values]);
         Assert.Equal("# A Simple File", reader.NextLine());
         Assert.Equal("### my method header", reader.NextLine());
         Assert.True(reader.EndOfContent());
@@ -302,12 +302,12 @@ It renders as:
             .WithVoidMethod<DocIncludeAttribute>("MyMethod", includedType)
             .Build();
 
-        var collector = TheCollector.Exhibits<string>();
+        var collector = Collect.ValuesOf<string>();
         TheScribe.GetArtery = a => collector;
 
         ExplainThis.Invoke(type, "whatever");
 
-        var reader = LinesReader.FromStringList([.. collector.TheExhibit]);
+        var reader = LinesReader.FromStringList([.. collector.Values]);
         Assert.Equal("# A Simple File", reader.NextLine());
         Assert.Equal("## Some Other Class", reader.NextLine());
         Assert.Equal("### Header From SomeOtherClass Method", reader.NextLine());

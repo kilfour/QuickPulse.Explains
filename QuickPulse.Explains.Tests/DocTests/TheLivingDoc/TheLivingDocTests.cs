@@ -56,7 +56,7 @@ public class TheLivingDocTests
            .WithClassAttribute<DocFileAttribute>()
            .WithClassAttribute<DocExampleAttribute>(includedType, "MyMethod", "csharp")
            .Build();
-        var collector = TheCollector.Exhibits<string>();
+        var collector = Collect.ValuesOf<string>();
         TheScribe.GetArtery = a => collector;
         var codeLocator = new CodeLocatorMock()
             .Add("code.cs", 0,
@@ -70,7 +70,7 @@ public class TheLivingDocTests
 
         ExplainThis.Invoke(type, "whatever");
 
-        var reader = LinesReader.FromStringList([.. collector.TheExhibit.SelectMany(a => a.Split(Environment.NewLine))]);
+        var reader = LinesReader.FromStringList([.. collector.Values.SelectMany(a => a.Split(Environment.NewLine))]);
         Assert.Equal(
             [
                 "# The Living Doc",

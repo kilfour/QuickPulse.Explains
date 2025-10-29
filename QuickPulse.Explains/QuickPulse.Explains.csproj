@@ -48,8 +48,8 @@
 
 
   <ItemGroup>
-    <PackageReference Include="QuickPulse" Version="0.3.1" /> 
-    <!-- <ProjectReference Include="..\..\QuickPulse\QuickPulse\QuickPulse.csproj" /> -->
+    <!-- <PackageReference Include="QuickPulse" Version="0.3.1" />  -->
+    <ProjectReference Include="..\..\QuickPulse\QuickPulse\QuickPulse.csproj" />
   </ItemGroup>
 
 

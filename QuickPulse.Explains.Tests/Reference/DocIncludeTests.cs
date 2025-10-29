@@ -33,12 +33,12 @@ public class DocIncludeTests
             .WithClassAttribute<DocIncludeAttribute>(includedType)
             .Build();
 
-        var collector = TheCollector.Exhibits<string>();
+        var collector = Collect.ValuesOf<string>();
         TheScribe.GetArtery = a => collector;
 
         ExplainThis.Invoke(type, "whatever");
 
-        var reader = LinesReader.FromStringList([.. collector.TheExhibit]);
+        var reader = LinesReader.FromStringList([.. collector.Values]);
         Assert.Equal("# A Simple File", reader.NextLine());
         Assert.Equal("## Some Other Class", reader.NextLine());
         Assert.Equal("### Header From SomeOtherClass Method", reader.NextLine());

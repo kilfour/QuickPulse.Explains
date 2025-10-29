@@ -47,10 +47,10 @@ public static class TheArchivist
             select c;
         var text =
             Signal.From<string>(a => Pulse.ToFlow(flow, a))
-                .SetArtery(TheString.Catcher())
+                .SetArtery(Arteries.Text.Capture())
                 .Pulse(GetCodeLocator().ReadAfter(docExample.Attribute.File, docExample.Attribute.Line))
-                .GetArtery<Holden>()
-                .Whispers();
+                .GetArtery<StringSink>()
+                .Content();
         var lines = text.Split(Environment.NewLine).Where(a => !string.IsNullOrWhiteSpace(a));
         var length = lines.Select(a => a.TakeWhile(a => a == ' ' || a == '\t').Count()).Min();
         var newLines = lines
@@ -77,10 +77,10 @@ public static class TheArchivist
             select c;
         var text =
             Signal.From<string>(a => Pulse.ToFlow(flow, a))
-                .SetArtery(TheString.Catcher())
+                .SetArtery(Arteries.Text.Capture())
                 .Pulse(GetCodeLocator().ReadAfter(docExample.Attribute.File, docExample.Attribute.Line))
-                .GetArtery<Holden>()
-                .Whispers();
+                .GetArtery<StringSink>()
+                .Content();
         var lines = text.Split(Environment.NewLine).Where(a => !string.IsNullOrWhiteSpace(a));
         var length = lines.Count() > 1 ? lines.Skip(1).Select(a => a.TakeWhile(a => a == ' ' || a == '\t').Count()).Min() : 0;
         var newLines = new string[] { lines.First() }.Concat(lines.Skip(1)
