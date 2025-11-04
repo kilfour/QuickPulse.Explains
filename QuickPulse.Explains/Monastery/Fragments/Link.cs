@@ -1,3 +1,7 @@
 namespace QuickPulse.Explains.Monastery.Fragments;
 
-public record LinkFragment(string Name, string Location) : Fragment;
+public class LinkFragment(string Name, string Location) : Fragment
+{
+    public string Name { get; } = Name;
+    public string Location { get; } = Location;
+}

@@ -1,4 +1,7 @@
 namespace QuickPulse.Explains.Monastery.Fragments;
 
-public record CodeFragment(string Code, string Language) : Fragment;
-
+public class CodeFragment(string Code, string Language) : Fragment
+{
+    public string Code { get; } = Code;
+    public string Language { get; } = Language;
+}

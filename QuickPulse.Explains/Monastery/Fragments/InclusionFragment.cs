@@ -1,4 +1,6 @@
 namespace QuickPulse.Explains.Monastery.Fragments;
 
-public record InclusionFragment(Type Included) : Fragment;
-
+public class InclusionFragment(Type Included) : Fragment
+{
+    public Type Included { get; } = Included;
+}

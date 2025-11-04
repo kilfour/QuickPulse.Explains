@@ -1,4 +1,4 @@
 namespace QuickPulse.Explains.Monastery.Fragments;
 
-public abstract record Fragment { }
+public abstract class Fragment { }
 
