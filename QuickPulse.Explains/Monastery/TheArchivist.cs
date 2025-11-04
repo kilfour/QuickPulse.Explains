@@ -121,7 +121,7 @@ public static class TheArchivist
         var fragments = TheReflectionist.GetDocFragmentAttributes(type).ToList();
         var nonLinks = fragments.Where(a => a is not DocLinkAttribute);
         var links = fragments.Where(a => a is DocLinkAttribute);
-        return new(GetHeaderText(type), [.. nonLinks.Union(links).Select(a => ToFragment(a, root))]);
+        return new(GetHeaderText(type), [.. nonLinks.Concat(links).Select(a => ToFragment(a, root))]);
     }
 
     public static Fragment ToFragment(DocFragmentAttribute attr, Type root) => attr switch

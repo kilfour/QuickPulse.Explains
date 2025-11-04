@@ -1,6 +1,4 @@
 namespace QuickPulse.Explains.Monastery.Fragments;
 
-public class ContentFragment(string Content) : Fragment
-{
-    public string Content { get; } = Content;
-}
+public record ContentFragment(string Content) : Fragment;
+
