@@ -1,5 +1,6 @@
 using System.Runtime.CompilerServices;
 using QuickPulse.Arteries;
+using QuickPulse.Instruments;
 
 namespace QuickPulse.Explains.Tests.CodeParsing;
 
@@ -48,6 +49,14 @@ public static class CodeReader
 {
     private enum BodyType { Unknown, Block, Expression }
 
+    private record ExpressionBody(bool InBody);
+
+    private record Scanner(char LastChar = ' ', int Consumed = 0)
+    {
+        public Scanner Consume(char ch) => new(ch, Consumed + 1);
+        public static Scanner Reset() => new();
+    };
+
     private static readonly Flow<char> InBodyChar =
         Pulse.Start<char>(ch => Pulse.TraceIf<Indent>(a => a.Emit(ch), () => ch));
 
@@ -71,8 +80,6 @@ public static class CodeReader
         from setFirst in Pulse.ManipulateIf<bool>(braces.InBody && first, _ => false)
         select str;
 
-    public record ExpressionBody(bool InBody);
-
     private static readonly Flow<char> ExpressionBodiedMethodBodyChar =
         from ch in Pulse.Start<char>()
         from sub in Pulse.ToFlowIf<char, ExpressionBody>(a => a.InBody, InBodyChar, () => ch)
@@ -89,25 +96,23 @@ public static class CodeReader
 
     private static readonly Flow<char> DetermineBodyTypeChar =
         from ch in Pulse.Start<char>()
-        from lastChar in Pulse.Draw<char>()
+        from scanner in Pulse.Draw<Scanner>()
         from isBlock in Pulse.ManipulateIf<BodyType>(ch == '{', _ => BodyType.Block)
         from consumed in Pulse.When<BodyType>(
             a => a == BodyType.Unknown,
-            () => Pulse.Manipulate<int>(a => a + 1).Dissipate())
-        from isExpression in Pulse.ManipulateIf<BodyType>($"{lastChar}{ch}" == "=>", _ => BodyType.Expression)
-        from setLastChar in Pulse.Manipulate<char>(_ => ch)
+            () => Pulse.Manipulate<Scanner>(a => a.Consume(ch)).Dissipate())
+        from isExpression in Pulse.ManipulateIf<BodyType>($"{scanner.LastChar}{ch}" == "=>", _ => BodyType.Expression)
         select ch;
 
     private static readonly Flow<string> DetermineBodyTypeContinue =
         from str in Pulse.Start<string>()
-        from consumed in Pulse.Draw<int>()
-        from cont in Pulse.ToFlow(Line!, str[(consumed)..])
+        from scanner in Pulse.Draw<Scanner>()
+        from cont in Pulse.ToFlow(Line!, str[scanner.Consumed..])
         select str;
 
     private static readonly Flow<string> DetermineBodyType =
         from str in Pulse.Start<string>()
-        from lastChar in Pulse.Prime(() => ' ')
-        from consumed in Pulse.Manipulate<int>(_ => 0)
+        from scanner in Pulse.Manipulate<Scanner>(a => Scanner.Reset())
         from check in Pulse.ToFlow(DetermineBodyTypeChar, str)
         from cont in Pulse.When<BodyType>(
             a => a != BodyType.Unknown, () => Pulse.ToFlow(DetermineBodyTypeContinue, str))
@@ -115,7 +120,7 @@ public static class CodeReader
 
     private static readonly Flow<string> Line =
         from str in Pulse.Start<string>()
-        from consumed in Pulse.Prime(() => 0)
+        from scanner in Pulse.Prime(() => new Scanner())
         from bodyType in Pulse.Prime(() => BodyType.Unknown)
         from exprBody in Pulse.Prime(() => new ExpressionBody(true))
         from _ in Pulse.FirstOf(
