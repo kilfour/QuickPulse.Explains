@@ -49,9 +49,7 @@ public static class CodeReader
     private enum BodyType { Unknown, Block, Expression }
 
     private static readonly Flow<char> InBodyChar =
-        from ch in Pulse.Start<char>()
-        from trace in Pulse.TraceIf<Indent>(a => a.Emit(ch), () => ch)
-        select ch;
+        Pulse.Start<char>(ch => Pulse.TraceIf<Indent>(a => a.Emit(ch), () => ch));
 
     private static readonly Flow<char> BlockBodiedMethodBodyChar =
         from ch in Pulse.Start<char>()
@@ -102,7 +100,6 @@ public static class CodeReader
 
     private static readonly Flow<string> DetermineBodyTypeContinue =
         from str in Pulse.Start<string>()
-
         from consumed in Pulse.Draw<int>()
         from cont in Pulse.ToFlow(Line!, str[(consumed)..])
         select str;
