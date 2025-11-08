@@ -21,6 +21,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="QuickPulse.Show" Version="0.1.9" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\QuickPulse.Explains\QuickPulse.Explains.csproj" />
   </ItemGroup>
 
