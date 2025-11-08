@@ -1,6 +1,6 @@
-using QuickPulse.Explains.Tests.CodeParsing.Implementation;
+using QuickPulse.Explains.Monastery.CodeLocator;
 using QuickPulse.Explains.Text;
-using QuickPulse.Show;
+
 
 namespace QuickPulse.Explains.Tests.CodeParsing;
 
@@ -19,7 +19,7 @@ public class CodeSnippetParsing
 "    Nope"
 ];
         var result = CodeReader.AsSnippet(input);
-        var reader = LinesReader.FromText(result);
+        var reader = LinesReader.FromStringList([.. result]);
         Assert.Equal("// just some text { a { b } }", reader.NextLine());
         //Assert.Equal("", reader.NextLine()); // <= This should not be here
         Assert.True(reader.EndOfContent());
@@ -39,7 +39,7 @@ public class CodeSnippetParsing
 "    Nope"
 ];
         var result = CodeReader.AsSnippet(input);
-        var reader = LinesReader.FromText(result);
+        var reader = LinesReader.FromStringList([.. result]);
         Assert.Equal("// just some text { a { b } }", reader.NextLine());
         Assert.Equal("var x = 0;", reader.NextLine());
         Assert.True(reader.EndOfContent());
@@ -52,8 +52,8 @@ public class CodeSnippetParsing
 [
 "    [Fact] private void Foo() { /* just some text */ } Nope"
 ];
-        var result = CodeReader.AsSnippet(input).PulseToLog("debug.log");
-        var reader = LinesReader.FromText(result);
+        var result = CodeReader.AsSnippet(input);
+        var reader = LinesReader.FromStringList([.. result]);
         Assert.Equal("/* just some text */ ", reader.NextLine());
         Assert.True(reader.EndOfContent());
     }
@@ -66,7 +66,7 @@ public class CodeSnippetParsing
 "    [Fact] private void Foo() { /* just some text } */ } Nope"
 ];
         var result = CodeReader.AsSnippet(input);
-        var reader = LinesReader.FromText(result);
+        var reader = LinesReader.FromStringList([.. result]);
         Assert.Equal("/* just some text } */ ", reader.NextLine());
         Assert.True(reader.EndOfContent());
     }
@@ -83,7 +83,7 @@ public class CodeSnippetParsing
 "    Nope"
 ];
         var result = CodeReader.AsSnippet(input);
-        var reader = LinesReader.FromText(result);
+        var reader = LinesReader.FromStringList([.. result]);
         Assert.Equal("\"foo\";", reader.NextLine());
         Assert.True(reader.EndOfContent());
     }
@@ -102,7 +102,7 @@ public class CodeSnippetParsing
 "    Nope"
 ];
         var result = CodeReader.AsSnippet(input);
-        var reader = LinesReader.FromText(result);
+        var reader = LinesReader.FromStringList([.. result]);
         Assert.Equal("true", reader.NextLine());
         Assert.Equal("    ? 1", reader.NextLine());
         Assert.Equal("    : 0;", reader.NextLine());
@@ -117,7 +117,7 @@ public class CodeSnippetParsing
 "     [Fact] public static string Foo() =>  \"foo\"; Nope"
 ];
         var result = CodeReader.AsSnippet(input);
-        var reader = LinesReader.FromText(result);
+        var reader = LinesReader.FromStringList([.. result]);
         Assert.Equal("\"foo\";", reader.NextLine());
         Assert.True(reader.EndOfContent());
     }

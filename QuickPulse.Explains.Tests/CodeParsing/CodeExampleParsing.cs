@@ -1,6 +1,5 @@
-using QuickPulse.Explains.Tests.CodeParsing.Implementation;
+using QuickPulse.Explains.Monastery.CodeLocator;
 using QuickPulse.Explains.Text;
-using QuickPulse.Show;
 
 namespace QuickPulse.Explains.Tests.CodeParsing;
 
@@ -20,7 +19,7 @@ public class CodeExampleParsing
 "    Nope"
 ];
         var result = CodeReader.AsExample(input);
-        var reader = LinesReader.FromText(result);
+        var reader = LinesReader.FromStringList([.. result]);
         Assert.Equal("private void Foo()", reader.NextLine());
         Assert.Equal("{", reader.NextLine());
         Assert.Equal("    // just some text { a { b } }", reader.NextLine());
@@ -36,7 +35,7 @@ public class CodeExampleParsing
 "    [A] [B] private void Foo() { /* just some text */ } Nope"
 ];
         var result = CodeReader.AsExample(input);
-        var reader = LinesReader.FromText(result);
+        var reader = LinesReader.FromStringList([.. result]);
         Assert.Equal("private void Foo() { /* just some text */ }", reader.NextLine());
         Assert.True(reader.EndOfContent());
     }
@@ -49,7 +48,7 @@ public class CodeExampleParsing
 "    [Fact] private void Foo() { /* just some text } */ } Nope"
 ];
         var result = CodeReader.AsExample(input);
-        var reader = LinesReader.FromText(result);
+        var reader = LinesReader.FromStringList([.. result]);
         Assert.Equal("private void Foo() { /* just some text } */ }", reader.NextLine());
         Assert.True(reader.EndOfContent());
     }
@@ -67,7 +66,7 @@ public class CodeExampleParsing
 "    Nope"
 ];
         var result = CodeReader.AsExample(input);
-        var reader = LinesReader.FromText(result);
+        var reader = LinesReader.FromStringList([.. result]);
         Assert.Equal("public static string Foo() ", reader.NextLine());
         Assert.Equal("    => ", reader.NextLine());
         Assert.Equal("        \"foo\";", reader.NextLine());
@@ -82,7 +81,7 @@ public class CodeExampleParsing
 "     [Fact] public static string Foo() =>  \"foo\"; Nope"
 ];
         var result = CodeReader.AsExample(input);
-        var reader = LinesReader.FromText(result);
+        var reader = LinesReader.FromStringList([.. result]);
         Assert.Equal("public static string Foo() =>  \"foo\";", reader.NextLine());
         Assert.True(reader.EndOfContent());
     }

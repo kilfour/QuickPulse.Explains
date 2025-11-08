@@ -83,10 +83,14 @@ public static class TheArchivist
                 .Content();
         var lines = text.Split(Environment.NewLine).Where(a => !string.IsNullOrWhiteSpace(a));
         var length = lines.Count() > 1 ? lines.Skip(1).Select(a => a.TakeWhile(a => a == ' ' || a == '\t').Count()).Min() : 0;
-        var newLines = new string[] { lines.First() }.Concat(lines.Skip(1)
+        var newLiness = new string[] { lines.First() }.Concat(lines.Skip(1)
             .Select(a => a.Substring(length)))
             .Select(a => ApplyReplacements(a, docExample.Replacements))
             .Where(a => !string.IsNullOrWhiteSpace(a));
+        var newLines =
+            CodeReader.AsExample(GetCodeLocator().ReadAfter(docExample.Attribute.File, docExample.Attribute.Line))
+                .Select(a => ApplyReplacements(a, docExample.Replacements))
+                .Where(a => !string.IsNullOrWhiteSpace(a));
         var result = string.Join(Environment.NewLine, ApplyFormatters(newLines, docExample.Formatters));
         return new Example(docExample.Name, result);
     }

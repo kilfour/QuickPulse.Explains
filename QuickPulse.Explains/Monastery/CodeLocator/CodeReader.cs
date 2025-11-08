@@ -1,6 +1,6 @@
 using QuickPulse.Arteries;
 
-namespace QuickPulse.Explains.Tests.CodeParsing.Implementation;
+namespace QuickPulse.Explains.Monastery.CodeLocator;
 
 public static class CodeReader
 {
@@ -191,21 +191,20 @@ public static class CodeReader
         from indent in Pulse.Prime(() => new Indent())
         select Flow.Continue;
 
-    private static string GetResult(Flow<IEnumerable<string>> flow, string[] input)
-        => string.Join(Environment.NewLine,
-            Signal.From(flow)
-                .SetArtery(Collect.ValuesOf<string>())
-                .Pulse(input)
-                .FlatLine(Flush)
-                .GetArtery<Collector<string>>()
-                .Values);
+    private static IEnumerable<string> GetResult(Flow<IEnumerable<string>> flow, IEnumerable<string> input)
+        => Signal.From(flow)
+            .SetArtery(Collect.ValuesOf<string>())
+            .Pulse(input)
+            .FlatLine(Flush)
+            .GetArtery<Collector<string>>()
+            .Values;
 
     private static readonly Flow<IEnumerable<string>> TheCode =
         Pulse.Start<IEnumerable<string>>(a => PrimeState.Then(Pulse.ToFlow(Line, a)));
 
-    public static string AsSnippet(string[] input) =>
+    public static IEnumerable<string> AsSnippet(IEnumerable<string> input) =>
         GetResult(Pulse.Prime(() => false).Then(TheCode), input);
 
-    public static string AsExample(string[] input) =>
+    public static IEnumerable<string> AsExample(IEnumerable<string> input) =>
         GetResult(Pulse.Prime(() => true).Then(TheCode), input);
 }

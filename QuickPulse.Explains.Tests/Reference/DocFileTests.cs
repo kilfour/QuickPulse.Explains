@@ -1,4 +1,3 @@
-using QuickPulse.Arteries;
 using QuickPulse.Explains.Monastery;
 using QuickPulse.Explains.Tests._Tools;
 using QuickPulse.Explains.Text;
