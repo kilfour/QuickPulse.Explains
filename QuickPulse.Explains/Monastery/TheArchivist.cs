@@ -4,6 +4,7 @@ using QuickPulse.Explains.Monastery.CodeLocator;
 using QuickPulse.Explains.Monastery.Fragments;
 using QuickPulse.Explains.Formatters;
 using QuickPulse.Explains.Monastery.Writings;
+using QuickPulse.Arteries;
 
 
 namespace QuickPulse.Explains.Monastery;
@@ -41,7 +42,7 @@ public static class TheArchivist
             CodeReader.AsSnippet(GetCodeLocator().ReadAfter(docExample.Attribute.File, docExample.Attribute.Line))
                 .Select(a => ApplyReplacements(a, docExample.Replacements))
                 .Where(a => !string.IsNullOrWhiteSpace(a));
-        var result = string.Join("", ApplyFormatters(newLines, docExample.Formatters));
+        var result = string.Join(Environment.NewLine, ApplyFormatters(newLines, docExample.Formatters));
         return new Example(docExample.Name, result);
     }
 
@@ -52,7 +53,7 @@ public static class TheArchivist
             CodeReader.AsExample(GetCodeLocator().ReadAfter(docExample.Attribute.File, docExample.Attribute.Line))
                 .Select(a => ApplyReplacements(a, docExample.Replacements))
                 .Where(a => !string.IsNullOrWhiteSpace(a));
-        var result = string.Join("", ApplyFormatters(newLines, docExample.Formatters));
+        var result = string.Join(Environment.NewLine, ApplyFormatters(newLines, docExample.Formatters));
         return new Example(docExample.Name, result);
     }
 

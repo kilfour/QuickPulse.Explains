@@ -36,6 +36,12 @@ public class CodeSnippetParsing
 "        // just some text { a { b } }",
 "        var x = 0;",
 "    }",
+"    [Fact]",
+"    private void Bar()",
+"    {",
+"        // SHOULD NOT SHOW UP",
+"        var x = 0;",
+"    }",
 "    Nope"
 ];
         var result = CodeReader.AsSnippet(input);

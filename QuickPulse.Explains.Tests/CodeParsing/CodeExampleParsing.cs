@@ -1,5 +1,6 @@
 using QuickPulse.Explains.Monastery.CodeLocator;
 using QuickPulse.Explains.Text;
+using QuickPulse.Show;
 
 namespace QuickPulse.Explains.Tests.CodeParsing;
 
@@ -32,7 +33,8 @@ public class CodeExampleParsing
     {
         string[] input =
 [
-"    [A] [B] private void Foo() { /* just some text */ } Nope"
+"    [A] [B] private void Foo() { /* just some text */ } Nope",
+"    [A] [B] private void Bar() { /* just some text */ } Nope"
 ];
         var result = CodeReader.AsExample(input);
         var reader = LinesReader.FromStringList([.. result]);

@@ -191,7 +191,7 @@ public static class CodeReader
         from indent in Pulse.Prime(() => new Indent())
         select Flow.Continue;
 
-    private static IEnumerable<string> GetResult(Flow<IEnumerable<string>> flow, IEnumerable<string> input)
+    private static List<string> GetResult(Flow<string> flow, IEnumerable<string> input)
         => Signal.From(flow)
             .SetArtery(Collect.ValuesOf<string>())
             .Pulse(input)
@@ -199,8 +199,8 @@ public static class CodeReader
             .GetArtery<Collector<string>>()
             .Values;
 
-    private static readonly Flow<IEnumerable<string>> TheCode =
-        Pulse.Start<IEnumerable<string>>(a => PrimeState.Then(Pulse.ToFlow(Line, a)));
+    private static readonly Flow<string> TheCode =
+        Pulse.Start<string>(a => PrimeState.Then(Pulse.ToFlow(Line, a)));
 
     public static IEnumerable<string> AsSnippet(IEnumerable<string> input) =>
         GetResult(Pulse.Prime(() => false).Then(TheCode), input);

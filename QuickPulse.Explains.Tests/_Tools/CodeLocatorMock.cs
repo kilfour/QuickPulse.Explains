@@ -13,5 +13,5 @@ public class CodeLocatorMock : ICodeLocator
     }
 
     public IEnumerable<string> ReadAfter(string file, int line) =>
-        _data.TryGetValue((file, line), out var lines) ? lines.Select(x => x + Environment.NewLine) : Array.Empty<string>();
+        _data.TryGetValue((file, line), out var lines) ? lines : [];
 }
