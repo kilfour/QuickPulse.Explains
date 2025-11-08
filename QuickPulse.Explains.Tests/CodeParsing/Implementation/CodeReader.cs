@@ -4,6 +4,12 @@ namespace QuickPulse.Explains.Tests.CodeParsing.Implementation;
 
 public static class CodeReader
 {
+    private record Emitted(string Tracked = "")
+    {
+        public Emitted Track(char ch) => new(Tracked + ch);
+        public static Emitted Reset() => new();
+    };
+
     public record Attributes
     {
         private int level = 0;
@@ -66,10 +72,10 @@ public static class CodeReader
         private bool Decided() { currentLevel = level; decided = true; return true; }
     }
 
-    private static readonly Flow<Flow> NewLine = Pulse.Trace(Environment.NewLine);
-
     private static readonly Flow<char> Emit =
-        Pulse.Start<char>(ch => Pulse.TraceIf<Indent>(a => a.Emit(ch), () => ch));
+        Pulse.Start<char>(
+            ch => Pulse.When<Indent>(a => a.Emit(ch),
+            () => Pulse.Manipulate<Emitted>(a => a.Track(ch)).Dissipate()));
 
     private static readonly Flow<char> BlockBodiedMethodBodyChar =
         from ch in Pulse.Start<char>()
@@ -86,10 +92,6 @@ public static class CodeReader
         from asExample in Pulse.Draw<bool>()
         from indent in Pulse.Manipulate<Indent>(a => a.Reset())
         from sub in Pulse.ToFlow(BlockBodiedMethodBodyChar, str)
-        from newline in Pulse.When<BlockBody>(
-            body => !asExample && body.IsNotFirstLine() && !body.Done, NewLine)
-        from newlineExample in Pulse.When<BlockBody>(
-            body => asExample && !body.Done, NewLine)
         select str;
 
     private static readonly Flow<char> ExpressionBodiedMethodBodyChar =
@@ -102,8 +104,6 @@ public static class CodeReader
     private static readonly Flow<string> ExpressionBodiedMethodBody =
         from str in Pulse.Start<string>()
         from reset in Pulse.Manipulate<Indent>(a => a.Reset())
-        from newline in Pulse.When<ExpressionBody>(
-            body => !string.IsNullOrWhiteSpace(str) && body.IsNotFirstLine(), NewLine)
         from sub in Pulse.ToFlow(ExpressionBodiedMethodBodyChar, str)
         select str;
 
@@ -144,7 +144,7 @@ public static class CodeReader
         from cont in Pulse.When<BodyType>(
             a => a != BodyType.Unknown, () => Pulse.ToFlow(Line!, str[scanner.Consumed..]))
         from trace in Pulse.When<BodyType>(
-            a => a == BodyType.Unknown, () => Pulse.ToFlow(Emit, str).Then(NewLine))
+            a => a == BodyType.Unknown, () => Pulse.ToFlow(Emit, str))
         select str;
 
     private static readonly Flow<char> SkipAttributesChar =
@@ -163,11 +163,16 @@ public static class CodeReader
         from remain in Pulse.When<Attributes>(a => a.HasRemainder(), () => Pulse.ToFlow(Line!, attrs.Remainder))
         select str;
 
+    private static readonly Flow<Flow> Flush =
+        Pulse.TraceIf<Emitted>(a => !string.IsNullOrWhiteSpace(a.Tracked), a => a.Tracked);
+
     private static readonly Flow<string> Line =
         from str in Pulse.Start<string>()
         from bodyType in Pulse.Draw<BodyType>()
         from asExample in Pulse.Draw<bool>()
         from attrs in Pulse.Draw<Attributes>()
+        from output in Flush
+        from reset in Pulse.Manipulate<Emitted>(_ => Emitted.Reset())
         from _ in Pulse.FirstOf(
             (() => asExample && !attrs.Done, () => Pulse.ToFlow(SkipAttributes, str)),
             (() => bodyType == BodyType.Unknown && !asExample, () => Pulse.ToFlow(DetermineBodyType, str)),
@@ -176,7 +181,8 @@ public static class CodeReader
             (() => bodyType == BodyType.Expression, () => Pulse.ToFlow(ExpressionBodiedMethodBody, str)))
         select str;
 
-    private static readonly Flow<Flow> Prime =
+    private static readonly Flow<Flow> PrimeState =
+        from emmitted in Pulse.Prime(() => new Emitted())
         from scanner in Pulse.Prime(() => new Scanner())
         from attrs in Pulse.Prime(() => new Attributes())
         from bodyType in Pulse.Prime(() => BodyType.Unknown)
@@ -186,16 +192,20 @@ public static class CodeReader
         select Flow.Continue;
 
     private static string GetResult(Flow<IEnumerable<string>> flow, string[] input)
-        => Signal.From(flow)
-                .SetArtery(Arteries.Text.Capture())
+        => string.Join(Environment.NewLine,
+            Signal.From(flow)
+                .SetArtery(Collect.ValuesOf<string>())
                 .Pulse(input)
-                .GetArtery<StringSink>()
-                .Content();
+                .FlatLine(Flush)
+                .GetArtery<Collector<string>>()
+                .Values);
 
-    private static readonly Flow<IEnumerable<string>> Snippet =
-        Pulse.Start<IEnumerable<string>>(a => Prime.Then(Pulse.ToFlow(Line, a)));
+    private static readonly Flow<IEnumerable<string>> TheCode =
+        Pulse.Start<IEnumerable<string>>(a => PrimeState.Then(Pulse.ToFlow(Line, a)));
 
-    public static string AsSnippet(string[] input) => GetResult(Pulse.Prime<bool>(() => false).Then(Snippet), input);
+    public static string AsSnippet(string[] input) =>
+        GetResult(Pulse.Prime(() => false).Then(TheCode), input);
 
-    public static string AsExample(string[] input) => GetResult(Pulse.Prime<bool>(() => true).Then(Snippet), input);
+    public static string AsExample(string[] input) =>
+        GetResult(Pulse.Prime(() => true).Then(TheCode), input);
 }

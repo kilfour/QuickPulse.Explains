@@ -11,7 +11,8 @@ public class CodeExampleParsing
     {
         string[] input =
 [
-"    [Fact]",
+"    [X(Y = new[] { 1, 2 })]",
+"    [Generic(typeof(Dictionary<string, List<int>>))]",
 "    private void Foo()",
 "    {",
 "        // just some text { a { b } }",
@@ -32,7 +33,7 @@ public class CodeExampleParsing
     {
         string[] input =
 [
-"    [Fact] private void Foo() { /* just some text */ } Nope"
+"    [A] [B] private void Foo() { /* just some text */ } Nope"
 ];
         var result = CodeReader.AsExample(input);
         var reader = LinesReader.FromText(result);
@@ -58,7 +59,8 @@ public class CodeExampleParsing
     {
         string[] input =
 [
-"    [Fact]",
+"    [A]",
+"    [B]",
 "    public static string Foo() ",
 "        => ",
 "            \"foo\";",
