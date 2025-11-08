@@ -1,10 +1,10 @@
 using QuickPulse;
-using QuickPulse.Arteries;
 using QuickPulse.Explains.Abstractions;
 using QuickPulse.Explains.Monastery.CodeLocator;
 using QuickPulse.Explains.Monastery.Fragments;
 using QuickPulse.Explains.Formatters;
 using QuickPulse.Explains.Monastery.Writings;
+
 
 namespace QuickPulse.Explains.Monastery;
 
@@ -37,61 +37,22 @@ public static class TheArchivist
 
     private static Example ExampleFromDocSnippet((string Name, CodeSnippetAttribute Attribute, List<CodeReplaceAttribute> Replacements, List<CodeFormatAttribute> Formatters) docExample)
     {
-        var flow =
-            from c in Pulse.Start<char>()
-            from _ in Pulse.Prime(() => -1)
-            from __ in Pulse.ManipulateIf<int>(c == '}', a => --a)
-            from ___ in Pulse.TraceIf<int>(a => a >= 0, () => c)
-            from ____ in Pulse.ManipulateIf<int>(c == '{', a => ++a)
-            from s in Pulse.StopFlowingIf<int>(a => c == '}' && a < 0)
-            select c;
-        var text =
-            Signal.From<string>(a => Pulse.ToFlow(flow, a))
-                .SetArtery(Arteries.Text.Capture())
-                .Pulse(GetCodeLocator().ReadAfter(docExample.Attribute.File, docExample.Attribute.Line))
-                .GetArtery<StringSink>()
-                .Content();
-        var lines = text.Split(Environment.NewLine).Where(a => !string.IsNullOrWhiteSpace(a));
-        var length = lines.Select(a => a.TakeWhile(a => a == ' ' || a == '\t').Count()).Min();
-        var newLines = lines
-            .Select(a => a.Substring(length))
-            .Select(a => ApplyReplacements(a, docExample.Replacements))
-            .Where(a => !string.IsNullOrWhiteSpace(a));
-        var result = string.Join(Environment.NewLine, ApplyFormatters(newLines, docExample.Formatters));
+        var newLines =
+            CodeReader.AsSnippet(GetCodeLocator().ReadAfter(docExample.Attribute.File, docExample.Attribute.Line))
+                .Select(a => ApplyReplacements(a, docExample.Replacements))
+                .Where(a => !string.IsNullOrWhiteSpace(a));
+        var result = string.Join("", ApplyFormatters(newLines, docExample.Formatters));
         return new Example(docExample.Name, result);
     }
 
     public record FlowContext(int Brackets, int Braces, bool Printing);
     private static Example ExampleFromCodeExample((string Name, CodeExampleAttribute Attribute, List<CodeReplaceAttribute> Replacements, List<CodeFormatAttribute> Formatters) docExample)
     {
-        var flow =
-            from c in Pulse.Start<char>()
-            from _ in Pulse.Prime(() => new FlowContext(-1, -1, false))
-            from a___ in Pulse.ManipulateIf<FlowContext>(c == '[', a => a with { Brackets = a.Brackets + 1 })
-            from a__ in Pulse.ManipulateIf<FlowContext>(a => !char.IsWhiteSpace(c) && a.Brackets < 0, a => a with { Printing = true })
-            from a_ in Pulse.ManipulateIf<FlowContext>(c == ']', a => a with { Brackets = a.Brackets - 1 })
-            from __ in Pulse.ManipulateIf<FlowContext>(c == '}', a => a with { Braces = a.Braces - 1 })
-            from ___ in Pulse.TraceIf<FlowContext>(a => a.Printing, () => c)
-            from ____ in Pulse.ManipulateIf<FlowContext>(c == '{', a => a with { Braces = a.Braces + 1 })
-            from s in Pulse.StopFlowingIf<FlowContext>(a => c == '}' && a.Braces < 0)
-            select c;
-        var text =
-            Signal.From<string>(a => Pulse.ToFlow(flow, a))
-                .SetArtery(Arteries.Text.Capture())
-                .Pulse(GetCodeLocator().ReadAfter(docExample.Attribute.File, docExample.Attribute.Line))
-                .GetArtery<StringSink>()
-                .Content();
-        var lines = text.Split(Environment.NewLine).Where(a => !string.IsNullOrWhiteSpace(a));
-        var length = lines.Count() > 1 ? lines.Skip(1).Select(a => a.TakeWhile(a => a == ' ' || a == '\t').Count()).Min() : 0;
-        var newLiness = new string[] { lines.First() }.Concat(lines.Skip(1)
-            .Select(a => a.Substring(length)))
-            .Select(a => ApplyReplacements(a, docExample.Replacements))
-            .Where(a => !string.IsNullOrWhiteSpace(a));
         var newLines =
             CodeReader.AsExample(GetCodeLocator().ReadAfter(docExample.Attribute.File, docExample.Attribute.Line))
                 .Select(a => ApplyReplacements(a, docExample.Replacements))
                 .Where(a => !string.IsNullOrWhiteSpace(a));
-        var result = string.Join(Environment.NewLine, ApplyFormatters(newLines, docExample.Formatters));
+        var result = string.Join("", ApplyFormatters(newLines, docExample.Formatters));
         return new Example(docExample.Name, result);
     }
 
