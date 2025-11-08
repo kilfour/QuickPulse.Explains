@@ -1,4 +1,4 @@
-using QuickPulse.Explains.Monastery.CodeLocator;
+using QuickPulse.Explains.Monastery.Reading;
 using QuickPulse.Explains.Text;
 using QuickPulse.Show;
 

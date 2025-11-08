@@ -1,77 +1,10 @@
 using QuickPulse.Arteries;
+using QuickPulse.Explains.Monastery.Reading.State;
 
-namespace QuickPulse.Explains.Monastery.CodeLocator;
+namespace QuickPulse.Explains.Monastery.Reading;
 
 public static class CodeReader
 {
-    private record Emitted(string Tracked = "")
-    {
-        public Emitted Track(char ch) => new(Tracked + ch);
-        public static Emitted Reset() => new();
-    };
-
-    public record Attributes
-    {
-        private int level = 0;
-        public Attributes Enter() => this with { level = level + 1 };
-        public Attributes Exit() { return this with { level = level - 1 }; }
-        public bool InAttribute => level > 0;
-        public string Remainder { get; private set; } = string.Empty;
-        public Attributes Remains(char ch) { Remainder += ch; return this; }
-        public bool Done { get; set; }
-        public bool HasRemainder() => Done && !string.IsNullOrWhiteSpace(Remainder);
-        public Attributes Reset() { Remainder = string.Empty; return this; }
-    }
-
-    private record Scanner(char LastChar = ' ', int Consumed = 0)
-    {
-        public Scanner Consume(char ch) => new(ch, Consumed + 1);
-        public static Scanner Reset() => new();
-    };
-
-    private enum BodyType { Unknown, Block, Expression }
-
-    public record BlockBody
-    {
-        private int level = 0;
-        public BlockBody Enter() => this with { level = level + 1 };
-        public BlockBody Exit() { if (level == 1) Done = true; return this with { level = level - 1 }; }
-        public bool InBody => level > 0;
-        public bool Done { get; private set; } = false;
-        private bool isNotFirstLine = false;
-        public bool IsNotFirstLine()
-        {
-            var result = isNotFirstLine;
-            isNotFirstLine = true;
-            return result;
-        }
-    }
-
-    private record ExpressionBody(bool InBody)
-    {
-        private bool isNotFirstLine = false;
-        public bool IsNotFirstLine()
-        {
-            var result = isNotFirstLine;
-            isNotFirstLine = true;
-            return result;
-        }
-    };
-
-    private record Indent
-    {
-        public bool Emit(char ch) => decided ? IncrementAndCheck() : DecideOnIndentLevel(ch);
-        public Indent Reset() { currentLevel = 0; return this; }
-        public bool HasDecided => decided;
-        private int level = 0;
-        private int currentLevel = 0;
-        private bool decided = false;
-        private bool IncrementAndCheck() { currentLevel++; return currentLevel > level; }
-        private bool DecideOnIndentLevel(char ch) => char.IsWhiteSpace(ch) ? StillThinking() : Decided();
-        private bool StillThinking() { level++; return false; }
-        private bool Decided() { currentLevel = level; decided = true; return true; }
-    }
-
     private static readonly Flow<char> Emit =
         Pulse.Start<char>(
             ch => Pulse.When<Indent>(a => a.Emit(ch),
