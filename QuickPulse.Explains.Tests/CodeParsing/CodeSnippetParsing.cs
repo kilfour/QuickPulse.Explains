@@ -21,7 +21,7 @@ public class CodeSnippetParsing
         var result = CodeReader.AsSnippet(input);
         var reader = LinesReader.FromText(result);
         Assert.Equal("// just some text { a { b } }", reader.NextLine());
-        Assert.Equal("", reader.NextLine());
+        Assert.Equal("", reader.NextLine()); // <= This should not be here
         Assert.True(reader.EndOfContent());
     }
 
@@ -42,7 +42,7 @@ public class CodeSnippetParsing
         var reader = LinesReader.FromText(result);
         Assert.Equal("// just some text { a { b } }", reader.NextLine());
         Assert.Equal("var x = 0;", reader.NextLine());
-        Assert.Equal("", reader.NextLine());
+        Assert.Equal("", reader.NextLine()); // <= This should not be here
         Assert.True(reader.EndOfContent());
     }
 
