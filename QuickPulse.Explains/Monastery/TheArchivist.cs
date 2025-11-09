@@ -4,7 +4,6 @@ using QuickPulse.Explains.Monastery.CodeLocator;
 using QuickPulse.Explains.Monastery.Fragments;
 using QuickPulse.Explains.Formatters;
 using QuickPulse.Explains.Monastery.Writings;
-using QuickPulse.Arteries;
 using QuickPulse.Explains.Monastery.Reading;
 
 
@@ -47,7 +46,6 @@ public static class TheArchivist
         return new Example(docExample.Name, result);
     }
 
-    public record FlowContext(int Brackets, int Braces, bool Printing);
     private static Example ExampleFromCodeExample((string Name, CodeExampleAttribute Attribute, List<CodeReplaceAttribute> Replacements, List<CodeFormatAttribute> Formatters) docExample)
     {
         var newLines =
@@ -88,10 +86,10 @@ public static class TheArchivist
         var fragments = TheReflectionist.GetDocFragmentAttributes(type).ToList();
         var nonLinks = fragments.Where(a => a is not DocLinkAttribute);
         var links = fragments.Where(a => a is DocLinkAttribute);
-        return new(GetHeaderText(type), [.. nonLinks.Concat(links).Select(a => ToFragment(a, root))]);
+        return new(GetHeaderText(type), [.. nonLinks.Concat(links).Select(a => ToFragment(a, root, type))]);
     }
 
-    public static Fragment ToFragment(DocFragmentAttribute attr, Type root) => attr switch
+    public static Fragment ToFragment(DocFragmentAttribute attr, Type root, Type type) => attr switch
     {
         DocHeaderAttribute a => new HeaderFragment(a.Header, a.Level),
         DocContentAttribute a => new ContentFragment(a.Content),
@@ -100,8 +98,14 @@ public static class TheArchivist
         DocExampleAttribute a => new CodeExampleFragment(a.Name, a.Language),
         DocCodeFileAttribute a => new CodeFragment(TheCartographer.GetFileContents(a.Path, a.Filename, a.SkipLines), a.Language),
         DocLinkAttribute a => new LinkFragment(a.Name, TheCartographer.ChartPath(root, a.Target) + (string.IsNullOrWhiteSpace(a.Section) ? "" : $"#{a.Section}")),
+        DocTableAttribute a => new TableFragment(a.Columns, GetColumns(type, a)),
         _ => throw new NotSupportedException(attr.GetType().Name)
     };
+
+    private static string[][] GetColumns(Type type, DocTableAttribute attribute)
+    {
+        return TheReflectionist.GetColumns(type, attribute);
+    }
 
     private static Inclusion InclusionFromType(Type root, Type type) =>
        new(type, ExplanationFromType(root, type));

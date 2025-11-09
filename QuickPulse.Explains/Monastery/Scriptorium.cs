@@ -64,18 +64,31 @@ public static class Scriptorium
          from e in Pulse.Trace("```")
          select fragment;
 
-    private static Flow<InclusionFragment> Include =>
+    private static readonly Flow<InclusionFragment> Include =
          from fragment in Pulse.Start<InclusionFragment>()
          from includes in Pulse.Draw<IReadOnlyCollection<Inclusion>>()
-         from _ in Pulse.ToFlow(Explanation, includes.Single(a => a.Type == fragment.Included).Explanation)
+         from _ in Pulse.ToFlow(Explanation!, includes.Single(a => a.Type == fragment.Included).Explanation)
          select fragment;
 
-    private static Flow<LinkFragment> Link =>
+    private static readonly Flow<LinkFragment> Link =
          from fragment in Pulse.Start<LinkFragment>()
          from includes in Pulse.Draw<IReadOnlyCollection<Inclusion>>()
          from _1 in Pulse.Trace("")
          from _2 in Pulse.Trace($"[{fragment.Name}]: {fragment.Location}")
          select fragment;
+
+
+    private static readonly Flow<IEnumerable<string>> TableRow =
+        from row in Pulse.Start<IEnumerable<string>>()
+        from cells in Pulse.Trace($"| {string.Join("| ", row)} |")
+        select row;
+
+    private static readonly Flow<TableFragment> Table =
+        from fragment in Pulse.Start<TableFragment>()
+        from headers in Pulse.ToFlow(TableRow, fragment.Headers)
+        from divider in Pulse.ToFlow(TableRow, fragment.Headers.Select(_ => "-").ToArray())
+        from body in Pulse.ToFlow(TableRow, fragment.Body)
+        select fragment;
 
     private static readonly Flow<Fragment> Fragment =
         from fragment in Pulse.Start<Fragment>()
@@ -87,6 +100,7 @@ public static class Scriptorium
             CodeExampleFragment a => Pulse.ToFlow(CodeExample, a),
             InclusionFragment a => Pulse.ToFlow(Include, a),
             LinkFragment a => Pulse.ToFlow(Link, a),
+            TableFragment a => Pulse.ToFlow(Table, a),
             _ => Pulse.NoOp()
         }
         select fragment;

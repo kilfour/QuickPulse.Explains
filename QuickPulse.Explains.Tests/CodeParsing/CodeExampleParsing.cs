@@ -1,6 +1,5 @@
 using QuickPulse.Explains.Monastery.Reading;
 using QuickPulse.Explains.Text;
-using QuickPulse.Show;
 
 namespace QuickPulse.Explains.Tests.CodeParsing;
 
@@ -141,6 +140,7 @@ public class CodeExampleParsing
         Assert.Equal("   select $\"{a}-{b}-{c}\";", reader.NextLine());
         Assert.True(reader.EndOfContent());
     }
+
     [Fact]
     public void Field_JustChecking_fails()
     {

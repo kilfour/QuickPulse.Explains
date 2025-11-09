@@ -51,6 +51,32 @@ public static class TheReflectionist
                 a.GetCustomAttributes<CodeReplaceAttribute>().ToList(),
                 a.GetCustomAttributes<CodeFormatAttribute>().ToList())));
 
+    public static string[][] GetColumns(Type type, DocTableAttribute attribute)
+    {
+        var types = type.Assembly.GetTypes().Where(a => a.Namespace == type.Namespace + "." + attribute.NamespaceName);
+        var result = new List<string[]>();
+        foreach (var rowType in types)
+        {
+
+            var columns = rowType.GetCustomAttributes<DocColumnAttribute>();
+            var list = new List<string>();
+            var first = true;
+            foreach (var col in attribute.Columns)
+            {
+                var content = columns.Single(a => a.ColumnName == col).Content;
+                if (first)
+                {
+                    first = false;
+                    var path = TheCartographer.ChartPath(type, rowType);
+                    content = $"[{content}]({path})";
+                }
+                list.Add(content);
+            }
+            result.Add([.. list]);
+        }
+        return [.. result];
+    }
+
     private readonly static BindingFlags Flags =
         BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
 }
