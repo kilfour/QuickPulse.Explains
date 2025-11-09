@@ -63,10 +63,13 @@ public static class TheReflectionist
             var first = true;
             foreach (var col in attribute.Columns)
             {
-                var content = columns.Single(a => a.ColumnName == col).Content;
+                var column = columns.Single(a => a.ColumnName == col);
+                var content = column == null ? " " : column.Content;
                 if (first)
                 {
                     first = false;
+                    if (string.IsNullOrWhiteSpace(content))
+                        content = GetDocFileHeader(rowType);
                     var path = TheCartographer.ChartPath(type, rowType);
                     content = $"[{content}]({path})";
                 }
