@@ -37,8 +37,6 @@ private class Bar
 }
 ```
 ````
-**Important:** The code extraction only works for methods with a *block body*,
-it currently fails miserably when confronted with *expression bodied* methods.
 
 All extracted code is formatted and syntax-highlighted automatically, preserving indentation and spacing.
 This ensures your documentation always reflects the current, runnable source without manual copy-paste.")]

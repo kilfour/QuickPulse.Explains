@@ -7,7 +7,7 @@ namespace QuickPulse.Explains;
 /// Used by documentation generators to embed the exact code from the
 /// original file and line location where this attribute is applied.
 /// </summary>
-[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false)]
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method | AttributeTargets.Field, AllowMultiple = false)]
 public class CodeExampleAttribute(
     [CallerFilePath] string file = "",
     [CallerLineNumber] int line = 0) : Attribute

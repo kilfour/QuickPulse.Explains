@@ -43,7 +43,7 @@ public static class TheReflectionist
                 a.GetCustomAttribute<CodeExampleAttribute>()!,
                 a.GetCustomAttributes<CodeReplaceAttribute>().ToList(),
                 a.GetCustomAttributes<CodeFormatAttribute>().ToList())).Concat(
-        types.SelectMany(a => a.GetMethods(Flags))
+        types.SelectMany(a => a.GetMethods(Flags).Cast<MemberInfo>().Concat(a.GetFields(Flags).Cast<MemberInfo>()))
             .Where(a => a.GetCustomAttributes<CodeExampleAttribute>().Any())
             .Select(a => (
                 $"{a.DeclaringType!.FullName!}.{a.Name}",

@@ -62,11 +62,16 @@ public static class CodeReader
     private static readonly Flow<char> GetSignatureChar =
         from ch in Pulse.Start<char>()
         from scanner in Pulse.Draw<Scanner>()
-        from isBlock in Pulse.ManipulateIf<BodyType>(ch == '{', _ => BodyType.Block)
+            // this happens somewhere else too ?
+        from firstOf in Pulse.FirstOf(
+            (() => ch == '{', () => Pulse.Manipulate<BodyType>(_ => BodyType.Block).Dissipate()),
+            (() => $"{scanner.LastChar}{ch}" == "=>",
+                () => Pulse.Manipulate<BodyType>(_ => BodyType.Expression).Dissipate()),
+            (() => ch == '=',//&& ch != '=' && ch != '>',
+                () => Pulse.Manipulate<BodyType>(_ => BodyType.Expression).Dissipate()))
         from consumed in Pulse.When<BodyType>(
             a => a == BodyType.Unknown,
             () => Pulse.Manipulate<Scanner>(a => a.Consume(ch)).Dissipate())
-        from isExpression in Pulse.ManipulateIf<BodyType>($"{scanner.LastChar}{ch}" == "=>", _ => BodyType.Expression)
         select ch;
 
     private static readonly Flow<string> GetSignature =
@@ -127,6 +132,7 @@ public static class CodeReader
     private static List<string> GetResult(Flow<string> flow, IEnumerable<string> input)
         => Signal.From(flow)
             .SetArtery(Collect.ValuesOf<string>())
+            //.Graft(new Diagnostic())
             .Pulse(input)
             .FlatLine(Flush)
             .GetArtery<Collector<string>>()
@@ -140,4 +146,6 @@ public static class CodeReader
 
     public static IEnumerable<string> AsExample(IEnumerable<string> input) =>
         GetResult(Pulse.Prime(() => true).Then(TheCode), input);
+
+    //public class Diagnostic : FileLogArtery;
 }
