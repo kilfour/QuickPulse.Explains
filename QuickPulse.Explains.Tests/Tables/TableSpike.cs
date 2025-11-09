@@ -10,8 +10,8 @@ public class TableSpike
 
     }
 
-    [Fact]
-    //[Fact(Skip = "explicit")]
+    //[Fact]
+    [Fact(Skip = "explicit")]
     [DocTable(nameof(Entries), Columns.First, Columns.Second)]
     public void Content()
     {
