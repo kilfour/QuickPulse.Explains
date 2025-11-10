@@ -109,7 +109,19 @@ public static class TheArchivist
             + (string.IsNullOrWhiteSpace(a.Section)
                 ? "" : $"#{a.Section}").ToLower();
     private static string GetLocalLinkLocation(Type type)
-        => "#" + GetHeaderText(type).Replace(' ', '-').ToLower();
+        => "#" + FormatLink(GetHeaderText(type));
+
+    private static string FormatLink(string input)
+        => input
+            .Replace(".", "")
+            .Replace("<", "")
+            .Replace(">", "")
+            .Replace("&lt;", "")
+            .Replace("&gt;", "")
+            .Replace("(", "")
+            .Replace(")", "")
+            .Replace(' ', '-')
+            .ToLower();
 
     // IEnumerables ?
     private static RowFragment[] GetColumns(Type type, DocTableAttribute attribute)
