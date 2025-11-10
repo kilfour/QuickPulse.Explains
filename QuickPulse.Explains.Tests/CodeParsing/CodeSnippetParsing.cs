@@ -127,4 +127,25 @@ public class CodeSnippetParsing
         Assert.Equal("\"foo\";", reader.NextLine());
         Assert.True(reader.EndOfContent());
     }
+
+    [Fact(Skip = "not implemented")]
+    public void Field_JustChecking()
+    {
+        string[] input =
+[
+"    public static readonly FuzzrOf<string> SSNFuzzr =",
+"       from a in Fuzzr.Int(100, 999)",
+"       from b in Fuzzr.Int(10, 99)",
+"       from c in Fuzzr.Int(1000, 9999)",
+"       select $\"{a}-{b}-{c}\";",
+"       Nope"
+];
+        var result = CodeReader.AsSnippet(input);
+        var reader = LinesReader.FromStringList([.. result]);
+        Assert.Equal("from a in Fuzzr.Int(100, 999)", reader.NextLine());
+        Assert.Equal("from b in Fuzzr.Int(10, 99)", reader.NextLine());
+        Assert.Equal("from c in Fuzzr.Int(1000, 9999)", reader.NextLine());
+        Assert.Equal("select $\"{a}-{b}-{c}\";", reader.NextLine());
+        Assert.True(reader.EndOfContent());
+    }
 }

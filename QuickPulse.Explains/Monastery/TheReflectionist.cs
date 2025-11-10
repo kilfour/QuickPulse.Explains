@@ -28,7 +28,7 @@ public static class TheReflectionist
         type.GetCustomAttribute<DocFileHeaderAttribute>(false)?.Header;
 
     public static IEnumerable<(string, CodeSnippetAttribute, List<CodeReplaceAttribute>, List<CodeFormatAttribute>)> GetDocSnippets(Type[] types) =>
-        types.SelectMany(a => a.GetMethods(Flags))
+        types.SelectMany(a => a.GetMethods(Flags).Cast<MemberInfo>().Concat(a.GetFields(Flags).Cast<MemberInfo>()))
             .Where(a => a.GetCustomAttributes<CodeSnippetAttribute>().Any())
             .Select(a => (
                 $"{a.DeclaringType!.FullName}.{a.Name}",

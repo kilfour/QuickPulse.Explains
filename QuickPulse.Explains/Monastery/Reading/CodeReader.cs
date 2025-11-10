@@ -47,7 +47,8 @@ public static class CodeReader
         from consumed in Pulse.When<BodyType>(
             a => a == BodyType.Unknown,
             () => Pulse.Manipulate<Scanner>(a => a.Consume(ch)).Dissipate())
-        from isExpression in Pulse.ManipulateIf<BodyType>($"{scanner.LastChar}{ch}" == "=>", _ => BodyType.Expression)
+            //from isExpression in Pulse.ManipulateIf<BodyType>($"{scanner.LastChar}{ch}" == "=>", _ => BodyType.Expression)
+        from isExpression in Pulse.ManipulateIf<BodyType>(scanner.LastChar == '=', _ => BodyType.Expression)
         select ch;
 
     private static readonly Flow<string> DetermineBodyType =

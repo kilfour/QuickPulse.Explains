@@ -142,7 +142,7 @@ public class CodeExampleParsing
     }
 
     [Fact]
-    public void Field_JustChecking_fails()
+    public void Field_JustChecking_again()
     {
         string[] input =
 [
@@ -150,7 +150,8 @@ public class CodeExampleParsing
 "       from a in Fuzzr.Int(100, 999)",
 "       from b in Fuzzr.Int(10, 99)",
 "       from c in Fuzzr.Int(1000, 9999)",
-"       select $\"{a}-{b}-{c}\";"
+"       select $\"{a}-{b}-{c}\";",
+"       Nope"
 ];
         var result = CodeReader.AsExample(input);
         var reader = LinesReader.FromStringList([.. result]);
