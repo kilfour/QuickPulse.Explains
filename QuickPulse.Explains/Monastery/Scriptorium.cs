@@ -1,4 +1,6 @@
+using QuickPulse.Bolts;
 using QuickPulse.Explains.Monastery.Fragments;
+using QuickPulse.Explains.Monastery.Fragments.Tables;
 using QuickPulse.Explains.Monastery.Writings;
 
 namespace QuickPulse.Explains.Monastery;
@@ -72,9 +74,13 @@ public static class Scriptorium
 
     private static readonly Flow<LinkFragment> Link =
          from fragment in Pulse.Start<LinkFragment>()
+         from includeLinks in Pulse.Draw<bool>()
          from includes in Pulse.Draw<IReadOnlyCollection<Inclusion>>()
-         from _1 in Pulse.Trace("")
-         from _2 in Pulse.Trace($"[{fragment.Name}]: {fragment.Location}")
+         from newLine in Pulse.Trace("")
+         let link = includeLinks
+            ? fragment.Location
+            : fragment.LocalLocation
+         from _2 in Pulse.Trace($"[{fragment.Name}]: {link}")
          select fragment;
 
 
@@ -83,11 +89,22 @@ public static class Scriptorium
         from cells in Pulse.Trace($"| {string.Join("| ", row)} |")
         select row;
 
+    private static readonly Flow<RowFragment> Row =
+        from fragment in Pulse.Start<RowFragment>()
+        from includeLinks in Pulse.Draw<bool>()
+        let link = includeLinks
+            ? fragment.FirstCell.Link
+            : fragment.FirstCell.LocalLink
+        let firstCell = $"[{fragment.FirstCell.Content}]({link})"
+        let cells = fragment.Cells.Select(a => a.Content).Prepend(firstCell)
+        from row in Pulse.ToFlow(TableRow, cells)
+        select fragment;
+
     private static readonly Flow<TableFragment> Table =
         from fragment in Pulse.Start<TableFragment>()
         from headers in Pulse.ToFlow(TableRow, fragment.Headers)
         from divider in Pulse.ToFlow(TableRow, fragment.Headers.Select(_ => "-").ToArray())
-        from body in Pulse.ToFlow(TableRow, fragment.Body)
+        from body in Pulse.ToFlow(Row, fragment.Body)
         select fragment;
 
     private static readonly Flow<Fragment> Fragment =
@@ -117,17 +134,21 @@ public static class Scriptorium
         from _ in Pulse.Scoped<int>(a => level, Pulse.ToFlow(Explanation, page.Explanation))
         select page;
 
-    public static readonly Flow<SinglePage> SinglePage =
-        from pageAndReference in Pulse.Start<SinglePage>()
-        from initialize in Pulse.ToFlow(LoadReference, pageAndReference)
-        from _ in Pulse.Scoped<int>(a => 1, Pulse.ToFlow(Explanation, pageAndReference.Page.Explanation))
-        select pageAndReference;
-
+    // this is the entrypoint for single page doc
     public static readonly Flow<Book> Book =
+        from excludeLinks in Pulse.Prime(() => false)
         from book in Pulse.Start<Book>()
         from initialize in Pulse.ToFlow(LoadReference, book)
         from _ in Pulse.ToFlow(BookPage, book.Pages)
         select book;
+
+    // this is the entry point for writing a doc folder
+    public static readonly Flow<SinglePage> SinglePage =
+        from includeLinks in Pulse.Prime(() => true)
+        from pageAndReference in Pulse.Start<SinglePage>()
+        from initialize in Pulse.ToFlow(LoadReference, pageAndReference)
+        from _ in Pulse.Scoped<int>(a => 1, Pulse.ToFlow(Explanation, pageAndReference.Page.Explanation))
+        select pageAndReference;
 
     public static readonly Flow<Chronicle> TableOfContent =
         from chronicle in Pulse.Start<Chronicle>()

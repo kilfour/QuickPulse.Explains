@@ -51,34 +51,11 @@ public static class TheReflectionist
                 a.GetCustomAttributes<CodeReplaceAttribute>().ToList(),
                 a.GetCustomAttributes<CodeFormatAttribute>().ToList())));
 
-    public static string[][] GetColumns(Type type, DocTableAttribute attribute)
-    {
-        var types = type.Assembly.GetTypes().Where(a => a.Namespace == type.Namespace + "." + attribute.NamespaceName);
-        var result = new List<string[]>();
-        foreach (var rowType in types)
-        {
-
-            var columns = rowType.GetCustomAttributes<DocColumnAttribute>();
-            var list = new List<string>();
-            var first = true;
-            foreach (var col in attribute.Columns)
-            {
-                var column = columns.Single(a => a.ColumnName == col);
-                var content = column == null ? " " : column.Content;
-                if (first)
-                {
-                    first = false;
-                    if (string.IsNullOrWhiteSpace(content))
-                        content = GetDocFileHeader(rowType);
-                    var path = TheCartographer.ChartPath(type, rowType);
-                    content = $"[{content}]({path})";
-                }
-                list.Add(content);
-            }
-            result.Add([.. list]);
-        }
-        return [.. result];
-    }
+    public static IEnumerable<(Type Type, IEnumerable<DocColumnAttribute> Columns)> GetColumns(Type type, DocTableAttribute attribute)
+        => type.Assembly.GetTypes()
+            .Where(a => a.Namespace == type.Namespace + "." + attribute.NamespaceName)
+            .Where(a => a.GetCustomAttributes<DocFileAttribute>(false).Any())
+            .Select(t => (t, t.GetCustomAttributes<DocColumnAttribute>()));
 
     private readonly static BindingFlags Flags =
         BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;

@@ -5,6 +5,8 @@ using QuickPulse.Explains.Monastery.Fragments;
 using QuickPulse.Explains.Formatters;
 using QuickPulse.Explains.Monastery.Writings;
 using QuickPulse.Explains.Monastery.Reading;
+using QuickPulse.Bolts;
+using QuickPulse.Explains.Monastery.Fragments.Tables;
 
 
 namespace QuickPulse.Explains.Monastery;
@@ -97,14 +99,46 @@ public static class TheArchivist
         DocIncludeAttribute a => new InclusionFragment(a.Included),
         DocExampleAttribute a => new CodeExampleFragment(a.Name, a.Language),
         DocCodeFileAttribute a => new CodeFragment(TheCartographer.GetFileContents(a.Path, a.Filename, a.SkipLines), a.Language),
-        DocLinkAttribute a => new LinkFragment(a.Name, TheCartographer.ChartPath(root, a.Target) + (string.IsNullOrWhiteSpace(a.Section) ? "" : $"#{a.Section}")),
+        DocLinkAttribute a => new LinkFragment(a.Name, GetLinkLocation(type, a), GetLocalLinkLocation(a.Target)),
         DocTableAttribute a => new TableFragment(a.Columns, GetColumns(type, a)),
         _ => throw new NotSupportedException(attr.GetType().Name)
     };
 
-    private static string[][] GetColumns(Type type, DocTableAttribute attribute)
+    private static string GetLinkLocation(Type root, DocLinkAttribute a)
+        => TheCartographer.ChartPath(root, a.Target)
+            + (string.IsNullOrWhiteSpace(a.Section)
+                ? "" : $"#{a.Section}").ToLower();
+    private static string GetLocalLinkLocation(Type type)
+        => "#" + GetHeaderText(type).Replace(' ', '-').ToLower();
+
+    // IEnumerables ?
+    private static RowFragment[] GetColumns(Type type, DocTableAttribute attribute)
     {
-        return TheReflectionist.GetColumns(type, attribute);
+        var typesWithColumns = TheReflectionist.GetColumns(type, attribute);
+        var result = new List<RowFragment>();
+        foreach (var (rowType, columns) in typesWithColumns)
+        {
+            FirstCellFragment firstCell = null!;
+            var cells = new List<CellFragment>();
+            var first = true;
+            foreach (var col in attribute.Columns)
+            {
+                var column = columns.SingleOrDefault(a => a.ColumnName == col);
+                var content = column == null ? " " : column.Content;
+                if (first)
+                {
+                    first = false;
+                    if (string.IsNullOrWhiteSpace(content))
+                        content = GetHeaderText(rowType);
+                    var path = TheCartographer.ChartPath(type, rowType);
+                    firstCell = new(content, path, GetLocalLinkLocation(rowType));
+                    continue;
+                }
+                cells.Add(new(content));
+            }
+            result.Add(new RowFragment(firstCell, [.. cells]));
+        }
+        return [.. result];
     }
 
     private static Inclusion InclusionFromType(Type root, Type type) =>
