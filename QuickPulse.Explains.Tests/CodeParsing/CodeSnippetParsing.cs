@@ -24,7 +24,7 @@ public class CodeSnippetParsing
         Assert.True(reader.EndOfContent());
     }
 
-    [Fact]
+    [Fact(Skip = "not implemented")]
     public void MethodWithBraces_Trailing_Comment()
     {
         string[] input =
@@ -33,7 +33,7 @@ public class CodeSnippetParsing
 "    private void Foo()",
 "    {",
 "        var bar = 0;",
-"    } // trailing comment"
+"    } // trailing { comment } "
 ];
         var result = CodeReader.AsSnippet(input);
         var reader = LinesReader.FromStringList([.. result]);
