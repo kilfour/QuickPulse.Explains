@@ -21,7 +21,23 @@ public class CodeSnippetParsing
         var result = CodeReader.AsSnippet(input);
         var reader = LinesReader.FromStringList([.. result]);
         Assert.Equal("// just some text { a { b } }", reader.NextLine());
-        //Assert.Equal("", reader.NextLine()); // <= This should not be here
+        Assert.True(reader.EndOfContent());
+    }
+
+    [Fact]
+    public void MethodWithBraces_Trailing_Comment()
+    {
+        string[] input =
+[
+"    [Fact]",
+"    private void Foo()",
+"    {",
+"        var bar = 0;",
+"    } // trailing comment"
+];
+        var result = CodeReader.AsSnippet(input);
+        var reader = LinesReader.FromStringList([.. result]);
+        Assert.Equal("var bar = 0;", reader.NextLine());
         Assert.True(reader.EndOfContent());
     }
 
