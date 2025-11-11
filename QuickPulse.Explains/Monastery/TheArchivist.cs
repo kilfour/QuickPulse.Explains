@@ -120,6 +120,8 @@ public static class TheArchivist
             .Replace("&gt;", "")
             .Replace("(", "")
             .Replace(")", "")
+            .Replace("[", "")
+            .Replace("]", "")
             .Replace(' ', '-')
             .ToLower();
 
