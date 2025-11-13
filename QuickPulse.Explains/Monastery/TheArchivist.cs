@@ -113,6 +113,7 @@ public static class TheArchivist
 
     private static string FormatLink(string input)
         => input
+            .Replace(",", "")
             .Replace(".", "")
             .Replace("<", "")
             .Replace(">", "")
