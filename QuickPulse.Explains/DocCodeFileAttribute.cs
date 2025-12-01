@@ -20,4 +20,3 @@ public class DocCodeFileAttribute(
     public int SkipLines { get; } = skipLines;
     public string Path { get; } = path;
 }
-

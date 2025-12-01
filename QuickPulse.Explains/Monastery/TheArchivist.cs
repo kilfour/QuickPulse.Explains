@@ -99,6 +99,7 @@ public static class TheArchivist
         DocIncludeAttribute a => new InclusionFragment(a.Included),
         DocExampleAttribute a => new CodeExampleFragment(a.Name, a.Language),
         DocCodeFileAttribute a => new CodeFragment(TheCartographer.GetFileContents(a.Path, a.Filename, a.SkipLines), a.Language),
+        DocRawFileAttribute a => new ContentFragment(TheCartographer.GetFileContents(a.Path, a.Filename, 0)),
         DocLinkAttribute a => new LinkFragment(a.Name, GetLinkLocation(type, a), GetLocalLinkLocation(a.Target)),
         DocTableAttribute a => new TableFragment(a.Columns, GetColumns(type, a)),
         _ => throw new NotSupportedException(attr.GetType().Name)
