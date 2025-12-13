@@ -1,5 +1,6 @@
 * DocCodeFile:
   * Unhandled exception. System.IO.FileNotFoundException: 
+* QuickPulse.Explains: CodeReplace with empty string => ploef
 
 - Xml Summaries
   - DocTableAttribute
