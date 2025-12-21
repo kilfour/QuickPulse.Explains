@@ -29,10 +29,10 @@
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
 
     <!-- SourceLink / determinism / validation -->
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <!-- <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
-    <EnablePackageValidation>true</EnablePackageValidation>
+    <EnablePackageValidation>true</EnablePackageValidation> -->
 
     <NeutralLanguage>en</NeutralLanguage>
   </PropertyGroup>
@@ -42,14 +42,14 @@
     <None Include="$(MSBuildThisFileDirectory)..\icon.png" Pack="true" PackagePath="\" />
   </ItemGroup>
 
-  <ItemGroup>
+  <!-- <ItemGroup>
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
-  </ItemGroup>
+  </ItemGroup> -->
 
 
   <ItemGroup>
-    <PackageReference Include="QuickPulse" Version="0.3.4" /> 
-    <!-- <ProjectReference Include="..\..\QuickPulse\QuickPulse\QuickPulse.csproj" /> -->
+    <!-- <PackageReference Include="QuickPulse" Version="0.3.4" />  -->
+    <ProjectReference Include="..\..\QuickPulse\QuickPulse\QuickPulse.csproj" />
   </ItemGroup>
 
 

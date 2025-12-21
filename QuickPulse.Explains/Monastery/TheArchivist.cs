@@ -5,7 +5,6 @@ using QuickPulse.Explains.Monastery.Fragments;
 using QuickPulse.Explains.Formatters;
 using QuickPulse.Explains.Monastery.Writings;
 using QuickPulse.Explains.Monastery.Reading;
-using QuickPulse.Bolts;
 using QuickPulse.Explains.Monastery.Fragments.Tables;
 
 
@@ -106,9 +105,10 @@ public static class TheArchivist
     };
 
     private static string GetLinkLocation(Type root, DocLinkAttribute a)
-        => TheCartographer.ChartPath(root, a.Target)
+        => TheCartographer.ChartLinkPath(root, a.Target)
             + (string.IsNullOrWhiteSpace(a.Section)
                 ? "" : $"#{a.Section}").ToLower();
+
     private static string GetLocalLinkLocation(Type type)
         => "#" + FormatLink(GetHeaderText(type));
 
@@ -146,7 +146,7 @@ public static class TheArchivist
                     first = false;
                     if (string.IsNullOrWhiteSpace(content))
                         content = GetHeaderText(rowType);
-                    var path = TheCartographer.ChartPath(type, rowType);
+                    var path = TheCartographer.ChartLinkPath(type, rowType);
                     firstCell = new(content, path, GetLocalLinkLocation(rowType));
                     continue;
                 }

@@ -1,5 +1,3 @@
-using QuickPulse.Explains.Abstractions;
-
 namespace QuickPulse.Explains;
 
 /// <summary>
