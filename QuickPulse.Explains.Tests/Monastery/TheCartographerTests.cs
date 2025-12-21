@@ -1,3 +1,5 @@
+using QuickCheckr.Tests.Docs.A_Guide;
+using QuickCheckr.Tests.Docs.A_Guide.A_CheckringThingsOut;
 using QuickCheckr.Tests.Docs.B_PuttingACaseOnTheBoard.C_Configuration.F_DeliberationPolicy;
 using QuickCheckr.Tests.Docs.H_OnShrinking.F_DeliberationShrinking;
 using QuickPulse.Explains.Abstractions;
@@ -82,5 +84,13 @@ public class TheCartographerTests
     {
         var result = TheCartographer.ChartLinkPath(typeof(DeliberationPolicy), typeof(DeliberationShrinking));
         Assert.Equal("../../../H_OnShrinking/F_DeliberationShrinking/DeliberationShrinking.md", result);
+    }
+
+
+    [Fact]
+    public void CheckingAgain()
+    {
+        var result = TheCartographer.ChartLinkPath(typeof(Guide), typeof(CheckringThingsOut));
+        Assert.Equal("A_CheckringThingsOut/CheckringThingsOut.md", result);
     }
 }

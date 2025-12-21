@@ -33,6 +33,11 @@ public static class TheCartographer
             stillSame = false;
             result.Add("..");
         }
+        if (stillSame && currentNamespace.Length > rootNamespace.Length)
+        {
+            differsAt = rootNamespace.Length;
+            stillSame = false;
+        }
         if (!stillSame)
         {
             for (int i = differsAt; i < currentNamespace.Length; i++)
