@@ -1,4 +1,9 @@
+using QuickCheckr.Tests.Docs.B_PuttingACaseOnTheBoard.C_Configuration.F_DeliberationPolicy;
+using QuickCheckr.Tests.Docs.H_OnShrinking.F_DeliberationShrinking;
+using QuickPulse.Explains.Abstractions;
 using QuickPulse.Explains.Monastery;
+using QuickPulse.Explains.Monastery.CodeLocator;
+using QuickPulse.Explains.Monastery.Writings;
 using QuickPulse.Explains.Tests.DocTests;
 using QuickPulse.Explains.Tests.Spike_Refs_Again;
 using QuickPulse.Explains.Tests.Spike_Refs_Again.Included;
@@ -59,9 +64,23 @@ public class TheCartographerTests
     }
 
     [Fact]
+    public void LinkDistantSiblingNamespaces()
+    {
+        var result = TheCartographer.ChartLinkPath(typeof(DocFragmentAttribute), typeof(ICodeLocator));
+        Assert.Equal("../Monastery/CodeLocator/ICodeLocator.md", result);
+    }
+
+    [Fact]
     public void LinkParentNamespace()
     {
         var result = TheCartographer.ChartLinkPath(typeof(FileToLinkTo), typeof(CreateFiles));
         Assert.Equal("../CreateFiles.md", result);
+    }
+
+    [Fact]
+    public void Checking()
+    {
+        var result = TheCartographer.ChartLinkPath(typeof(DeliberationPolicy), typeof(DeliberationShrinking));
+        Assert.Equal("../../../H_OnShrinking/F_DeliberationShrinking/DeliberationShrinking.md", result);
     }
 }

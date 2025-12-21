@@ -22,7 +22,7 @@ public static class TheCartographer
         var result = new List<string>();
         for (int i = 0; i < rootNamespace.Length; i++)
         {
-            if (i >= currentNamespace.Length)
+            if (stillSame && i >= currentNamespace.Length)
             {
                 differsAt = i;
                 stillSame = false;
