@@ -28,6 +28,8 @@ private class Bar
 ```markdown
 Just Checking
 multi line stuff
+multi line stuff
+DontWantThis
 ```
 ```csharp
 // just a comment { a { b } }
@@ -87,3 +89,8 @@ see it works
 [LinkName]: #linking-to
 
 [Anchored]: #linking-to
+# Spike Partial Doc File
+```markdown
+multi line stuff
+multi line stuff
+```

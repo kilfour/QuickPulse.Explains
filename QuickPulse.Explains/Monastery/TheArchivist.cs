@@ -97,8 +97,8 @@ public static class TheArchivist
         DocCodeAttribute a => new CodeFragment(a.Code, a.Language),
         DocIncludeAttribute a => new InclusionFragment(a.Included),
         DocExampleAttribute a => new CodeExampleFragment(a.Name, a.Language),
-        DocCodeFileAttribute a => new CodeFragment(TheCartographer.GetFileContents(a.Path, a.Filename, a.SkipLines), a.Language),
-        DocRawFileAttribute a => new ContentFragment(TheCartographer.GetFileContents(a.Path, a.Filename, 0)),
+        DocCodeFileAttribute a => new CodeFragment(TheCartographer.GetFileContents(a.Path, a.Filename, a.SkipLines, a.NumberOfLines), a.Language),
+        DocRawFileAttribute a => new ContentFragment(TheCartographer.GetFileContents(a.Path, a.Filename, 0, null)),
         DocLinkAttribute a => new LinkFragment(a.Name, GetLinkLocation(type, a), GetLocalLinkLocation(a.Target)),
         DocTableAttribute a => new TableFragment(a.Columns, GetColumns(type, a)),
         _ => throw new NotSupportedException(attr.GetType().Name)

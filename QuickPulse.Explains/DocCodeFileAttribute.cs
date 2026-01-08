@@ -13,10 +13,12 @@ public class DocCodeFileAttribute(
     string filename,
     string language = "",
     int skipLines = 0,
+    int numberOfLines = -1,
     [CallerFilePath] string path = "") : DocFragmentAttribute
 {
     public string Filename { get; } = filename;
     public string Language { get; } = language;
     public int SkipLines { get; } = skipLines;
+    public int? NumberOfLines { get; } = numberOfLines == -1 ? null : numberOfLines;
     public string Path { get; } = path;
 }

@@ -1,1 +1,0 @@
-dotnet run --project .\QuickPulse.Explains.WriteDocs

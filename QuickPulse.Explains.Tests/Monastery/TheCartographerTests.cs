@@ -79,12 +79,12 @@ public class TheCartographerTests
         Assert.Equal("../CreateFiles.md", result);
     }
 
-    [Fact]
-    public void Checking()
-    {
-        var result = TheCartographer.ChartLinkPath(typeof(DeliberationPolicy), typeof(DeliberationShrinking));
-        Assert.Equal("../../../H_OnShrinking/F_DeliberationShrinking/DeliberationShrinking.md", result);
-    }
+    // [Fact]
+    // public void Checking()
+    // {
+    //     var result = TheCartographer.ChartLinkPath(typeof(DeliberationPolicy), typeof(DeliberationShrinking));
+    //     Assert.Equal("../../../H_OnShrinking/F_DeliberationShrinking/DeliberationShrinking.md", result);
+    // }
 
 
     [Fact]

@@ -49,9 +49,12 @@ public static class TheCartographer
         return Path.Combine(path, current.Name + ".md").Replace("\\", "/");
     }
 
-    public static string GetFileContents(string filePath, string filename, int skipLines)
+    public static string GetFileContents(string filePath, string filename, int skipLines, int? numberOfLines)
     {
         var codeFile = Path.Combine(Path.GetDirectoryName(filePath)!, filename);
-        return string.Join(Environment.NewLine, File.ReadAllLines(codeFile).Skip(skipLines));
+        var lines = File.ReadAllLines(codeFile).Skip(skipLines);
+        if (numberOfLines.HasValue)
+            lines = lines.Take(numberOfLines.Value);
+        return string.Join(Environment.NewLine, lines);
     }
 }
