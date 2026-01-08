@@ -12,10 +12,10 @@ public static class TheReflectionist
             .OrderBy(t => t.Namespace)
             .ThenBy(t => t.Name);
 
-    public static IEnumerable<Type> GetIncludedTypes(Type[] types) =>
-        types.SelectMany(a => a.GetCustomAttributes<DocIncludeAttribute>(false).Select(a => a.Included))
+    public static IEnumerable<(Type Type, bool NoHeader)> GetIncludedTypes(Type[] types) =>
+        types.SelectMany(a => a.GetCustomAttributes<DocIncludeAttribute>(false).Select(a => (a.Included, a.NoHeader)))
             .Concat(types.SelectMany(a => a.GetMethods(Flags).SelectMany(a => a.GetCustomAttributes<DocIncludeAttribute>(false)))
-            .Select(a => a.Included))
+            .Select(a => (a.Included, a.NoHeader)))
             .Distinct();
 
     public static List<DocFragmentAttribute> GetDocFragmentAttributes(Type type) =>

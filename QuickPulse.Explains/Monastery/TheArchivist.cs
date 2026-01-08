@@ -29,7 +29,7 @@ public static class TheArchivist
             .Select(a => PageFromType(typeof(T), a))
             .ToReadOnlyCollection(),
         TheReflectionist.GetIncludedTypes(types)
-            .Select(a => InclusionFromType(typeof(T), a))
+            .Select(a => InclusionFromType(typeof(T), a.Type, a.NoHeader))
             .ToReadOnlyCollection(),
         TheReflectionist.GetDocSnippets(typeof(T).Assembly.GetTypes())
             .Select(ExampleFromDocSnippet)
@@ -157,8 +157,8 @@ public static class TheArchivist
         return [.. result];
     }
 
-    private static Inclusion InclusionFromType(Type root, Type type) =>
-       new(type, ExplanationFromType(root, type));
+    private static Inclusion InclusionFromType(Type root, Type type, bool noHeader) =>
+       new(type, ExplanationFromType(root, type), noHeader);
 
     private static string GetHeaderText(Type type)
     {

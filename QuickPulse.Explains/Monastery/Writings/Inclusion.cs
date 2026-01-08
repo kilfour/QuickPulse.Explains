@@ -1,3 +1,3 @@
 namespace QuickPulse.Explains.Monastery.Writings;
 
-public record Inclusion(Type Type, Explanation Explanation);
+public record Inclusion(Type Type, Explanation Explanation, bool NoHeader);

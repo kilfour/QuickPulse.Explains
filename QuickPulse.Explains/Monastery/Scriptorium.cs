@@ -68,7 +68,9 @@ public static class Scriptorium
     private static readonly Flow<InclusionFragment> Include =
          from fragment in Pulse.Start<InclusionFragment>()
          from includes in Pulse.Draw<IReadOnlyCollection<Inclusion>>()
-         from _ in Pulse.ToFlow(Explanation!, includes.Single(a => a.Type == fragment.Included).Explanation)
+         let include = includes.Single(a => a.Type == fragment.Included)
+         from _1 in Pulse.ToFlowIf(include.NoHeader, Fragments!, () => include.Explanation.Fragments)
+         from _2 in Pulse.ToFlowIf(!include.NoHeader, Explanation!, () => include.Explanation)
          select fragment;
 
     private static readonly Flow<LinkFragment> Link =
@@ -121,10 +123,15 @@ public static class Scriptorium
         }
         select fragment;
 
+    private static readonly Flow<IEnumerable<Fragment>> Fragments =
+        from fragments in Pulse.Start<IEnumerable<Fragment>>()
+        from __ in Pulse.Scoped<int>(a => a + 1, Pulse.ToFlow(Fragment, fragments))
+        select fragments;
+
     private static readonly Flow<Explanation> Explanation =
         from explanation in Pulse.Start<Explanation>()
-        from _ in Pulse.ToFlow(MarkDownHeader, explanation.HeaderText)
-        from __ in Pulse.Scoped<int>(a => a + 1, Pulse.ToFlow(Fragment, explanation.Fragments))
+        from _1 in Pulse.ToFlow(MarkDownHeader, explanation.HeaderText)
+        from _2 in Pulse.ToFlow(Fragments, explanation.Fragments)
         select explanation;
 
     private static readonly Flow<Page> BookPage =

@@ -8,7 +8,8 @@ namespace QuickPulse.Explains;
 /// without duplicating their source definitions.
 /// </summary>
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true)]
-public class DocIncludeAttribute(Type includedDoc) : DocFragmentAttribute
+public class DocIncludeAttribute(Type includedDoc, bool noHeader = false) : DocFragmentAttribute
 {
     public Type Included { get; } = includedDoc;
+    public bool NoHeader { get; } = noHeader;
 }

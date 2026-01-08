@@ -30,7 +30,7 @@ public class DocIncludeTests
 
         var type = DynamicTypeBuilder.Create("ASimpleFile", module)
             .WithClassAttribute<DocFileAttribute>()
-            .WithClassAttribute<DocIncludeAttribute>(includedType)
+            .WithClassAttribute<DocIncludeAttribute>(includedType, false)
             .Build();
 
         var collector = Collect.ValuesOf<string>();
@@ -41,6 +41,39 @@ public class DocIncludeTests
         var reader = LinesReader.FromStringList([.. collector.Values]);
         Assert.Equal("# A Simple File", reader.NextLine());
         Assert.Equal("## Some Other Class", reader.NextLine());
+        Assert.Equal("### Header From SomeOtherClass Method", reader.NextLine());
+        Assert.True(reader.EndOfContent());
+    }
+
+    [Fact]
+    public void DocInclude_NoHeader()
+    {
+        var asmName = new AssemblyName("DocIncludeTestingAssembly");
+        var asm = AssemblyBuilder.DefineDynamicAssembly(asmName, AssemblyBuilderAccess.Run);
+        var module = asm.DefineDynamicModule("Main");
+        AppDomain.CurrentDomain.AssemblyResolve += (sender, args) =>
+        {
+            if (args.Name.StartsWith(asm.FullName!))
+                return asm;
+            return null;
+        };
+
+        var includedType = DynamicTypeBuilder.Create("SomeOtherClass", module)
+            .WithVoidMethod<DocHeaderAttribute>("MyMethod", "Header From SomeOtherClass Method", 0)
+            .Build();
+
+        var type = DynamicTypeBuilder.Create("ASimpleFile", module)
+            .WithClassAttribute<DocFileAttribute>()
+            .WithClassAttribute<DocIncludeAttribute>(includedType, true)
+            .Build();
+
+        var collector = Collect.ValuesOf<string>();
+        TheScribe.GetArtery = a => collector;
+
+        ExplainThis.Invoke(type, "whatever");
+
+        var reader = LinesReader.FromStringList([.. collector.Values]);
+        Assert.Equal("# A Simple File", reader.NextLine());
         Assert.Equal("### Header From SomeOtherClass Method", reader.NextLine());
         Assert.True(reader.EndOfContent());
     }
