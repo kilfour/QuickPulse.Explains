@@ -49,6 +49,14 @@ public static class TheArchivist
 
     private static Example ExampleFromCodeExample((string Name, CodeExampleAttribute Attribute, List<CodeReplaceAttribute> Replacements, List<CodeFormatAttribute> Formatters) docExample)
     {
+        // var newLines =
+        //     CodeExampleExtractor
+        //         .Extract(docExample.Attribute.File, docExample.Attribute.Line).Code
+        //         .Split(Environment.NewLine)
+        //         .Select(a => ApplyReplacements(a, docExample.Replacements));
+        // var formattedLines = ApplyFormatters(newLines, docExample.Formatters);
+        // var indentCorrected = Dedent(formattedLines);
+        // var result = string.Join(Environment.NewLine, indentCorrected);
         var newLines =
             CodeReader.AsExample(GetCodeLocator().ReadAfter(docExample.Attribute.File, docExample.Attribute.Line))
                 .Select(a => ApplyReplacements(a, docExample.Replacements))
@@ -56,6 +64,20 @@ public static class TheArchivist
         var result = string.Join(Environment.NewLine, ApplyFormatters(newLines, docExample.Formatters));
         return new Example(docExample.Name, result);
     }
+
+    public static IEnumerable<string> Dedent(IEnumerable<string> lines)
+    {
+        var nonEmpty = lines.Where(line => !string.IsNullOrWhiteSpace(line)).ToList();
+        if (nonEmpty.Count <= 1)
+            return lines;
+        var head = nonEmpty[0];
+        var tail = nonEmpty.Skip(1);
+        int indent = tail.Min(l => l.TakeWhile(char.IsWhiteSpace).Count());
+        return tail.Select(line => DedentLine(line, indent)).Prepend(head);
+    }
+
+    private static string DedentLine(string line, int indent)
+        => line.Length >= indent ? line[indent..] : line;
 
     private static IEnumerable<string> ApplyFormatters(IEnumerable<string> code, List<CodeFormatAttribute> formatters)
     {

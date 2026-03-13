@@ -12,3 +12,5 @@
         => fuzzrshufflet
 
 - fix fields parsing for code snippet: CodeSnippetParsing.Field_Just_Checking
+
+* [DocFileNoHeader]

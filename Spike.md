@@ -8,6 +8,8 @@ private class Bar
 ```markdown
 Just Checking
 multi line stuff
+multi line stuff
+DontWantThis
 ```
 ```csharp
 // just a comment { a { b } }
@@ -16,6 +18,12 @@ multi line stuff
 private void FullFoo()
 {
     // replaced { }
+}
+```
+```csharp
+private class Bar
+{
+    public int MyMethod() { return 42; }
 }
 ```
 ```sql

@@ -8,7 +8,7 @@ public class Spike
 {
 
     //[Fact]
-    [Fact(Skip = "explicit")]
+    [Fact]
     // [DocExample(typeof(Spike), "NopeNotHere")]
     // [DocExample(typeof(Generic<string>))]
     public void Content()
