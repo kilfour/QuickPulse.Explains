@@ -7,8 +7,8 @@ namespace QuickPulse.Explains.DontInclude;
 public class Spike
 {
 
-    [Fact]
-    // [Fact(Skip = "explicit")]
+    // [Fact]
+    [Fact(Skip = "explicit")]
     // [DocExample(typeof(Spike), "NopeNotHere")]
     // [DocExample(typeof(Generic<string>))]
     // [DocCodeFile("NotHere.txt", "markdown")]
