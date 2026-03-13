@@ -1,6 +1,3 @@
-* DocCodeFile:
-  * Unhandled exception. System.IO.FileNotFoundException: 
-
 - Xml Summaries
   - DocTableAttribute
   - DocColumnAttribute
@@ -9,5 +6,3 @@
     - Fuzzr.Shuffle<T>()
     - Fuzzr.Shuffle&lt;T&gt;()
         => fuzzrshufflet
-
-* [DocFileNoHeader]

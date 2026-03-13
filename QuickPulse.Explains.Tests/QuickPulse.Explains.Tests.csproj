@@ -26,7 +26,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\QuickPulse.Explains\QuickPulse.Explains.csproj" />
-    <ProjectReference Include="..\..\QuickCheckr\QuickCheckr.Tests\QuickCheckr.Tests.csproj" />
   </ItemGroup>
 
 </Project>

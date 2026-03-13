@@ -34,9 +34,9 @@ public static class CodeExampleExtractor
         var stripped = (MemberDeclarationSyntax)new StripAllAttributesRewriter().Visit(declaration)!;
 
         if (asSnippet)
-            return ExtractBody(stripped).Trim();
+            return ExtractBody(stripped);
 
-        return stripped.ToFullString().Trim();
+        return stripped.ToFullString();
     }
 
     private static MemberDeclarationSyntax? FindDeclarationMarkedAtLine(SyntaxNode root, int lineNumber, bool asSnippet)
@@ -83,12 +83,6 @@ public static class CodeExampleExtractor
         || name.EndsWith($".{attributeString}", StringComparison.Ordinal)
         || name.EndsWith($".{attributeString}Attribute", StringComparison.Ordinal);
 
-    private static bool IsCodeSnippetName(string name) =>
-        name == "CodeSnippet"
-        || name == "CodeSnippetAttribute"
-        || name.EndsWith(".CodeSnippet", StringComparison.Ordinal)
-        || name.EndsWith(".CodeSnippetAttribute", StringComparison.Ordinal);
-
     private static bool ContainsLine(SyntaxNode node, int oneBasedLine)
     {
         var span = node.GetLocation().GetLineSpan();
@@ -111,20 +105,57 @@ public static class CodeExampleExtractor
     }
 
     private static string ExtractBody(MemberDeclarationSyntax declaration) =>
-        declaration switch
-        {
-            MethodDeclarationSyntax m when m.Body is not null
-                => ExtractBlockContents(m.Body).Trim(),
+    declaration switch
+    {
+        MethodDeclarationSyntax m when m.Body is not null
+            => ExtractBlockContents(m.Body),
 
-            MethodDeclarationSyntax m when m.ExpressionBody is not null
-                => m.ExpressionBody.Expression.ToFullString().Trim() + ";",
+        MethodDeclarationSyntax m when m.ExpressionBody is not null
+            => m.ExpressionBody.Expression.ToFullString() + ";",
 
-            ConstructorDeclarationSyntax c when c.Body is not null
-                => ExtractBlockContents(c.Body).Trim(),
+        ConstructorDeclarationSyntax c when c.Body is not null
+            => ExtractBlockContents(c.Body),
 
-            ConstructorDeclarationSyntax c when c.ExpressionBody is not null
-                => c.ExpressionBody.Expression.ToFullString().Trim() + ";",
+        ConstructorDeclarationSyntax c when c.ExpressionBody is not null
+            => c.ExpressionBody.Expression.ToFullString() + ";",
 
-            _ => throw new InvalidOperationException("Body extraction is only supported for methods and constructors.")
-        };
+        FieldDeclarationSyntax f
+            => ExtractFieldInitializer(f),
+
+        PropertyDeclarationSyntax p when p.ExpressionBody is not null
+            => p.ExpressionBody.Expression.ToFullString(),
+
+        PropertyDeclarationSyntax p when p.Initializer is not null
+            => p.Initializer.Value.ToFullString(),
+
+        PropertyDeclarationSyntax p
+            => ExtractPropertyGetterBody(p),
+
+        _ => throw new InvalidOperationException(
+            "Body extraction is only supported for methods, constructors, fields, and properties.")
+    };
+
+    private static string ExtractFieldInitializer(FieldDeclarationSyntax field)
+    {
+        var variable = field.Declaration.Variables.FirstOrDefault()
+            ?? throw new InvalidOperationException("Field declaration contains no variables.");
+
+        return variable.Initializer?.Value.ToFullString()
+            ?? throw new InvalidOperationException("Field has no initializer.");
+    }
+
+    private static string ExtractPropertyGetterBody(PropertyDeclarationSyntax property)
+    {
+        var getter = property.AccessorList?.Accessors
+            .FirstOrDefault(a => a.IsKind(SyntaxKind.GetAccessorDeclaration))
+            ?? throw new InvalidOperationException("Property has no getter body, expression body, or initializer.");
+
+        if (getter.ExpressionBody is not null)
+            return getter.ExpressionBody.Expression.ToFullString();
+
+        if (getter.Body is not null)
+            return ExtractBlockContents(getter.Body);
+
+        throw new InvalidOperationException("Getter has no body.");
+    }
 }

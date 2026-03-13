@@ -70,21 +70,21 @@ public static class TheArchivist
                 .Extract(file, line, asSnippet)
                 .Split(Environment.NewLine)
                 .Select(a => ApplyReplacements(name, a, replacements));
-        var formattedLines = ApplyFormatters(newLines, formatters);
-        var indentCorrected = Dedent(formattedLines);
+        var formattedLines = ApplyFormatters(newLines, formatters).ToList();
+        var indentCorrected = Dedent(formattedLines, asSnippet);
         var result = string.Join(Environment.NewLine, indentCorrected);
         return new Example(name, result);
     }
 
-    public static IEnumerable<string> Dedent(IEnumerable<string> lines)
+    public static IEnumerable<string> Dedent(IEnumerable<string> lines, bool asSnippet)
     {
-        var nonEmpty = lines.Where(line => !string.IsNullOrWhiteSpace(line)).ToList();
-        if (nonEmpty.Count <= 1)
-            return lines;
+        var filter = lines.SkipWhile(string.IsNullOrWhiteSpace);
+        var nonEmpty = filter.Where(line => !string.IsNullOrWhiteSpace(line)).ToList();
+        if (nonEmpty.Count == 0)
+            return nonEmpty;
         var head = nonEmpty[0];
-        var tail = nonEmpty.Skip(1);
-        int indent = tail.Min(l => l.TakeWhile(char.IsWhiteSpace).Count());
-        return tail.Select(line => DedentLine(line, indent)).Prepend(head);
+        var indent = head.TakeWhile(char.IsWhiteSpace).Count();
+        return nonEmpty.Select(line => DedentLine(line, indent));
     }
 
     private static string DedentLine(string line, int indent)
