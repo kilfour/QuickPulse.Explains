@@ -6,6 +6,7 @@ using QuickPulse.Explains.Formatters;
 using QuickPulse.Explains.Monastery.Writings;
 using QuickPulse.Explains.Monastery.Reading;
 using QuickPulse.Explains.Monastery.Fragments.Tables;
+using QuickPulse.Explains.Exceptions;
 
 
 namespace QuickPulse.Explains.Monastery;
@@ -38,31 +39,41 @@ public static class TheArchivist
             .ToReadOnlyCollection());
 
     private static Example ExampleFromDocSnippet((string Name, CodeSnippetAttribute Attribute, List<CodeReplaceAttribute> Replacements, List<CodeFormatAttribute> Formatters) docExample)
-    {
-        var newLines =
-            CodeReader.AsSnippet(GetCodeLocator().ReadAfter(docExample.Attribute.File, docExample.Attribute.Line))
-                .Select(a => ApplyReplacements(a, docExample.Replacements))
-                .Where(a => !string.IsNullOrWhiteSpace(a));
-        var result = string.Join(Environment.NewLine, ApplyFormatters(newLines, docExample.Formatters));
-        return new Example(docExample.Name, result);
-    }
+        => ExampleFrom(
+                docExample.Name,
+                docExample.Attribute.File,
+                docExample.Attribute.Line,
+                true,
+                docExample.Replacements,
+                docExample.Formatters);
 
-    private static Example ExampleFromCodeExample((string Name, CodeExampleAttribute Attribute, List<CodeReplaceAttribute> Replacements, List<CodeFormatAttribute> Formatters) docExample)
+    private static Example ExampleFromCodeExample(
+        (string Name, CodeExampleAttribute Attribute, List<CodeReplaceAttribute> Replacements, List<CodeFormatAttribute> Formatters) docExample)
+            => ExampleFrom(
+                docExample.Name,
+                docExample.Attribute.File,
+                docExample.Attribute.Line,
+                false,
+                docExample.Replacements,
+                docExample.Formatters);
+
+    private static Example ExampleFrom(
+        string name,
+        string file,
+        int line,
+        bool asSnippet,
+        List<CodeReplaceAttribute> replacements,
+        List<CodeFormatAttribute> formatters)
     {
-        // var newLines =
-        //     CodeExampleExtractor
-        //         .Extract(docExample.Attribute.File, docExample.Attribute.Line).Code
-        //         .Split(Environment.NewLine)
-        //         .Select(a => ApplyReplacements(a, docExample.Replacements));
-        // var formattedLines = ApplyFormatters(newLines, docExample.Formatters);
-        // var indentCorrected = Dedent(formattedLines);
-        // var result = string.Join(Environment.NewLine, indentCorrected);
         var newLines =
-            CodeReader.AsExample(GetCodeLocator().ReadAfter(docExample.Attribute.File, docExample.Attribute.Line))
-                .Select(a => ApplyReplacements(a, docExample.Replacements))
-                .Where(a => !string.IsNullOrWhiteSpace(a));
-        var result = string.Join(Environment.NewLine, ApplyFormatters(newLines, docExample.Formatters));
-        return new Example(docExample.Name, result);
+            CodeExampleExtractor
+                .Extract(file, line, asSnippet)
+                .Split(Environment.NewLine)
+                .Select(a => ApplyReplacements(name, a, replacements));
+        var formattedLines = ApplyFormatters(newLines, formatters);
+        var indentCorrected = Dedent(formattedLines);
+        var result = string.Join(Environment.NewLine, indentCorrected);
+        return new Example(name, result);
     }
 
     public static IEnumerable<string> Dedent(IEnumerable<string> lines)
@@ -90,11 +101,12 @@ public static class TheArchivist
         return raw;
     }
 
-    private static string ApplyReplacements(string code, List<CodeReplaceAttribute> replacements)
+    private static string ApplyReplacements(string name, string code, List<CodeReplaceAttribute> replacements)
     {
         var raw = code;
         foreach (var repl in replacements)
         {
+            if (string.IsNullOrEmpty(repl.From)) throw new EmptyStringUsedInCodeReplaceAttributeException(name);
             raw = raw.Replace(repl.From, repl.To);
         }
         return raw;
@@ -120,7 +132,7 @@ public static class TheArchivist
         DocIncludeAttribute a => new InclusionFragment(a.Included),
         DocExampleAttribute a => new CodeExampleFragment(a.Name, a.Language),
         DocCodeFileAttribute a => new CodeFragment(TheCartographer.GetFileContents(a.Path, a.Filename, a.SkipLines, a.NumberOfLines), a.Language),
-        DocRawFileAttribute a => new ContentFragment(TheCartographer.GetFileContents(a.Path, a.Filename, 0, null)),
+        DocRawFileAttribute a => new ContentFragment(TheCartographer.GetRawFileContents(a.Path, a.Filename)),
         DocLinkAttribute a => new LinkFragment(a.Name, GetLinkLocation(type, a), GetLocalLinkLocation(a.Target)),
         DocTableAttribute a => new TableFragment(a.Columns, GetColumns(type, a)),
         _ => throw new NotSupportedException(attr.GetType().Name)
@@ -196,5 +208,5 @@ public static class TheArchivist
     }
 
     public static IReadOnlyCollection<T> ToReadOnlyCollection<T>(this IEnumerable<T> source)
-        => source as IReadOnlyCollection<T> ?? source.ToList();
+        => source as IReadOnlyCollection<T> ?? [.. source];
 }

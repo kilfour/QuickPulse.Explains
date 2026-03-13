@@ -1,3 +1,5 @@
+using QuickPulse.Explains.Exceptions;
+
 namespace QuickPulse.Explains.Monastery;
 
 public static class TheCartographer
@@ -52,9 +54,17 @@ public static class TheCartographer
     public static string GetFileContents(string filePath, string filename, int skipLines, int? numberOfLines)
     {
         var codeFile = Path.Combine(Path.GetDirectoryName(filePath)!, filename);
+        if (!File.Exists(codeFile)) throw new DocCodeFileNotFoundException(codeFile);
         var lines = File.ReadAllLines(codeFile).Skip(skipLines);
         if (numberOfLines.HasValue)
             lines = lines.Take(numberOfLines.Value);
         return string.Join(Environment.NewLine, lines);
+    }
+
+    public static string GetRawFileContents(string filePath, string filename)
+    {
+        var codeFile = Path.Combine(Path.GetDirectoryName(filePath)!, filename);
+        if (!File.Exists(codeFile)) throw new DocRawFileNotFoundException(codeFile);
+        return File.ReadAllText(codeFile);
     }
 }

@@ -3,8 +3,8 @@ namespace QuickPulse.Explains.DontInclude;
 [DocFile]
 public class SpikePartialDocFile
 {
-    [Fact]
-    //[Fact(Skip = "explicit")]
+    // [Fact]
+    [Fact(Skip = "explicit")]
     [DocCodeFile("Spike.txt", "markdown", 1, 2)]
     public void Content()
     {

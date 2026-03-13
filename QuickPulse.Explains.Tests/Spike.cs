@@ -7,10 +7,11 @@ namespace QuickPulse.Explains.DontInclude;
 public class Spike
 {
 
-    //[Fact]
     [Fact]
+    // [Fact(Skip = "explicit")]
     // [DocExample(typeof(Spike), "NopeNotHere")]
     // [DocExample(typeof(Generic<string>))]
+    // [DocCodeFile("NotHere.txt", "markdown")]
     public void Content()
     {
         Explain.OnlyThis<Spike>("Spike.md");
@@ -34,6 +35,7 @@ public class Spike
     [CodeSnippet]
     [CodeReplace("text", "comment")]
     [CodeReplace("some", "a")]
+    // [CodeReplace("", "FRED")]
     private void Foo()
     {
         // just some text { a { b } }

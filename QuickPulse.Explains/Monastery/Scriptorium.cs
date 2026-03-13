@@ -1,3 +1,4 @@
+using QuickPulse.Explains.Exceptions;
 using QuickPulse.Explains.Monastery.Fragments;
 using QuickPulse.Explains.Monastery.Fragments.Tables;
 using QuickPulse.Explains.Monastery.Writings;
@@ -60,8 +61,7 @@ public static class Scriptorium
          let example = examples.SingleOrDefault(a => a.Name == fragment.Name)
          from s in Pulse.Trace($"```{fragment.Language}")
          from _ in Pulse.TraceIf(example != null, () => example.Code)
-         from __ in Pulse.When(example == null,
-            () => Pulse.TraceTo<Diagnostics>(GetErrorMessageFromCodeExampleFragmentName(fragment.Name)))
+         from check in Pulse.When(example == null, () => throw new CodeExampleNotFoundException(fragment.Name))
          from e in Pulse.Trace("```")
          select fragment;
 
