@@ -28,17 +28,17 @@ public class StringArrayToString : ICodeFormatter
     //             .Split(Environment.NewLine);
     // }
 
-    private static Flow<char> Enclosed(Flow<char> nextFlow) =>
-        from c in Pulse.Start<char>()
-        from _ in Pulse.Prime(() => new BracketEnclosure())
-        from ___ in Pulse.ToFlowIf<char, BracketEnclosure>(a => a.InEnclosure(c), nextFlow, () => c)
-        select c;
+    // private static Flow<char> Enclosed(Flow<char> nextFlow) =>
+    //     from c in Pulse.Start<char>()
+    //     from _ in Pulse.Prime(() => new BracketEnclosure())
+    //     from ___ in Pulse.ToFlowIf<char, BracketEnclosure>(a => a.InEnclosure(c), nextFlow, () => c)
+    //     select c;
 
-    private static Flow<char> Between(Flow<char> nextFlow) =>
-        from c in Pulse.Start<char>()
-        from _ in Pulse.Prime(() => new QuoteEnclosure())
-        from ___ in Pulse.ToFlowIf<char, QuoteEnclosure>(a => a.InEnclosure(c), nextFlow, () => c)
-        select c;
+    // private static Flow<char> Between(Flow<char> nextFlow) =>
+    //     from c in Pulse.Start<char>()
+    //     from _ in Pulse.Prime(() => new QuoteEnclosure())
+    //     from ___ in Pulse.ToFlowIf<char, QuoteEnclosure>(a => a.InEnclosure(c), nextFlow, () => c)
+    //     select c;
 
     public abstract record Enclosure
     {

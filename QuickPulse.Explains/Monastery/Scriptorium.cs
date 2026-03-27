@@ -9,39 +9,33 @@ public static class Scriptorium
 {
     private const char Separator = '/';
 
-    public static readonly Flow<Reference> LoadReference =
-        from reference in Pulse.Start<Reference>()
+    public static Flow<Flow> LoadReference(Reference reference) =>
         from includes in Pulse.Prime(() => reference.Inclusions)
         from examples in Pulse.Prime(() => reference.Examples)
         from level in Pulse.Prime(() => 1)
-        select reference;
+        select Flow.Continue;
 
-    private static readonly Flow<string> MarkDownHeader =
-         from text in Pulse.Start<string>()
-         from level in Pulse.Draw<int>()
-         let headingMarker = new string('#', level)
-         let header = $"{headingMarker} {text}"
-         from _ in Pulse.Trace(header)
-         select text;
+    private static Flow<Flow> MarkDownHeader(string text) =>
+        from level in Pulse.Draw<int>()
+        let headingMarker = new string('#', level)
+        let header = $"{headingMarker} {text}"
+        from _ in Pulse.Trace(header)
+        select Flow.Continue;
 
-    private static readonly Flow<HeaderFragment> Header =
-         from fragment in Pulse.Start<HeaderFragment>()
-         from level in Pulse.Draw<int>()
-         let headingMarker = new string('#', level + fragment.Level)
-         from _ in Pulse.Trace($"{headingMarker} {fragment.Header}")
-         select fragment;
+    private static Flow<Flow> Header(HeaderFragment fragment) =>
+        from level in Pulse.Draw<int>()
+        let headingMarker = new string('#', level + fragment.Level)
+        from _ in Pulse.Trace($"{headingMarker} {fragment.Header}")
+        select Flow.Continue;
 
-    private static readonly Flow<ContentFragment> Content =
-         from fragment in Pulse.Start<ContentFragment>()
-         from _ in Pulse.Trace($"{fragment.Content}  ")
-         select fragment;
+    private static Flow<Flow> Content(ContentFragment fragment) =>
+        Pulse.Trace($"{fragment.Content}  ");
 
-    private static readonly Flow<CodeFragment> Code =
-         from fragment in Pulse.Start<CodeFragment>()
+    private static Flow<Flow> Code(CodeFragment fragment) =>
          from s in Pulse.Trace($"```{fragment.Language}")
          from _ in Pulse.Trace(fragment.Code.Trim())
          from e in Pulse.Trace("```")
-         select fragment;
+         select Flow.Continue;
 
     private static string GetErrorMessageFromCodeExampleFragmentName(string name)
     {
@@ -55,43 +49,37 @@ public static class Scriptorium
         return result;
     }
 
-    private static readonly Flow<CodeExampleFragment> CodeExample =
-         from fragment in Pulse.Start<CodeExampleFragment>()
+    private static Flow<Flow> CodeExample(CodeExampleFragment fragment) =>
          from examples in Pulse.Draw<IReadOnlyCollection<Example>>()
          let example = examples.SingleOrDefault(a => a.Name == fragment.Name)
          from s in Pulse.Trace($"```{fragment.Language}")
          from _ in Pulse.TraceIf(example != null, () => example.Code)
          from check in Pulse.When(example == null, () => throw new CodeExampleNotFoundException(fragment.Name))
          from e in Pulse.Trace("```")
-         select fragment;
+         select Flow.Continue;
 
-    private static readonly Flow<InclusionFragment> Include =
-         from fragment in Pulse.Start<InclusionFragment>()
-         from includes in Pulse.Draw<IReadOnlyCollection<Inclusion>>()
-         let include = includes.Single(a => a.Type == fragment.Included)
-         from _1 in Pulse.ToFlowIf(include.NoHeader, Fragments!, () => include.Explanation.Fragments)
-         from _2 in Pulse.ToFlowIf(!include.NoHeader, Explanation!, () => include.Explanation)
-         select fragment;
+    private static Flow<Flow> Include(InclusionFragment fragment) =>
+        from includes in Pulse.Draw<IReadOnlyCollection<Inclusion>>()
+        let include = includes.Single(a => a.Type == fragment.Included)
+        from _1 in Pulse.ToFlowIf(include.NoHeader, Fragments!, () => include.Explanation.Fragments)
+        from _2 in Pulse.ToFlowIf(!include.NoHeader, Explanation!, () => include.Explanation)
+        select Flow.Continue;
 
-    private static readonly Flow<LinkFragment> Link =
-         from fragment in Pulse.Start<LinkFragment>()
-         from includeLinks in Pulse.Draw<bool>()
-         from includes in Pulse.Draw<IReadOnlyCollection<Inclusion>>()
-         from newLine in Pulse.Trace("")
-         let link = includeLinks
-            ? fragment.Location
-            : fragment.LocalLocation
-         from _2 in Pulse.Trace($"[{fragment.Name}]: {link}")
-         select fragment;
+    private static Flow<Flow> Link(LinkFragment fragment) =>
+        from includeLinks in Pulse.Draw<bool>()
+        from includes in Pulse.Draw<IReadOnlyCollection<Inclusion>>()
+        from newLine in Pulse.Trace("")
+        let link = includeLinks
+           ? fragment.Location
+           : fragment.LocalLocation
+        from _2 in Pulse.Trace($"[{fragment.Name}]: {link}")
+        select Flow.Continue;
 
 
-    private static readonly Flow<IEnumerable<string>> TableRow =
-        from row in Pulse.Start<IEnumerable<string>>()
-        from cells in Pulse.Trace($"| {string.Join("| ", row)} |")
-        select row;
+    private static Flow<Flow> TableRow(IEnumerable<string> row) =>
+        Pulse.Trace($"| {string.Join("| ", row)} |");
 
-    private static readonly Flow<RowFragment> Row =
-        from fragment in Pulse.Start<RowFragment>()
+    private static Flow<Flow> Row(RowFragment fragment) =>
         from includeLinks in Pulse.Draw<bool>()
         let link = includeLinks
             ? fragment.FirstCell.Link
@@ -99,17 +87,15 @@ public static class Scriptorium
         let firstCell = $"[{fragment.FirstCell.Content}]({link})"
         let cells = fragment.Cells.Select(a => a.Content).Prepend(firstCell)
         from row in Pulse.ToFlow(TableRow, cells)
-        select fragment;
+        select Flow.Continue;
 
-    private static readonly Flow<TableFragment> Table =
-        from fragment in Pulse.Start<TableFragment>()
+    private static Flow<Flow> Table(TableFragment fragment) =>
         from headers in Pulse.ToFlow(TableRow, fragment.Headers)
         from divider in Pulse.ToFlow(TableRow, fragment.Headers.Select(_ => "-").ToArray())
         from body in Pulse.ToFlow(Row, fragment.Body)
-        select fragment;
+        select Flow.Continue;
 
-    private static readonly Flow<Fragment> Fragment =
-        from fragment in Pulse.Start<Fragment>()
+    private static Flow<Flow> Fragment(Fragment fragment) =>
         from _ in fragment switch
         {
             HeaderFragment a => Pulse.ToFlow(b => Pulse.ToFlow(Header, b), a),
@@ -121,46 +107,38 @@ public static class Scriptorium
             TableFragment a => Pulse.ToFlow(Table, a),
             _ => Pulse.NoOp()
         }
-        select fragment;
+        select Flow.Continue;
 
-    private static readonly Flow<IEnumerable<Fragment>> Fragments =
-        from fragments in Pulse.Start<IEnumerable<Fragment>>()
-        from __ in Pulse.Scoped<int>(a => a + 1, Pulse.ToFlow(Fragment, fragments))
-        select fragments;
+    private static Flow<Flow> Fragments(IEnumerable<Fragment> fragments) =>
+        Pulse.Scoped<int>(a => a + 1, Pulse.ToFlow(Fragment, fragments));
 
-    private static readonly Flow<Explanation> Explanation =
-        from explanation in Pulse.Start<Explanation>()
+    private static Flow<Flow> Explanation(Explanation explanation) =>
         from _1 in Pulse.ToFlow(MarkDownHeader, explanation.HeaderText)
         from _2 in Pulse.ToFlow(Fragments, explanation.Fragments)
-        select explanation;
+        select Flow.Continue;
 
-    private static readonly Flow<Page> BookPage =
-        from page in Pulse.Start<Page>()
-        let level = page.Path.Split(Separator).Length
-        from _ in Pulse.Scoped<int>(a => level, Pulse.ToFlow(Explanation, page.Explanation))
-        select page;
+    private static Flow<Flow> BookPage(Page page) =>
+        Pulse.Scoped<int>(a => page.Path.Split(Separator).Length, Pulse.ToFlow(Explanation, page.Explanation));
 
     // this is the entrypoint for single page doc
-    public static readonly Flow<Book> Book =
+    public static Flow<Flow> Book(Book book) =>
         from excludeLinks in Pulse.Prime(() => false)
-        from book in Pulse.Start<Book>()
         from initialize in Pulse.ToFlow(LoadReference, book)
         from _ in Pulse.ToFlow(BookPage, book.Pages)
-        select book;
+        select Flow.Continue;
 
     // this is the entry point for writing a doc folder
-    public static readonly Flow<SinglePage> SinglePage =
+    public static Flow<Flow> SinglePage(SinglePage pageAndReference) =>
         from includeLinks in Pulse.Prime(() => true)
-        from pageAndReference in Pulse.Start<SinglePage>()
         from initialize in Pulse.ToFlow(LoadReference, pageAndReference)
         from _ in Pulse.Scoped<int>(a => 1, Pulse.ToFlow(Explanation, pageAndReference.Page.Explanation))
-        select pageAndReference;
+        select Flow.Continue;
 
-    public static readonly Flow<Chronicle> TableOfContent =
-        from chronicle in Pulse.Start<Chronicle>()
+    public static Flow<Flow> TableOfContent(Chronicle chronicle) =>
+        from _ in Pulse.NoOp()
         let level = chronicle.Path.Split(Separator).Length - 1
         let indent = new string(' ', level * 2)
-        from _ in Pulse.Trace($"{indent}- [{chronicle.Text}]({chronicle.Path})")
-        select chronicle;
+        from trace in Pulse.Trace($"{indent}- [{chronicle.Text}]({chronicle.Path})")
+        select Flow.Continue;
 }
 
