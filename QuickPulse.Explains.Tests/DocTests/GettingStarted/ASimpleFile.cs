@@ -1,5 +1,3 @@
-using System.Reflection;
-using System.Reflection.Emit;
 using QuickPulse.Arteries;
 using QuickPulse.Explains.Monastery;
 using QuickPulse.Explains.Tests._Tools;
@@ -239,8 +237,7 @@ Renders as:
         Assert.True(reader.EndOfContent());
     }
 
-    //[Fact]
-    [Fact(Skip = "flaky in ci")]
+    [Fact]
     [DocContent(
 @"You could of course just put *'## Level Two'* etc. inside the previously shown `DocContent` attribute and be done with it.  
 That is how the previous version of this lib worked.  
@@ -284,15 +281,7 @@ It renders as:
 ")]
     public void DocIncludes()
     {
-        var asmName = new AssemblyName("DocIncludeTestAssembly");
-        var asm = AssemblyBuilder.DefineDynamicAssembly(asmName, AssemblyBuilderAccess.Run);
-        var module = asm.DefineDynamicModule("Main");
-        AppDomain.CurrentDomain.AssemblyResolve += (sender, args) =>
-        {
-            if (args.Name.StartsWith(asm.FullName!))
-                return asm;
-            return null;
-        };
+        using var module = DynamicModuleBuilder.Create();
 
         var includedType = DynamicTypeBuilder.Create("SomeOtherClass", module)
             .WithVoidMethod<DocHeaderAttribute>("MyMethod", "Header From SomeOtherClass Method", 0)
@@ -300,13 +289,20 @@ It renders as:
 
         var type = DynamicTypeBuilder.Create("ASimpleFile", module)
             .WithClassAttribute<DocFileAttribute>()
-            .WithVoidMethod<DocIncludeAttribute>("MyMethod", includedType)
+            .WithVoidMethod<DocIncludeAttribute>("MyMethod", includedType, false)
             .Build();
 
         var collector = Collect.ValuesOf<string>();
-        TheScribe.GetArtery = a => collector;
-
-        ExplainThis.Invoke(type, "whatever");
+        var previousArtery = TheScribe.GetArtery;
+        try
+        {
+            TheScribe.GetArtery = _ => collector;
+            ExplainThis.Invoke(type, "whatever");
+        }
+        finally
+        {
+            TheScribe.GetArtery = previousArtery;
+        }
 
         var reader = LinesReader.FromStringList([.. collector.Values]);
         Assert.Equal("# A Simple File", reader.NextLine());

@@ -42,11 +42,11 @@ All extracted code is formatted and syntax-highlighted automatically, preserving
 This ensures your documentation always reflects the current, runnable source without manual copy-paste.")]
 public class TheLivingDocTests
 {
-    [Fact(Skip = "broken after introducing Roslyn")]
+    [Fact]
     [DocContent("`CodeExample` extracts a method or class for use as an example to be included later.")]
     public void CodeExample()
     {
-        var module = DynamicModuleBuilder.Create();
+        using var module = DynamicModuleBuilder.Create();
         var includedType = DynamicTypeBuilder.Create("SomeOtherClass", module)
             .WithVoidMethod<CodeExampleAttribute>("MyMethod", "code.cs", 1)
             .Build();
@@ -55,18 +55,28 @@ public class TheLivingDocTests
            .WithClassAttribute<DocExampleAttribute>(includedType, "MyMethod", "csharp")
            .Build();
         var collector = Collect.ValuesOf<string>();
-        TheScribe.GetArtery = a => collector;
+        var previousArtery = TheScribe.GetArtery;
         var codeLocator = new CodeLocatorMock()
             .Add("code.cs", 0,
+                "[CodeExample]",
                 "public static class Demo {",
                 "    public static void Run() {",
                 "        Console.WriteLine(\"Hi\");",
                 "    }",
                 "}",
                 "not interested");
-        TheArchivist.GetCodeLocator = () => codeLocator;
-
-        ExplainThis.Invoke(type, "whatever");
+        var previousCodeLocator = TheArchivist.GetCodeLocator;
+        try
+        {
+            TheScribe.GetArtery = _ => collector;
+            TheArchivist.GetCodeLocator = () => codeLocator;
+            ExplainThis.Invoke(type, "whatever");
+        }
+        finally
+        {
+            TheScribe.GetArtery = previousArtery;
+            TheArchivist.GetCodeLocator = previousCodeLocator;
+        }
 
         var reader = LinesReader.FromStringList([.. collector.Values.SelectMany(a => a.Split(Environment.NewLine))]);
         Assert.Equal(

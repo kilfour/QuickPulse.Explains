@@ -8,7 +8,9 @@ public static class TheCartographer
     {
         var rootNamespace = root.Namespace ?? "";
         var currentNamespace = current.Namespace ?? "";
-        var relativeNamespace = currentNamespace.StartsWith(rootNamespace)
+        var relativeNamespace = currentNamespace == rootNamespace
+            ? ""
+            : currentNamespace.StartsWith(rootNamespace + ".", StringComparison.Ordinal)
             ? currentNamespace[rootNamespace.Length..].TrimStart('.')
             : currentNamespace;
         var path = Path.Combine(relativeNamespace.Split('.', StringSplitOptions.RemoveEmptyEntries));

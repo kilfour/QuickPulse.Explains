@@ -9,8 +9,10 @@ using QuickPulse.Explains.Monastery.Fragments.Tables;
 using QuickPulse.Explains.Exceptions;
 using System.Collections;
 using System.Globalization;
+using System.Net;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Text;
 
 
 namespace QuickPulse.Explains.Monastery;
@@ -28,19 +30,107 @@ public static class TheArchivist
     public static Book Compose<T>() => ComposeBook<T>(typeof(T).Assembly.GetTypes());
     public static Book ComposeOnly<T>() => ComposeBook<T>([typeof(T)]);
 
-    private static Book ComposeBook<T>(Type[] types) => new(
-        TheReflectionist.GetDocFileTypes(types)
-            .Where(a => (a.Namespace ?? "").StartsWith(typeof(T).Namespace ?? ""))
-            .Select(a => PageFromType(typeof(T), a))
-            .ToReadOnlyCollection(),
-        TheReflectionist.GetIncludedTypes(types)
-            .Select(a => InclusionFromType(typeof(T), a.Type, a.NoHeader))
-            .ToReadOnlyCollection(),
-        TheReflectionist.GetDocSnippets(typeof(T).Assembly.GetTypes())
-            .Select(ExampleFromDocSnippet)
-            .Concat(TheReflectionist.GetDocExamples(typeof(T).Assembly.GetTypes())
-                .Select(ExampleFromCodeExample))
-            .ToReadOnlyCollection());
+    private static Book ComposeBook<T>(Type[] types)
+    {
+        var root = typeof(T);
+        var pageTypes = TheReflectionist.GetDocFileTypes(types)
+            .Where(type => IsNamespaceInScope(root.Namespace, type.Namespace))
+            .ToReadOnlyCollection();
+        var pages = pageTypes
+            .Select(type => PageFromType(root, type))
+            .ToReadOnlyCollection();
+        var inclusions = ResolveInclusions(root, pageTypes);
+        var examples = ResolveExamples(
+            pages.Select(page => page.Explanation)
+                .Concat(inclusions.Select(inclusion => inclusion.Explanation)));
+
+        return new(pages, inclusions, examples);
+    }
+
+    private static bool IsNamespaceInScope(string? rootNamespace, string? currentNamespace)
+    {
+        rootNamespace ??= "";
+        currentNamespace ??= "";
+        return rootNamespace.Length == 0
+            || currentNamespace == rootNamespace
+            || currentNamespace.StartsWith(rootNamespace + ".", StringComparison.Ordinal);
+    }
+
+    private static IReadOnlyCollection<Inclusion> ResolveInclusions(
+        Type root,
+        IReadOnlyCollection<Type> pageTypes)
+    {
+        var resolved = new Dictionary<Type, Inclusion>();
+        var visiting = new List<Type>();
+
+        foreach (var pageType in pageTypes)
+            Visit(pageType);
+
+        return [.. resolved.Values];
+
+        void Visit(Type owner)
+        {
+            visiting.Add(owner);
+            var includedTypes = TheReflectionist.GetIncludedTypes([owner])
+                .Select(include => include.Type)
+                .Distinct();
+
+            foreach (var includedType in includedTypes)
+            {
+                var cycleStart = visiting.IndexOf(includedType);
+                if (cycleStart >= 0)
+                {
+                    var cycle = visiting.Skip(cycleStart)
+                        .Append(includedType)
+                        .Select(type => type.FullName ?? type.Name);
+                    throw new InvalidOperationException(
+                        $"A documentation include cycle was found: {string.Join(" -> ", cycle)}.");
+                }
+
+                if (resolved.ContainsKey(includedType))
+                    continue;
+
+                resolved.Add(includedType, InclusionFromType(root, includedType, false));
+                Visit(includedType);
+            }
+
+            visiting.RemoveAt(visiting.Count - 1);
+        }
+    }
+
+    private static IReadOnlyCollection<Example> ResolveExamples(
+        IEnumerable<Explanation> explanations)
+    {
+        var references = explanations
+            .SelectMany(explanation => explanation.Fragments)
+            .OfType<CodeExampleFragment>()
+            .Where(reference => reference.SourceType is not null)
+            .DistinctBy(reference => (reference.Name, reference.SourceType));
+        var result = new List<Example>();
+
+        foreach (var reference in references)
+        {
+            var sourceType = reference.SourceType!;
+            var snippets = TheReflectionist.GetDocSnippets([sourceType])
+                .Where(candidate => candidate.Item1 == reference.Name)
+                .ToList();
+            var examples = TheReflectionist.GetDocExamples([sourceType])
+                .Where(candidate => candidate.Item1 == reference.Name)
+                .ToList();
+
+            if (snippets.Count + examples.Count > 1)
+                throw new InvalidOperationException(
+                    $"More than one code example matches '{reference.Name}'. " +
+                    "Overloaded or multiply annotated members cannot be selected by name alone.");
+
+            if (snippets.Count == 1)
+                result.Add(ExampleFromDocSnippet(snippets[0]));
+            else if (examples.Count == 1)
+                result.Add(ExampleFromCodeExample(examples[0]));
+        }
+
+        return result;
+    }
 
     private static Example ExampleFromDocSnippet((string Name, CodeSnippetAttribute Attribute, List<CodeReplaceAttribute> Replacements, List<CodeFormatAttribute> Formatters) docExample)
         => ExampleFrom(
@@ -69,9 +159,12 @@ public static class TheArchivist
         List<CodeReplaceAttribute> replacements,
         List<CodeFormatAttribute> formatters)
     {
+        var source = string.Join(
+            Environment.NewLine,
+            GetCodeLocator().ReadAfter(file, 0));
         var newLines =
             CodeExampleExtractor
-                .Extract(file, line, asSnippet)
+                .ExtractSource(source, file, line, asSnippet)
                 .ReplaceLineEndings()
                 .Split(Environment.NewLine)
                 .Select(a => ApplyReplacements(name, a, replacements));
@@ -83,13 +176,17 @@ public static class TheArchivist
 
     public static IEnumerable<string> Dedent(IEnumerable<string> lines, bool asSnippet)
     {
-        var filter = lines.SkipWhile(string.IsNullOrWhiteSpace);
-        var nonEmpty = filter.Where(line => !string.IsNullOrWhiteSpace(line)).ToList();
-        if (nonEmpty.Count == 0)
-            return nonEmpty;
-        var head = nonEmpty[0];
-        var indent = head.TakeWhile(char.IsWhiteSpace).Count();
-        return nonEmpty.Select(line => DedentLine(line, indent));
+        var materialized = lines.ToList();
+        var first = materialized.FindIndex(line => !string.IsNullOrWhiteSpace(line));
+        if (first < 0)
+            return [];
+
+        var last = materialized.FindLastIndex(line => !string.IsNullOrWhiteSpace(line));
+        var content = materialized.GetRange(first, last - first + 1);
+        var indent = content
+            .Where(line => !string.IsNullOrWhiteSpace(line))
+            .Min(line => line.TakeWhile(char.IsWhiteSpace).Count());
+        return content.Select(line => DedentLine(line, indent));
     }
 
     private static string DedentLine(string line, int indent)
@@ -135,11 +232,11 @@ public static class TheArchivist
         DocContentAttribute a => new ContentFragment(a.Content),
         DocCodeAttribute a => new CodeFragment(a.Code, a.Language),
         DocBarChartAttribute a => BarChartFrom(type, a),
-        DocIncludeAttribute a => new InclusionFragment(a.Included),
-        DocExampleAttribute a => new CodeExampleFragment(a.Name, a.Language),
+        DocIncludeAttribute a => new InclusionFragment(a.Included, a.NoHeader),
+        DocExampleAttribute a => new CodeExampleFragment(a.Name, a.Language, a.SourceType),
         DocCodeFileAttribute a => new CodeFragment(TheCartographer.GetFileContents(a.Path, a.Filename, a.SkipLines, a.NumberOfLines), a.Language),
         DocRawFileAttribute a => new ContentFragment(TheCartographer.GetRawFileContents(a.Path, a.Filename)),
-        DocLinkAttribute a => new LinkFragment(a.Name, GetLinkLocation(type, a), GetLocalLinkLocation(a.Target)),
+        DocLinkAttribute a => new LinkFragment(a.Name, GetLinkLocation(type, a), GetLocalLinkLocation(a)),
         DocTableAttribute a => new TableFragment(a.Columns, GetColumns(type, a)),
         _ => throw new NotSupportedException(attr.GetType().Name)
     };
@@ -203,28 +300,46 @@ public static class TheArchivist
         }
     }
 
-    private static string GetLinkLocation(Type root, DocLinkAttribute a)
-        => TheCartographer.ChartLinkPath(root, a.Target)
-            + (string.IsNullOrWhiteSpace(a.Section)
-                ? "" : $"#{a.Section}").ToLower();
+    private static string GetLinkLocation(Type root, DocLinkAttribute attribute)
+    {
+        var path = TheCartographer.ChartLinkPath(root, attribute.Target);
+        return string.IsNullOrWhiteSpace(attribute.Section)
+            ? path
+            : $"{path}#{FormatLink(attribute.Section)}";
+    }
+
+    private static string GetLocalLinkLocation(DocLinkAttribute attribute)
+        => "#" + FormatLink(
+            string.IsNullOrWhiteSpace(attribute.Section)
+                ? GetHeaderText(attribute.Target)
+                : attribute.Section);
 
     private static string GetLocalLinkLocation(Type type)
         => "#" + FormatLink(GetHeaderText(type));
 
     private static string FormatLink(string input)
-        => input
-            .Replace(",", "")
-            .Replace(".", "")
-            .Replace("<", "")
-            .Replace(">", "")
-            .Replace("&lt;", "")
-            .Replace("&gt;", "")
-            .Replace("(", "")
-            .Replace(")", "")
-            .Replace("[", "")
-            .Replace("]", "")
-            .Replace(' ', '-')
-            .ToLower();
+    {
+        var decoded = WebUtility.HtmlDecode(input);
+        var result = new StringBuilder(decoded.Length);
+        var previousWasWhitespace = false;
+
+        foreach (var character in decoded)
+        {
+            if (char.IsWhiteSpace(character))
+            {
+                if (!previousWasWhitespace)
+                    result.Append('-');
+                previousWasWhitespace = true;
+                continue;
+            }
+
+            previousWasWhitespace = false;
+            if (char.IsLetterOrDigit(character) || character is '-' or '_')
+                result.Append(char.ToLowerInvariant(character));
+        }
+
+        return result.ToString();
+    }
 
     // IEnumerables ?
     private static RowFragment[] GetColumns(Type type, DocTableAttribute attribute)

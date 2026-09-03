@@ -12,13 +12,28 @@ public static class CodeExampleExtractor
         if (string.IsNullOrWhiteSpace(filePath))
             throw new InvalidOperationException("Code example file path is missing.");
 
-        if (lineNumber == 0)
-            throw new InvalidOperationException("Code example line number is missing.");
-
         if (!File.Exists(filePath))
             throw new FileNotFoundException("Could not find source file.", filePath);
 
         var source = File.ReadAllText(filePath);
+        return ExtractSource(source, filePath, lineNumber, asSnippet);
+    }
+
+    internal static string ExtractSource(
+        string source,
+        string filePath,
+        int lineNumber,
+        bool asSnippet)
+    {
+        if (source is null)
+            throw new ArgumentNullException(nameof(source));
+
+        if (string.IsNullOrWhiteSpace(filePath))
+            throw new InvalidOperationException("Code example file path is missing.");
+
+        if (lineNumber == 0)
+            throw new InvalidOperationException("Code example line number is missing.");
+
         var text = SourceText.From(source);
         var tree = CSharpSyntaxTree.ParseText(source, path: filePath);
         var root = tree.GetRoot();
@@ -29,7 +44,9 @@ public static class CodeExampleExtractor
 
         var declaration = FindDeclarationMarkedAtLine(root, lineNumber, asSnippet)
             ?? throw new InvalidOperationException(
-                $"Could not find a declaration marked with CodeExampleAttribute on line {lineNumber} in '{filePath}'.");
+                $"Could not find a declaration marked with " +
+                $"{(asSnippet ? nameof(CodeSnippetAttribute) : nameof(CodeExampleAttribute))} " +
+                $"on line {lineNumber} in '{filePath}'.");
 
         var stripped = (MemberDeclarationSyntax)new StripAllAttributesRewriter().Visit(declaration)!;
 

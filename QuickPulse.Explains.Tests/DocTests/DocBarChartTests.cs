@@ -50,6 +50,25 @@ public class DocBarChartTests
         Assert.Equal("    bar [3, 3, 3, 3, 3, 4, 4, 5, 6, 6]", reader.NextLine());
     }
 
+    [Fact]
+    public void Escapes_syntax_significant_characters_in_labels()
+    {
+        var attribute = new DocBarChartAttribute(
+            typeof(CurveData),
+            nameof(CurveData.WeightCurve),
+            "Revenue \"net\"\r\n2026",
+            "Input #34; <raw>",
+            "Weight & \"kg\"");
+        var reader = Render(attribute);
+
+        reader.Skip(3);
+        Assert.Equal("    title \"Revenue #34;net#34; 2026\"", reader.NextLine());
+        Assert.Equal(
+            "    x-axis \"Input #35;34; #60;raw#62;\" [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]",
+            reader.NextLine());
+        Assert.Equal("    y-axis \"Weight #38; #34;kg#34;\"", reader.NextLine());
+    }
+
     private static LinesReader Render(DocBarChartAttribute attribute)
     {
         var collector = Collect.ValuesOf<string>();

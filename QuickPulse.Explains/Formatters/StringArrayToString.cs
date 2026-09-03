@@ -40,46 +40,46 @@ public class StringArrayToString : ICodeFormatter
     //     from ___ in Pulse.ToFlowIf<char, QuoteEnclosure>(a => a.InEnclosure(c), nextFlow, () => c)
     //     select c;
 
-    public abstract record Enclosure
-    {
-        protected abstract char Enter { get; }
-        protected abstract char Exit { get; }
-        public int Level { get; private set; } = -1;
-        public bool InEnclosure(char ch)
-        {
-            if (Enter == Exit)
-                return InSameEncloser(ch);
-            if (ch == Exit) Level--;
-            var result = Level >= 0;
-            if (ch == Enter) Level++;
-            return result;
-        }
+    // public abstract record Enclosure
+    // {
+    //     protected abstract char Enter { get; }
+    //     protected abstract char Exit { get; }
+    //     public int Level { get; private set; } = -1;
+    //     public bool InEnclosure(char ch)
+    //     {
+    //         if (Enter == Exit)
+    //             return InSameEncloser(ch);
+    //         if (ch == Exit) Level--;
+    //         var result = Level >= 0;
+    //         if (ch == Enter) Level++;
+    //         return result;
+    //     }
 
-        private bool InSameEncloser(char ch)
-        {
-            if (ch == Enter)
-            {
-                if (Level == 0)
-                {
-                    Level--;
-                }
-                else
-                    Level++;
-            }
-            return Level >= 0 && ch != Enter;
-        }
-    }
+    //     private bool InSameEncloser(char ch)
+    //     {
+    //         if (ch == Enter)
+    //         {
+    //             if (Level == 0)
+    //             {
+    //                 Level--;
+    //             }
+    //             else
+    //                 Level++;
+    //         }
+    //         return Level >= 0 && ch != Enter;
+    //     }
+    // }
 
-    public record BracketEnclosure : Enclosure
-    {
-        protected override char Enter => '[';
-        protected override char Exit => ']';
-    }
+    // public record BracketEnclosure : Enclosure
+    // {
+    //     protected override char Enter => '[';
+    //     protected override char Exit => ']';
+    // }
 
-    public record QuoteEnclosure : Enclosure
-    {
-        protected override char Enter => '"';
-        protected override char Exit => '"';
-    }
+    // public record QuoteEnclosure : Enclosure
+    // {
+    //     protected override char Enter => '"';
+    //     protected override char Exit => '"';
+    // }
 }
 

@@ -3,6 +3,7 @@ using QuickPulse.Explains.Monastery.Fragments;
 using QuickPulse.Explains.Monastery.Fragments.Tables;
 using QuickPulse.Explains.Monastery.Writings;
 using System.Globalization;
+using System.Text;
 
 namespace QuickPulse.Explains.Monastery;
 
@@ -41,8 +42,8 @@ public static class Scriptorium
     private static Flow<Flow> BarChart(BarChartFragment fragment) =>
         from start in Pulse.Trace("```mermaid")
         from chart in Pulse.Trace("xychart-beta")
-        from title in Pulse.Trace($"    title \"{fragment.Title}\"")
-        from xAxis in Pulse.Trace($"    x-axis \"{fragment.XAxis}\" [{string.Join(", ", fragment.XValues)}]")
+        from title in Pulse.Trace($"    title \"{EscapeMermaidLabel(fragment.Title)}\"")
+        from xAxis in Pulse.Trace($"    x-axis \"{EscapeMermaidLabel(fragment.XAxis)}\" [{string.Join(", ", fragment.XValues)}]")
         from yAxis in Pulse.Trace(YAxis(fragment))
         from bars in Pulse.Trace($"    bar [{string.Join(", ", fragment.YValues)}]")
         from end in Pulse.Trace("```")
@@ -50,8 +51,28 @@ public static class Scriptorium
 
     private static string YAxis(BarChartFragment fragment) =>
         fragment.YAxisMinimum is double minimum && fragment.YAxisMaximum is double maximum
-            ? $"    y-axis \"{fragment.YAxis}\" {FormatNumber(minimum)} --> {FormatNumber(maximum)}"
-            : $"    y-axis \"{fragment.YAxis}\"";
+            ? $"    y-axis \"{EscapeMermaidLabel(fragment.YAxis)}\" {FormatNumber(minimum)} --> {FormatNumber(maximum)}"
+            : $"    y-axis \"{EscapeMermaidLabel(fragment.YAxis)}\"";
+
+    private static string EscapeMermaidLabel(string value)
+    {
+        var normalized = value.ReplaceLineEndings(" ");
+        var result = new StringBuilder(normalized.Length);
+        foreach (var character in normalized)
+        {
+            result.Append(character switch
+            {
+                '#' => "#35;",
+                '&' => "#38;",
+                '"' => "#34;",
+                '<' => "#60;",
+                '>' => "#62;",
+                _ when char.IsControl(character) => " ",
+                _ => character
+            });
+        }
+        return result.ToString();
+    }
 
     private static string FormatNumber(double value) =>
         value.ToString("G", CultureInfo.InvariantCulture);
@@ -68,8 +89,9 @@ public static class Scriptorium
     private static Flow<Flow> Include(InclusionFragment fragment) =>
         from includes in Pulse.Draw<IReadOnlyCollection<Inclusion>>()
         let include = includes.Single(a => a.Type == fragment.Included)
-        from _1 in Pulse.ToFlowIf(include.NoHeader, Fragments!, () => include.Explanation.Fragments)
-        from _2 in Pulse.ToFlowIf(!include.NoHeader, Explanation!, () => include.Explanation)
+        let noHeader = fragment.NoHeader || include.NoHeader
+        from _1 in Pulse.ToFlowIf(noHeader, Fragments!, () => include.Explanation.Fragments)
+        from _2 in Pulse.ToFlowIf(!noHeader, Explanation!, () => include.Explanation)
         select Flow.Continue;
 
     private static Flow<Flow> Link(LinkFragment fragment) =>
@@ -84,7 +106,13 @@ public static class Scriptorium
 
 
     private static Flow<Flow> TableRow(IEnumerable<string> row) =>
-        Pulse.Trace($"| {string.Join("| ", row)} |");
+        Pulse.Trace($"| {string.Join("| ", row.Select(EscapeMarkdownTableCell))} |");
+
+    private static string EscapeMarkdownTableCell(string value) =>
+        value
+            .Replace("\\", "\\\\", StringComparison.Ordinal)
+            .Replace("|", "\\|", StringComparison.Ordinal)
+            .ReplaceLineEndings("<br>");
 
     private static Flow<Flow> Row(RowFragment fragment) =>
         from includeLinks in Pulse.Draw<bool>()

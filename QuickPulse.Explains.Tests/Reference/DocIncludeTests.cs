@@ -1,5 +1,3 @@
-using System.Reflection;
-using System.Reflection.Emit;
 using QuickPulse.Arteries;
 using QuickPulse.Explains.Monastery;
 using QuickPulse.Explains.Tests._Tools;
@@ -14,15 +12,7 @@ public class DocIncludeTests
     [DocContent("Also works on Class definition.")]
     public void DocInclude_Works_on_class()
     {
-        var asmName = new AssemblyName("DocIncludeTestingAssembly");
-        var asm = AssemblyBuilder.DefineDynamicAssembly(asmName, AssemblyBuilderAccess.Run);
-        var module = asm.DefineDynamicModule("Main");
-        AppDomain.CurrentDomain.AssemblyResolve += (sender, args) =>
-        {
-            if (args.Name.StartsWith(asm.FullName!))
-                return asm;
-            return null;
-        };
+        using var module = DynamicModuleBuilder.Create();
 
         var includedType = DynamicTypeBuilder.Create("SomeOtherClass", module)
             .WithVoidMethod<DocHeaderAttribute>("MyMethod", "Header From SomeOtherClass Method", 0)
@@ -34,9 +24,16 @@ public class DocIncludeTests
             .Build();
 
         var collector = Collect.ValuesOf<string>();
-        TheScribe.GetArtery = a => collector;
-
-        ExplainThis.Invoke(type, "whatever");
+        var previousArtery = TheScribe.GetArtery;
+        try
+        {
+            TheScribe.GetArtery = _ => collector;
+            ExplainThis.Invoke(type, "whatever");
+        }
+        finally
+        {
+            TheScribe.GetArtery = previousArtery;
+        }
 
         var reader = LinesReader.FromStringList([.. collector.Values]);
         Assert.Equal("# A Simple File", reader.NextLine());
@@ -48,15 +45,7 @@ public class DocIncludeTests
     [Fact]
     public void DocInclude_NoHeader()
     {
-        var asmName = new AssemblyName("DocIncludeTestingAssembly");
-        var asm = AssemblyBuilder.DefineDynamicAssembly(asmName, AssemblyBuilderAccess.Run);
-        var module = asm.DefineDynamicModule("Main");
-        AppDomain.CurrentDomain.AssemblyResolve += (sender, args) =>
-        {
-            if (args.Name.StartsWith(asm.FullName!))
-                return asm;
-            return null;
-        };
+        using var module = DynamicModuleBuilder.Create();
 
         var includedType = DynamicTypeBuilder.Create("SomeOtherClass", module)
             .WithVoidMethod<DocHeaderAttribute>("MyMethod", "Header From SomeOtherClass Method", 0)
@@ -68,9 +57,16 @@ public class DocIncludeTests
             .Build();
 
         var collector = Collect.ValuesOf<string>();
-        TheScribe.GetArtery = a => collector;
-
-        ExplainThis.Invoke(type, "whatever");
+        var previousArtery = TheScribe.GetArtery;
+        try
+        {
+            TheScribe.GetArtery = _ => collector;
+            ExplainThis.Invoke(type, "whatever");
+        }
+        finally
+        {
+            TheScribe.GetArtery = previousArtery;
+        }
 
         var reader = LinesReader.FromStringList([.. collector.Values]);
         Assert.Equal("# A Simple File", reader.NextLine());
