@@ -1,12 +1,7 @@
 namespace QuickPulse.Explains.Formatters;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true)]
-public class CodeFormatAttribute : Attribute
+public class CodeFormatAttribute(Type formatterType) : Attribute
 {
-    public Type FormatterType { get; }
-
-    public CodeFormatAttribute(Type formatterType, string? methodName = null, params object?[] args)
-    {
-        FormatterType = formatterType;
-    }
+    public Type FormatterType { get; } = formatterType;
 }

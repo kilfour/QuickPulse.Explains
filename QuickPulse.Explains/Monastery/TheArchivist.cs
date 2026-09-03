@@ -7,6 +7,10 @@ using QuickPulse.Explains.Monastery.Writings;
 using QuickPulse.Explains.Monastery.Reading;
 using QuickPulse.Explains.Monastery.Fragments.Tables;
 using QuickPulse.Explains.Exceptions;
+using System.Collections;
+using System.Globalization;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 
 
 namespace QuickPulse.Explains.Monastery;
@@ -68,6 +72,7 @@ public static class TheArchivist
         var newLines =
             CodeExampleExtractor
                 .Extract(file, line, asSnippet)
+                .ReplaceLineEndings()
                 .Split(Environment.NewLine)
                 .Select(a => ApplyReplacements(name, a, replacements));
         var formattedLines = ApplyFormatters(newLines, formatters).ToList();
@@ -129,6 +134,7 @@ public static class TheArchivist
         DocHeaderAttribute a => new HeaderFragment(a.Header, a.Level),
         DocContentAttribute a => new ContentFragment(a.Content),
         DocCodeAttribute a => new CodeFragment(a.Code, a.Language),
+        DocBarChartAttribute a => BarChartFrom(type, a),
         DocIncludeAttribute a => new InclusionFragment(a.Included),
         DocExampleAttribute a => new CodeExampleFragment(a.Name, a.Language),
         DocCodeFileAttribute a => new CodeFragment(TheCartographer.GetFileContents(a.Path, a.Filename, a.SkipLines, a.NumberOfLines), a.Language),
@@ -137,6 +143,65 @@ public static class TheArchivist
         DocTableAttribute a => new TableFragment(a.Columns, GetColumns(type, a)),
         _ => throw new NotSupportedException(attr.GetType().Name)
     };
+
+    private static BarChartFragment BarChartFrom(Type type, DocBarChartAttribute attribute)
+    {
+        var dataSourceType = attribute.DataSourceType ?? type;
+        const BindingFlags flags = BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
+        var member = dataSourceType.GetField(attribute.DataMember, flags) as MemberInfo
+            ?? dataSourceType.GetProperty(attribute.DataMember, flags);
+        var data = member switch
+        {
+            FieldInfo field => field.GetValue(null),
+            PropertyInfo property => property.GetValue(null),
+            _ => throw new InvalidOperationException(
+                $"Static chart data member '{attribute.DataMember}' was not found on '{dataSourceType.FullName}'.")
+        };
+
+        if (data is not IEnumerable points)
+            throw new InvalidOperationException(
+                $"Chart data member '{dataSourceType.FullName}.{attribute.DataMember}' must be an enumerable of (x, y) tuples.");
+
+        var xValues = new List<string>();
+        var yValues = new List<string>();
+        foreach (var point in points)
+        {
+            if (point is not ITuple tuple || tuple.Length != 2)
+                throw new InvalidOperationException(
+                    $"Chart data member '{dataSourceType.FullName}.{attribute.DataMember}' must contain (x, y) tuples.");
+
+            xValues.Add(FormatChartValue(tuple[0], dataSourceType, attribute));
+            yValues.Add(FormatChartValue(tuple[1], dataSourceType, attribute));
+        }
+
+        return new(
+            attribute.Title,
+            attribute.XAxis,
+            attribute.YAxis,
+            xValues,
+            yValues,
+            attribute.YAxisMinimum,
+            attribute.YAxisMaximum);
+    }
+
+    private static string FormatChartValue(object? value, Type type, DocBarChartAttribute attribute)
+    {
+        if (value is null || value is not IConvertible)
+            throw new InvalidOperationException(
+                $"Chart data member '{type.FullName}.{attribute.DataMember}' must contain numeric values.");
+
+        try
+        {
+            return Convert.ToDouble(value, CultureInfo.InvariantCulture)
+                .ToString("G", CultureInfo.InvariantCulture);
+        }
+        catch (Exception exception) when (exception is FormatException or InvalidCastException or OverflowException)
+        {
+            throw new InvalidOperationException(
+                $"Chart data member '{type.FullName}.{attribute.DataMember}' must contain numeric values.",
+                exception);
+        }
+    }
 
     private static string GetLinkLocation(Type root, DocLinkAttribute a)
         => TheCartographer.ChartLinkPath(root, a.Target)

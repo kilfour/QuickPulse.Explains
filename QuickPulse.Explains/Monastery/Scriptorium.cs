@@ -2,6 +2,7 @@ using QuickPulse.Explains.Exceptions;
 using QuickPulse.Explains.Monastery.Fragments;
 using QuickPulse.Explains.Monastery.Fragments.Tables;
 using QuickPulse.Explains.Monastery.Writings;
+using System.Globalization;
 
 namespace QuickPulse.Explains.Monastery;
 
@@ -36,6 +37,24 @@ public static class Scriptorium
          from _ in Pulse.Trace(fragment.Code.Trim())
          from e in Pulse.Trace("```")
          select Flow.Continue;
+
+    private static Flow<Flow> BarChart(BarChartFragment fragment) =>
+        from start in Pulse.Trace("```mermaid")
+        from chart in Pulse.Trace("xychart-beta")
+        from title in Pulse.Trace($"    title \"{fragment.Title}\"")
+        from xAxis in Pulse.Trace($"    x-axis \"{fragment.XAxis}\" [{string.Join(", ", fragment.XValues)}]")
+        from yAxis in Pulse.Trace(YAxis(fragment))
+        from bars in Pulse.Trace($"    bar [{string.Join(", ", fragment.YValues)}]")
+        from end in Pulse.Trace("```")
+        select Flow.Continue;
+
+    private static string YAxis(BarChartFragment fragment) =>
+        fragment.YAxisMinimum is double minimum && fragment.YAxisMaximum is double maximum
+            ? $"    y-axis \"{fragment.YAxis}\" {FormatNumber(minimum)} --> {FormatNumber(maximum)}"
+            : $"    y-axis \"{fragment.YAxis}\"";
+
+    private static string FormatNumber(double value) =>
+        value.ToString("G", CultureInfo.InvariantCulture);
 
     private static Flow<Flow> CodeExample(CodeExampleFragment fragment) =>
          from examples in Pulse.Draw<IReadOnlyCollection<Example>>()
@@ -89,6 +108,7 @@ public static class Scriptorium
             HeaderFragment a => Pulse.ToFlow(b => Pulse.ToFlow(Header, b), a),
             ContentFragment a => Pulse.ToFlow(Content, a),
             CodeFragment a => Pulse.ToFlow(Code, a),
+            BarChartFragment a => Pulse.ToFlow(BarChart, a),
             CodeExampleFragment a => Pulse.ToFlow(CodeExample, a),
             InclusionFragment a => Pulse.ToFlow(Include, a),
             LinkFragment a => Pulse.ToFlow(Link, a),
