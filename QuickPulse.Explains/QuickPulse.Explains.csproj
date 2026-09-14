@@ -4,7 +4,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 
-    <Version>0.3.18</Version>
+    <Version>0.3.19</Version>
     <Authors>Kilfour</Authors>
     
     <PackageId>QuickPulse.Explains</PackageId>
