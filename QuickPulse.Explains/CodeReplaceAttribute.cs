@@ -6,7 +6,7 @@ namespace QuickPulse.Explains;
 /// before rendering them in the generated output.
 /// </summary>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true)]
-public class CodeReplaceAttribute(string from, string to) : Attribute
+public class CodeReplaceAttribute(string from, string to) : Abstractions.CodeAttribute
 {
     public string From { get; } = from;
     public string To { get; } = to;

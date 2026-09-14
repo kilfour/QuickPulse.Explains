@@ -23,7 +23,8 @@ public static class CodeExampleExtractor
         string source,
         string filePath,
         int lineNumber,
-        bool asSnippet)
+        bool asSnippet,
+        string[]? compositionAttributeNames = null)
     {
         if (source is null)
             throw new ArgumentNullException(nameof(source));
@@ -42,13 +43,13 @@ public static class CodeExampleExtractor
             throw new InvalidOperationException(
                 $"Line {lineNumber} is outside the file '{filePath}'.");
 
-        var declaration = FindDeclarationMarkedAtLine(root, lineNumber, asSnippet)
+        var declaration = FindDeclarationMarkedAtLine(root, lineNumber, asSnippet, compositionAttributeNames ?? [])
             ?? throw new InvalidOperationException(
                 $"Could not find a declaration marked with " +
                 $"{(asSnippet ? nameof(CodeSnippetAttribute) : nameof(CodeExampleAttribute))} " +
                 $"on line {lineNumber} in '{filePath}'.");
 
-        var stripped = (MemberDeclarationSyntax)new StripAllAttributesRewriter().Visit(declaration)!;
+        var stripped = (MemberDeclarationSyntax)new StripAllAttributesRewriter(compositionAttributeNames ?? []).Visit(declaration)!;
 
         if (asSnippet)
             return ExtractBody(stripped);
@@ -56,7 +57,7 @@ public static class CodeExampleExtractor
         return stripped.ToFullString();
     }
 
-    private static MemberDeclarationSyntax? FindDeclarationMarkedAtLine(SyntaxNode root, int lineNumber, bool asSnippet)
+    private static MemberDeclarationSyntax? FindDeclarationMarkedAtLine(SyntaxNode root, int lineNumber, bool asSnippet, string[] compositionAttributeNames)
     {
         foreach (var member in root.DescendantNodes().OfType<MemberDeclarationSyntax>())
         {
@@ -65,7 +66,9 @@ public static class CodeExampleExtractor
                 continue;
             foreach (var list in lists)
             {
-                if (!ContainsCodeAttribute(list, asSnippet))
+                if (!ContainsCodeAttribute(list, asSnippet)
+                    && !list.Attributes.Any(attribute => compositionAttributeNames.Any(name =>
+                        IsCodeExampleName(attribute.Name.ToString(), name.EndsWith("Attribute", StringComparison.Ordinal) ? name[..^9] : name))))
                     continue;
                 if (ContainsLine(list, lineNumber))
                     return member;

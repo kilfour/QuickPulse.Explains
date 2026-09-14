@@ -17,7 +17,7 @@ namespace QuickPulse.Explains;
     AllowMultiple = false)]
 public class CodeExampleAttribute(
     [CallerFilePath] string file = "",
-    [CallerLineNumber] int line = 0) : Attribute
+    [CallerLineNumber] int line = 0) : Abstractions.CodeAttribute
 {
     public string File { get; } = file;
     public int Line { get; } = line;

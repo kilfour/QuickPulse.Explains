@@ -13,43 +13,65 @@ public static class TheReflectionist
             .ThenBy(t => t.Name);
 
     public static IEnumerable<(Type Type, bool NoHeader)> GetIncludedTypes(Type[] types) =>
-        types.SelectMany(a => a.GetCustomAttributes<DocIncludeAttribute>(false).Select(a => (a.Included, a.NoHeader)))
-            .Concat(types.SelectMany(a => a.GetMethods(Flags).SelectMany(a => a.GetCustomAttributes<DocIncludeAttribute>(false)))
-            .Select(a => (a.Included, a.NoHeader)))
+        types.SelectMany(GetDocFragmentAttributes).OfType<DocIncludeAttribute>()
+            .Select(a => (a.Included, a.NoHeader))
             .Distinct();
 
     public static List<DocFragmentAttribute> GetDocFragmentAttributes(Type type) =>
-        [.. type.GetCustomAttributes<DocFragmentAttribute>(false)
+        [.. GetFragments(type)
             .Concat(type.GetMethods(Flags)
-                .SelectMany(a => a.GetCustomAttributes<DocFragmentAttribute>(false)))
+                .SelectMany(GetFragments))
             ];
+
+    private static IEnumerable<DocFragmentAttribute> GetFragments(MemberInfo member) =>
+        member.GetCustomAttributes(false).SelectMany(attribute => attribute switch
+        {
+            IDocAttribute composite => composite.Expand(),
+            DocFragmentAttribute fragment => new[] { fragment },
+            _ => Enumerable.Empty<DocFragmentAttribute>()
+        });
 
     public static string? GetDocFileHeader(Type type) =>
         type.GetCustomAttribute<DocFileHeaderAttribute>(false)?.Header;
 
     public static IEnumerable<(string, CodeSnippetAttribute, List<CodeReplaceAttribute>, List<CodeFormatAttribute>)> GetDocSnippets(Type[] types) =>
-        types.SelectMany(a => a.GetMethods(Flags).Cast<MemberInfo>().Concat(a.GetFields(Flags).Cast<MemberInfo>()))
-            .Where(a => a.GetCustomAttributes<CodeSnippetAttribute>().Any())
-            .Select(a => (
-                $"{a.DeclaringType!.FullName}.{a.Name}",
-                a.GetCustomAttribute<CodeSnippetAttribute>(),
-                a.GetCustomAttributes<CodeReplaceAttribute>().ToList(),
-                a.GetCustomAttributes<CodeFormatAttribute>().ToList()))!;
+        GetCodeMarkers<CodeSnippetAttribute>(GetCodeSources(types));
 
     public static IEnumerable<(string, CodeExampleAttribute, List<CodeReplaceAttribute>, List<CodeFormatAttribute>)> GetDocExamples(Type[] types) =>
-        types.Where(a => a.GetCustomAttributes<CodeExampleAttribute>().Any())
-            .Select(a => (
-                a.FullName!,
-                a.GetCustomAttribute<CodeExampleAttribute>()!,
-                a.GetCustomAttributes<CodeReplaceAttribute>().ToList(),
-                a.GetCustomAttributes<CodeFormatAttribute>().ToList())).Concat(
-        types.SelectMany(a => a.GetMethods(Flags).Cast<MemberInfo>().Concat(a.GetFields(Flags).Cast<MemberInfo>()))
-            .Where(a => a.GetCustomAttributes<CodeExampleAttribute>().Any())
-            .Select(a => (
-                $"{a.DeclaringType!.FullName!}.{a.Name}",
-                a.GetCustomAttribute<CodeExampleAttribute>()!,
-                a.GetCustomAttributes<CodeReplaceAttribute>().ToList(),
-                a.GetCustomAttributes<CodeFormatAttribute>().ToList())));
+        GetCodeMarkers<CodeExampleAttribute>(GetCodeSources(types));
+
+    internal static List<(string Name, CodeAttribute[] Attributes)> GetCodeSources(Type[] types, HashSet<string>? referencedNames = null) =>
+        types.SelectMany(type => new MemberInfo[] { type }
+            .Concat(type.GetMethods(Flags))
+            .Concat(type.GetFields(Flags)))
+            .Select(member => (Member: member,
+                Name: member is Type type ? type.FullName! : $"{member.DeclaringType!.FullName}.{member.Name}"))
+            .Where(source => referencedNames is null || referencedNames.Contains(source.Name))
+            .Select(source => (source.Name, GetCodeAttributes(source.Member)))
+            .ToList();
+
+    internal static IEnumerable<(string, T, List<CodeReplaceAttribute>, List<CodeFormatAttribute>)> GetCodeMarkers<T>(
+        IEnumerable<(string Name, CodeAttribute[] Attributes)> sources) where T : CodeAttribute =>
+        sources.SelectMany(source => source.Attributes.OfType<T>().Select(marker => (
+            source.Name, marker,
+            source.Attributes.OfType<CodeReplaceAttribute>().ToList(),
+            source.Attributes.OfType<CodeFormatAttribute>().ToList())));
+
+    private static CodeAttribute[] GetCodeAttributes(MemberInfo member)
+    {
+        var attributes = member.GetCustomAttributes(true);
+        var names = attributes.OfType<ICodeAttribute>()
+            .Select(attribute => attribute.GetType().Name).Distinct().ToArray();
+        var expanded = attributes.SelectMany(attribute => attribute switch
+        {
+            ICodeAttribute composite => composite.Expand(),
+            CodeAttribute code => new[] { code },
+            _ => Enumerable.Empty<CodeAttribute>()
+        }).ToArray();
+        foreach (var attribute in expanded)
+            attribute.CompositionAttributeNames = names;
+        return expanded;
+    }
 
     public static IEnumerable<(Type Type, IEnumerable<DocColumnAttribute> Columns)> GetColumns(Type type, DocTableAttribute attribute)
         => type.Assembly.GetTypes()

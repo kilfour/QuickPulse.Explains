@@ -33,13 +33,23 @@ public static class TheArchivist
     private static Book ComposeBook<T>(Type[] types)
     {
         var root = typeof(T);
+        var explanations = new Dictionary<Type, Explanation>();
+        Explanation GetExplanation(Type type)
+        {
+            if (!explanations.TryGetValue(type, out var explanation))
+            {
+                explanation = ExplanationFromType(root, type);
+                explanations.Add(type, explanation);
+            }
+            return explanation;
+        }
         var pageTypes = TheReflectionist.GetDocFileTypes(types)
             .Where(type => IsNamespaceInScope(root.Namespace, type.Namespace))
             .ToReadOnlyCollection();
         var pages = pageTypes
-            .Select(type => PageFromType(root, type))
+            .Select(type => new Page(GetExplanation(type), TheCartographer.ChartPath(root, type)))
             .ToReadOnlyCollection();
-        var inclusions = ResolveInclusions(root, pageTypes);
+        var inclusions = ResolveInclusions(pageTypes, GetExplanation);
         var examples = ResolveExamples(
             pages.Select(page => page.Explanation)
                 .Concat(inclusions.Select(inclusion => inclusion.Explanation)));
@@ -57,8 +67,8 @@ public static class TheArchivist
     }
 
     private static IReadOnlyCollection<Inclusion> ResolveInclusions(
-        Type root,
-        IReadOnlyCollection<Type> pageTypes)
+        IReadOnlyCollection<Type> pageTypes,
+        Func<Type, Explanation> getExplanation)
     {
         var resolved = new Dictionary<Type, Inclusion>();
         var visiting = new List<Type>();
@@ -71,8 +81,8 @@ public static class TheArchivist
         void Visit(Type owner)
         {
             visiting.Add(owner);
-            var includedTypes = TheReflectionist.GetIncludedTypes([owner])
-                .Select(include => include.Type)
+            var includedTypes = getExplanation(owner).Fragments.OfType<InclusionFragment>()
+                .Select(include => include.Included)
                 .Distinct();
 
             foreach (var includedType in includedTypes)
@@ -90,7 +100,7 @@ public static class TheArchivist
                 if (resolved.ContainsKey(includedType))
                     continue;
 
-                resolved.Add(includedType, InclusionFromType(root, includedType, false));
+                resolved.Add(includedType, new Inclusion(includedType, getExplanation(includedType), false));
                 Visit(includedType);
             }
 
@@ -105,16 +115,25 @@ public static class TheArchivist
             .SelectMany(explanation => explanation.Fragments)
             .OfType<CodeExampleFragment>()
             .Where(reference => reference.SourceType is not null)
-            .DistinctBy(reference => (reference.Name, reference.SourceType));
+            .DistinctBy(reference => (reference.Name, reference.SourceType))
+            .ToList();
         var result = new List<Example>();
+        var sources = new Dictionary<Type, List<(string Name, CodeAttribute[] Attributes)>>();
 
         foreach (var reference in references)
         {
             var sourceType = reference.SourceType!;
-            var snippets = TheReflectionist.GetDocSnippets([sourceType])
+            if (!sources.TryGetValue(sourceType, out var codeSources))
+            {
+                var referencedNames = references.Where(candidate => candidate.SourceType == sourceType)
+                    .Select(candidate => candidate.Name).ToHashSet(StringComparer.Ordinal);
+                codeSources = TheReflectionist.GetCodeSources([sourceType], referencedNames);
+                sources.Add(sourceType, codeSources);
+            }
+            var snippets = TheReflectionist.GetCodeMarkers<CodeSnippetAttribute>(codeSources)
                 .Where(candidate => candidate.Item1 == reference.Name)
                 .ToList();
-            var examples = TheReflectionist.GetDocExamples([sourceType])
+            var examples = TheReflectionist.GetCodeMarkers<CodeExampleAttribute>(codeSources)
                 .Where(candidate => candidate.Item1 == reference.Name)
                 .ToList();
 
@@ -139,7 +158,8 @@ public static class TheArchivist
                 docExample.Attribute.Line,
                 true,
                 docExample.Replacements,
-                docExample.Formatters);
+                docExample.Formatters,
+                docExample.Attribute.CompositionAttributeNames);
 
     private static Example ExampleFromCodeExample(
         (string Name, CodeExampleAttribute Attribute, List<CodeReplaceAttribute> Replacements, List<CodeFormatAttribute> Formatters) docExample)
@@ -149,7 +169,8 @@ public static class TheArchivist
                 docExample.Attribute.Line,
                 false,
                 docExample.Replacements,
-                docExample.Formatters);
+                docExample.Formatters,
+                docExample.Attribute.CompositionAttributeNames);
 
     private static Example ExampleFrom(
         string name,
@@ -157,14 +178,15 @@ public static class TheArchivist
         int line,
         bool asSnippet,
         List<CodeReplaceAttribute> replacements,
-        List<CodeFormatAttribute> formatters)
+        List<CodeFormatAttribute> formatters,
+        string[] compositionAttributeNames)
     {
         var source = string.Join(
             Environment.NewLine,
             GetCodeLocator().ReadAfter(file, 0));
         var newLines =
             CodeExampleExtractor
-                .ExtractSource(source, file, line, asSnippet)
+                .ExtractSource(source, file, line, asSnippet, compositionAttributeNames)
                 .ReplaceLineEndings()
                 .Split(Environment.NewLine)
                 .Select(a => ApplyReplacements(name, a, replacements));
@@ -213,10 +235,6 @@ public static class TheArchivist
         }
         return raw;
     }
-
-    private static Page PageFromType(Type root, Type type) => new(
-        ExplanationFromType(root, type),
-        TheCartographer.ChartPath(root, type));
 
     private static Explanation ExplanationFromType(Type root, Type type)
     {
@@ -370,9 +388,6 @@ public static class TheArchivist
         }
         return [.. result];
     }
-
-    private static Inclusion InclusionFromType(Type root, Type type, bool noHeader) =>
-       new(type, ExplanationFromType(root, type), noHeader);
 
     private static string GetHeaderText(Type type)
     {

@@ -5,7 +5,7 @@ namespace QuickPulse.Explains.Formatters;
 /// The formatter type is instantiated when the code example or snippet is composed.
 /// </summary>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true)]
-public class CodeFormatAttribute(Type formatterType) : Attribute
+public class CodeFormatAttribute(Type formatterType) : Abstractions.CodeAttribute
 {
     public Type FormatterType { get; } = formatterType;
 }

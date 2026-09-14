@@ -34,10 +34,22 @@ public static class Scriptorium
         Pulse.Trace($"{fragment.Content}  ");
 
     private static Flow<Flow> Code(CodeFragment fragment) =>
-         from s in Pulse.Trace($"```{fragment.Language}")
+         from s in Pulse.Trace($"{CodeFence(fragment.Code)}{fragment.Language}")
          from _ in Pulse.Trace(fragment.Code.Trim())
-         from e in Pulse.Trace("```")
+         from e in Pulse.Trace(CodeFence(fragment.Code))
          select Flow.Continue;
+
+    private static string CodeFence(string code)
+    {
+        var longestRun = 0;
+        var currentRun = 0;
+        foreach (var character in code)
+        {
+            currentRun = character == '`' ? currentRun + 1 : 0;
+            longestRun = Math.Max(longestRun, currentRun);
+        }
+        return new string('`', Math.Max(3, longestRun + 1));
+    }
 
     private static Flow<Flow> BarChart(BarChartFragment fragment) =>
         from start in Pulse.Trace("```mermaid")
@@ -80,10 +92,11 @@ public static class Scriptorium
     private static Flow<Flow> CodeExample(CodeExampleFragment fragment) =>
          from examples in Pulse.Draw<IReadOnlyCollection<Example>>()
          let example = examples.SingleOrDefault(a => a.Name == fragment.Name)
-         from s in Pulse.Trace($"```{fragment.Language}")
+         let fence = CodeFence(example?.Code ?? "")
+         from s in Pulse.Trace($"{fence}{fragment.Language}")
          from _ in Pulse.TraceIf(example != null, () => example.Code)
          from check in Pulse.When(example == null, () => throw new CodeExampleNotFoundException(fragment.Name))
-         from e in Pulse.Trace("```")
+         from e in Pulse.Trace(fence)
          select Flow.Continue;
 
     private static Flow<Flow> Include(InclusionFragment fragment) =>

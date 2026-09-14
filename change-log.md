@@ -1,4 +1,7 @@
-### 0.3.18
+### 0.3.18 (not yet released)
+- Added composable documentation and code attributes through `IDocAttribute` and `ICodeAttribute`, with ordered expansion, caller-location-aware extraction, and reusable replacements and formatters.
+- Limited code attribute expansion to referenced members so unused composites cannot break generation.
+- Made Markdown code fences adapt to embedded backticks in literal code, code files, and extracted examples.
 - Added `DocBarChart` support for rendering numeric tuple data as Mermaid XY bar charts.
 - Fixed case-sensitive document links, section anchors, generic anchors, and namespace-prefix matching.
 - Made includes recursive, detected include cycles, and preserved `NoHeader` per include occurrence.

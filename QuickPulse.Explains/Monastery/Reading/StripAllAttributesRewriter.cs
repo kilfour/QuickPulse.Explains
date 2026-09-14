@@ -4,6 +4,16 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 public sealed class StripAllAttributesRewriter : CSharpSyntaxRewriter
 {
+    private readonly HashSet<string> compositionAttributes;
+
+    public StripAllAttributesRewriter() : this([]) { }
+
+    public StripAllAttributesRewriter(IEnumerable<string> compositionAttributeNames)
+    {
+        compositionAttributes = compositionAttributeNames.Select(name =>
+            name.EndsWith("Attribute", StringComparison.Ordinal) ? name[..^9] : name).ToHashSet();
+    }
+
     private static readonly HashSet<string> DocumentationAttributes =
     [
         "CodeExample",
@@ -59,7 +69,7 @@ public sealed class StripAllAttributesRewriter : CSharpSyntaxRewriter
     public override SyntaxNode? VisitDelegateDeclaration(DelegateDeclarationSyntax node) =>
         base.VisitDelegateDeclaration(node.WithAttributeLists(WithoutDocumentationAttributes(node.AttributeLists)));
 
-    private static SyntaxList<AttributeListSyntax> WithoutDocumentationAttributes(
+    private SyntaxList<AttributeListSyntax> WithoutDocumentationAttributes(
         SyntaxList<AttributeListSyntax> attributeLists)
     {
         var result = new List<AttributeListSyntax>();
@@ -75,7 +85,7 @@ public sealed class StripAllAttributesRewriter : CSharpSyntaxRewriter
         return SyntaxFactory.List(result);
     }
 
-    private static bool IsDocumentationAttribute(AttributeSyntax attribute)
+    private bool IsDocumentationAttribute(AttributeSyntax attribute)
     {
         var name = attribute.Name switch
         {
@@ -86,6 +96,6 @@ public sealed class StripAllAttributesRewriter : CSharpSyntaxRewriter
         };
         if (name.EndsWith("Attribute", StringComparison.Ordinal))
             name = name[..^"Attribute".Length];
-        return DocumentationAttributes.Contains(name);
+        return DocumentationAttributes.Contains(name) || compositionAttributes.Contains(name);
     }
 }
