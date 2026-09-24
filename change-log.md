@@ -1,3 +1,6 @@
+### 0.3.20
+- Added `IExplainsAttribute` for composing documentation and code attributes in one reusable attribute.
+
 ### 0.3.19
 - Added composable documentation and code attributes through `IDocAttribute` and `ICodeAttribute`, with ordered expansion, caller-location-aware extraction, and reusable replacements and formatters.
 

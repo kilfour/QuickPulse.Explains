@@ -26,6 +26,7 @@ public static class TheReflectionist
     private static IEnumerable<DocFragmentAttribute> GetFragments(MemberInfo member) =>
         member.GetCustomAttributes(false).SelectMany(attribute => attribute switch
         {
+            IExplainsAttribute composite => composite.Expand().OfType<DocFragmentAttribute>(),
             IDocAttribute composite => composite.Expand(),
             DocFragmentAttribute fragment => new[] { fragment },
             _ => Enumerable.Empty<DocFragmentAttribute>()
@@ -60,10 +61,11 @@ public static class TheReflectionist
     private static CodeAttribute[] GetCodeAttributes(MemberInfo member)
     {
         var attributes = member.GetCustomAttributes(true);
-        var names = attributes.OfType<ICodeAttribute>()
+        var names = attributes.Where(attribute => attribute is ICodeAttribute or IExplainsAttribute)
             .Select(attribute => attribute.GetType().Name).Distinct().ToArray();
         var expanded = attributes.SelectMany(attribute => attribute switch
         {
+            IExplainsAttribute composite => composite.Expand().OfType<CodeAttribute>(),
             ICodeAttribute composite => composite.Expand(),
             CodeAttribute code => new[] { code },
             _ => Enumerable.Empty<CodeAttribute>()

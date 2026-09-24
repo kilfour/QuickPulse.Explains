@@ -2,6 +2,7 @@ using System.Runtime.CompilerServices;
 using QuickPulse.Explains.Abstractions;
 using QuickPulse.Explains.Formatters;
 using QuickPulse.Explains.Monastery;
+using QuickPulse.Explains.Monastery.Fragments;
 
 namespace QuickPulse.Explains.Tests.CodeExampleTests;
 
@@ -33,6 +34,20 @@ public class CodeCompositionTests
         Assert.Contains("class ClassSource", example.Code);
         Assert.Contains("Value = 42", example.Code);
         Assert.DoesNotContain("ExampleBundle", example.Code);
+    }
+
+    [Fact]
+    public void Combined_composites_add_documentation_and_extract_its_code_example()
+    {
+        var book = TheArchivist.ComposeOnly<CombinedDocument>();
+
+        var fragments = Assert.Single(book.Pages).Explanation.Fragments;
+        Assert.Equal("A documented example:", Assert.IsType<ContentFragment>(fragments[0]).Content);
+        Assert.IsType<CodeExampleFragment>(fragments[1]);
+
+        var example = Assert.Single(book.Examples);
+        Assert.Contains("return \"public\";", example.Code);
+        Assert.DoesNotContain("CombinedExample", example.Code);
     }
 
     [Fact]
@@ -92,6 +107,21 @@ public class CodeCompositionTests
         public IEnumerable<CodeAttribute> Expand() => [new CodeSnippetAttribute(file, line)];
     }
 
+    private sealed class CombinedExampleAttribute(
+        Type source,
+        string member,
+        [CallerFilePath] string file = "",
+        [CallerLineNumber] int line = 0) : Attribute, IExplainsAttribute
+    {
+        public IEnumerable<Attribute> Expand() =>
+        [
+            new DocContentAttribute("A documented example:"),
+            new DocExampleAttribute(source, member),
+            new CodeExampleAttribute(file, line),
+            new CodeReplaceAttribute("internal", "public")
+        ];
+    }
+
     public sealed class FinishFormatter : ICodeFormatter
     {
         public IEnumerable<string> Format(IEnumerable<string> code) =>
@@ -126,6 +156,13 @@ public class CodeCompositionTests
     private class ClassSource
     {
         public const int Value = 42;
+    }
+
+    [DocFile]
+    private class CombinedDocument
+    {
+        [CombinedExample(typeof(CombinedDocument), nameof(Example))]
+        public static string Example() { return "internal"; }
     }
 
     [DocFile]

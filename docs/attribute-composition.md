@@ -87,3 +87,46 @@ extraction and stripped from the displayed example. Unrelated attributes remain.
 Expansion is materialized and reused for references to the same source type within
 a book. Multiple example/snippet markers for the same reference remain ambiguous
 and produce an error. Nested composite expansion is not supported.
+
+## Combining documentation and code attributes
+
+Implement `IExplainsAttribute` when one custom attribute should contribute to both
+composition pipelines. Its single `Expand()` method returns `Attribute` instances;
+documentation fragments and code attributes are selected by their respective
+pipelines while preserving their relative order.
+
+This is useful for an attribute that both inserts an example into the document and
+marks the annotated member as the source of that example:
+
+```csharp
+using System.Runtime.CompilerServices;
+using QuickPulse.Explains;
+
+[AttributeUsage(AttributeTargets.Method)]
+public sealed class DocumentedExampleAttribute(
+    Type source,
+    string member,
+    [CallerFilePath] string file = "",
+    [CallerLineNumber] int line = 0) : Attribute, IExplainsAttribute
+{
+    public IEnumerable<Attribute> Expand()
+    {
+        yield return new DocHeaderAttribute("Example");
+        yield return new DocExampleAttribute(source, member);
+        yield return new CodeExampleAttribute(file, line);
+        yield return new CodeRemoveAttribute("// implementation detail");
+    }
+}
+
+[DocFile]
+public class SampleDocumentation
+{
+    [DocumentedExample(typeof(SampleDocumentation), nameof(Answer))]
+    public static int Answer() => 42; // implementation detail
+}
+```
+
+The same caller-location requirement as `ICodeAttribute` applies. Return concrete
+`DocFragmentAttribute` and `CodeAttribute` instances; nested composites and custom
+attribute types in the returned sequence are ignored. Existing `IDocAttribute` and
+`ICodeAttribute` composites continue to work unchanged.
